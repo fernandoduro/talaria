@@ -317,3 +317,38 @@ the rest. Recorded here because the later phases touch the same files.
 The general form: verify the *property*, not the spelling you happen to have
 thought of, and prefer a criterion that fails loudly over one that comes back
 empty.
+
+
+## Known issues carried past Phase 0
+
+Found during Phase 0, deliberately not fixed in it. Recorded so they are not
+rediscovered as surprises.
+
+- **`POST_FILETE_Y = 2242` does not match the shipped asset.** The placeholder
+  template's rule is drawn at y=2260-2268. Separately, `POST_CIT_ALTURA = 160`
+  is the *old* `POST_CIT_SIZE` and is 51px short of Poppins-at-150's real
+  211px line box. The two errors cancel conservatively, so
+  `test_citacao_nao_invade_o_filete` still reaches the right verdict — but it
+  reaches it by arithmetic over four constants and never consults the asset or
+  `POST_CIT_SIZE`. Phase 2 makes the layout font-relative; fix it there, and
+  measure the asset rather than trusting the constants.
+- **The closing-card cache does not key on the font.** `encerramento.card_cacheado`
+  keys only on the logo's mtime, so a project rendered before Phase 0 keeps a
+  card drawn in the old macOS font. Harmless on Linux, where the card could
+  never be built at all, but real for anyone who ran the pipeline on macOS.
+- **Fourteen comment sites are raggedly wrapped** where a history label was
+  cut mid-paragraph. Purely cosmetic and deliberately deferred; Phase 1
+  rewrites all of this prose into English anyway, which is the moment to
+  reflow.
+- **The real episode's YouTube video ID persists in git history**, in two
+  places: the as-received import commit's `run.py` blob, and the body of the
+  commit that removed it. Neither is in the working tree. Removing them
+  requires rewriting published history.
+- **`README.md` links to this spec**, which retains the originating project's
+  name, the real guest names and cities; the plan beside it holds the full
+  substitution key. That is intentional — these documents are the record of
+  what was removed — but it means the de-branded, user-facing surface points
+  at the record. Harmless in a private repository, worth revisiting before the
+  package is ever handed to anyone.
+- **Phase 0's commit messages are English; the final fix wave's seven are
+  Portuguese-bodied.** An imprecise instruction, not a decision. Cosmetic.
