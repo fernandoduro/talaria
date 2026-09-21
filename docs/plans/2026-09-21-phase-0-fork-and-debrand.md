@@ -973,7 +973,7 @@ git push
 git status --short --branch
 ```
 
-Expected: `## master...origin/master` with no divergence and a clean tree.
+Expected: `## main...origin/main` with no divergence and a clean tree.
 
 - [ ] **Step 7: Rename the directory**
 
@@ -996,7 +996,7 @@ python3 -m venv .venv
 git -C /data/Code/talaria status --short --branch
 ```
 
-Expected: `OK` with the same count as Step 4, and a clean tree tracking `origin/master`.
+Expected: `OK` with the same count as Step 4, and a clean tree tracking `origin/main`.
 
 - [ ] **Step 9: Final Phase 0 acceptance check**
 
