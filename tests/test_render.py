@@ -224,8 +224,7 @@ class TestWrapByPixels(unittest.TestCase):
         """
         from PIL import ImageFont
         from talaria import config, render
-        fnt = ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE,
-                                 index=config.POST_FONT_INDEX)
+        fnt = ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE)
         linhas = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
                                        largura=config.POST_LARGURA_UTIL)
         self.assertGreater(len(linhas), 1)

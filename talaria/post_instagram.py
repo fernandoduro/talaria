@@ -17,8 +17,7 @@ from . import caption, config, episodio, layout, render, textos, utils
 
 
 def _fonte_citacao():
-    return ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE,
-                              index=config.POST_FONT_INDEX)
+    return ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE)
 
 
 def quebra(texto: str) -> list:
@@ -68,8 +67,8 @@ def valida_card(texto: str) -> dict:
     return {"cabe": True, "linhas": n, "motivo": ""}
 
 
-def _fonte(caminho, tamanho, idx):
-    return ImageFont.truetype(caminho, tamanho, index=idx)
+def _fonte(caminho, tamanho):
+    return ImageFont.truetype(caminho, tamanho)
 
 
 def autor_do_episodio(project_dir: str, quem: str = "") -> dict:
@@ -152,11 +151,11 @@ def compoe_card(texto: str, autor: dict, out_path: str, template: str = None):
                fill=config.POST_COR_CITACAO)
 
     # Rodapé (o filete laranja já vem desenhado no template)
-    fnome = _fonte(config.POST_FONT, config.POST_NOME_SIZE, config.POST_FONT_INDEX)
+    fnome = _fonte(config.POST_FONT, config.POST_NOME_SIZE)
     d.text((config.POST_MARGEM_X, config.POST_NOME_Y), autor["nome"],
            font=fnome, fill=config.POST_COR_NOME)
 
-    fcargo = _fonte(config.POST_MONO, config.POST_CARGO_SIZE, config.POST_MONO_INDEX)
+    fcargo = _fonte(config.POST_MONO, config.POST_CARGO_SIZE)
     rodape = " · ".join(p for p in (autor.get("cargo"), autor.get("empresa")) if p)
     d.text((config.POST_MARGEM_X, config.POST_CARGO_Y), rodape,
            font=fcargo, fill=config.POST_COR_CARGO)

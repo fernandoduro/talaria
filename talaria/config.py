@@ -178,12 +178,9 @@ POST_COR_CITACAO = (245, 242, 234)
 POST_COR_NOME = (255, 255, 255)
 POST_COR_CARGO = (154, 149, 144)
 
-# Fonte da citação e do rodapé do post. Índice 0 em .ttf — a distinção só
-# importava enquanto a cadeia de candidatas podia cair num .ttc do macOS.
+# Fonte da citação e do rodapé do post.
 POST_FONT = _fonte_versionada("Poppins-SemiBold.ttf")
-POST_FONT_INDEX = 0
 POST_MONO = _fonte_versionada("DejaVuSansMono-Bold.ttf")
-POST_MONO_INDEX = 0
 
 # ---------------------------------------------------------------------------
 # Publicação agendada
