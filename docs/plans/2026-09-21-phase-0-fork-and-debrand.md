@@ -642,7 +642,39 @@ Change only the possessive idiom:
 - `talaria/episodio.py:17,103` and `tests/test_episodio.py:98` — `prompt da casa` → `prompt de materiais` (that is the prompt actually being referenced: `prompts/materiais.md`)
 - `tests/test_caption.py:103` — `"""A casa não usa travessão em legenda: sai com cara de texto de IA."""` → `"""O canal não usa travessão em legenda: sai com cara de texto de IA."""`
 
-- [ ] **Step 5: Replace the real company names in `talaria/utils.py`**
+- [ ] **Step 5: Replace the originating project's real names everywhere — the verified substitution table**
+
+The names are not confined to comments: `Norvik` is the fixture company across 12 test files (~45 occurrences), `talaria/txt_parse.py`'s module docstring carries what reads as a verbatim episode excerpt, and there are real guest names and cities. Every substitution below was verified against the live code before being written here — apply them exactly, do not improvise alternatives.
+
+| Old | New | Why this specific replacement |
+|---|---|---|
+| `Norvik` | `Zarvik` | `utils._padrao_fonetico` builds `first + "l?" + rest` with `o/u/a→[oua]`, `i/y/e→[yieu]`, `c/k/q→[ckq]`. `Norvik` yields `nl?[oua]rv[yieu][ckq]`; `Zarvik` yields `[sz]l?arv[yieu][ckq]` — same shape, so all three variants still match and round-trip through `corrige_nomes`, word-boundary and lowercase behaviour are unchanged. Verified. |
+| `Norvic` | `Zarvic` | phonetic variant, maps 1:1 |
+| `Norvyk` | `Zarvyk` | phonetic variant, maps 1:1 |
+| `Norvyc` | `Zarvyc` | phonetic variant, maps 1:1 |
+| `nossa` (the near-miss example in `utils.py`'s `_padrao_fonetico` docstring) | `zarpa` | The example exists to show that a consonant outside the table stays literal, so the pattern cannot swallow a dictionary word. `zarpa` is a real Portuguese word and a *sharper* illustration: `z`, `a`, `r` all match and it fails only at the literal `v`, whereas `nossa` failed at the third character. Verified not to match. |
+| `São Gonçalo` | `Ribeirão Açaí` | `test_inclui_cidade_e_empresa` asserts `#SaoGoncalo`, which is what proves accent stripping. `Ribeirão Açaí` slugs to `#RibeiraoAcai`, exercising `ã`, `ç` **and** `í` — strictly more coverage than the original. Verified through `hashtags.slug`. |
+| `Bauru` | `Pedra Nova` | Used only where no accent property is asserted (`test_sem_empresa_usa_fallback`, `test_retorna_string_formatada`, `test_textos.py`). |
+| `Sanduíche Valley` | `Planície Valley` | A real regional nickname for the interior-São Paulo startup belt, so it goes. Its test proves multi-word + `í` stripping; the replacement keeps both. |
+| `Renata Silveira` | `Marina Siqueira` | Same 15 characters, so any layout-sensitive rendering is unaffected. |
+| `Gustavo Reis` | `Rafael Nunes` | Same 12 characters. |
+| `Daniel` | `Teresa` | Same 6 characters. |
+
+**Leave these alone** — they are deliberate placeholders or neutral test data, not the originating project's: `Fulano de Tal`, `Nome Errado`, `X`, `A.B.C. Tech`, `Empreendedorismo` (a city name equal to a fixed tag, testing de-duplication), and the `"SP"` UF default.
+
+Rewrite `talaria/txt_parse.py`'s docstring sample so the excerpt is invented rather than lifted, using the replacement city and company.
+
+In `talaria/utils.py`, the comment above `_EQUIV_FONETICA` currently lists five real company misrecognitions. Replace it with a shorter one naming only invented variants and the three properties that matter:
+
+```python
+# Trocas fonéticas que a transcrição automática faz em nome próprio. A mesma
+# empresa sai como Zarvik, Zarvic, Zarvyk e Ilzarvik — varia na vogal interna,
+# no y/i, e no `l` que a transcrição insere.
+```
+
+After applying the table, run the full suite. Every one of these substitutions is covered by an existing assertion, so a replacement that loses a property fails a test rather than passing quietly. If anything goes red, the substitution is wrong — fix the substitution, never the assertion.
+
+- [ ] **Step 5b: Replace the company name in `talaria/utils.py`'s remaining comments**
 
 Lines 117–119 and 170 name actual guest companies. Replace with an invented name that still demonstrates the three variations the pattern handles — initial vowel, `y`/`i`, and the inserted `l`:
 

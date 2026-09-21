@@ -95,10 +95,30 @@ are load-bearing and stay.
   (`utils.py:134` "Regex que casa o nome", `utils.py:213`) and a legitimate
   `_PALAVRAS_COMUNS` entry (`utils.py:158`); only the possessive-idiom uses are
   in scope.
-- `utils.py:117,170` — the guest company names `Norvik`, `Norvic`, `Ilusen`,
-  `Eosen`, `Yusen` are replaced by an invented name exhibiting the same vowel
-  and `y`/`i` variation, so the comment still explains why the phonetic table
-  exists.
+- The originating project's real names are **not** confined to comments, as an
+  earlier draft of this spec assumed. `Norvik` is the fixture company name
+  across 12 test files (~45 occurrences); `txt_parse.py`'s module docstring
+  carries what reads as a verbatim episode excerpt ("estamos aqui hoje em São
+  Gonçalo... sobre a Norvik"); and there are real guest names (`Renata
+  Silveira`, `Gustavo Reis`, `Daniel`), cities (`São Gonçalo`, `Bauru`) and a
+  regional nickname for the interior-São Paulo startup belt (`Sanduíche
+  Valley`). All are replaced.
+
+  Each substitution preserves what its tests prove, verified against the live
+  code before being chosen. `Norvik` → `Zarvik`: `_padrao_fonetico` yields
+  `nl?[oua]rv[yieu][ckq]` for the first and `[sz]l?arv[yieu][ckq]` for the
+  second, the same shape, so the three transcription variants still match and
+  word-boundary and lowercase handling are unchanged. The near-miss example
+  `nossa` → `zarpa`, a real word that fails only at the literal `v` — a sharper
+  illustration than the original, which failed at the third character. `São
+  Gonçalo` → `Ribeirão Açaí`, because `test_inclui_cidade_e_empresa` asserts
+  `#SaoGoncalo` to prove accent stripping, and the replacement slugs to
+  `#RibeiraoAcai`, covering `ã`, `ç` and `í` — more coverage, not less. Guest
+  names are replaced at identical character length so nothing layout-sensitive
+  shifts.
+
+  Deliberate placeholders stay: `Fulano de Tal`, `Nome Errado`, `X`,
+  `A.B.C. Tech`, `Empreendedorismo`.
 - "o gestor" stays. It names a role, not a brand; Phase 1 makes it "operator".
 
 `test_render.py:215 CITACAO_DO_DESIGN` and the Instagram fixtures contain "sair
