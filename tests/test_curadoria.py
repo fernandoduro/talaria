@@ -1,7 +1,7 @@
 """Testes do estado da curadoria iterativa."""
 import unittest
 
-from nvshorts import curadoria
+from talaria import curadoria
 
 
 class TestSobreposicao(unittest.TestCase):

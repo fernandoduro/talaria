@@ -5,7 +5,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import caption
+from talaria import caption
 
 
 class TestMonta(unittest.TestCase):

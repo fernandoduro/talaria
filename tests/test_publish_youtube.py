@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from nvshorts import publish_youtube
+from talaria import publish_youtube
 
 
 def _client_secret(d):
@@ -32,8 +32,8 @@ class TestUpload(unittest.TestCase):
         self.env = {"YT_CLIENT_SECRET_PATH": _client_secret(self.d),
                     "YT_REFRESH_TOKEN": "rt"}
 
-    @mock.patch("nvshorts.publish_youtube.MediaFileUpload")
-    @mock.patch("nvshorts.publish_youtube.build")
+    @mock.patch("talaria.publish_youtube.MediaFileUpload")
+    @mock.patch("talaria.publish_youtube.build")
     def test_upload_devolve_id_e_url_de_short(self, build_mock, media_mock):
         with mock.patch.dict("os.environ", self.env):
             insert = build_mock.return_value.videos.return_value.insert
@@ -55,8 +55,8 @@ class TestPrivacidade(unittest.TestCase):
 
     def _sobe(self, extra_env):
         with mock.patch.dict("os.environ", {**self.env, **extra_env}):
-            with mock.patch("nvshorts.publish_youtube.MediaFileUpload"), \
-                 mock.patch("nvshorts.publish_youtube.build") as build_mock:
+            with mock.patch("talaria.publish_youtube.MediaFileUpload"), \
+                 mock.patch("talaria.publish_youtube.build") as build_mock:
                 insert = build_mock.return_value.videos.return_value.insert
                 insert.return_value.next_chunk.return_value = (None, {"id": "V"})
                 publish_youtube.upload("/tmp/v.mp4", "T", "D")

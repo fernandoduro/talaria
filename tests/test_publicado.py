@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import layout, publicado
+from talaria import layout, publicado
 
 
 class TestCarrega(unittest.TestCase):

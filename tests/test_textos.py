@@ -5,7 +5,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import layout, textos, thumbnail
+from talaria import layout, textos, thumbnail
 
 
 class TestTextos(unittest.TestCase):

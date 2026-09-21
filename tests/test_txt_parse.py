@@ -2,7 +2,7 @@
 import os
 import unittest
 
-from nvshorts import txt_parse
+from talaria import txt_parse
 
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "exemplo.txt")
 

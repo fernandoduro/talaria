@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import episodio
+from talaria import episodio
 
 
 class TestEpisodio(unittest.TestCase):

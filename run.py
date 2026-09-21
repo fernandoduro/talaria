@@ -37,7 +37,7 @@ import subprocess
 import sys
 import tempfile
 
-from nvshorts import (acquire, ambiente, brief, calendario, curadoria,
+from talaria import (acquire, ambiente, brief, calendario, curadoria,
                       episodio, layout, post_instagram, publicado, publish,
                       render, textos, thumbnail, transcribe, txt_parse)
 
@@ -130,7 +130,7 @@ def cmd_thumb(args):
 
     # O frame extraído é intermediário, não produto — vai para um temp real em
     # vez de sujar a raiz do projeto (era o `_thumb_frame.jpg` de antes).
-    fd, frame = tempfile.mkstemp(suffix=".jpg", prefix="nvshorts_thumb_")
+    fd, frame = tempfile.mkstemp(suffix=".jpg", prefix="talaria_thumb_")
     os.close(fd)
     try:
         thumbnail.extract_frame(video, args.frame_at, frame)

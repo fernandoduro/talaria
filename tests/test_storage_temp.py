@@ -2,12 +2,12 @@
 import unittest
 from unittest import mock
 
-from nvshorts import storage_temp
+from talaria import storage_temp
 
 
 class TestSobe(unittest.TestCase):
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_sobe_no_prefixo_e_devolve_url_assinada(self, boto3_mock):
         s3 = boto3_mock.client.return_value
         s3.generate_presigned_url.return_value = "https://assinada"
@@ -23,7 +23,7 @@ class TestSobe(unittest.TestCase):
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b",
                                     "S3_ENDPOINT_URL": "https://r2.exemplo"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_endpoint_customizado_permite_r2_e_compativeis(self, boto3_mock):
         # Sem endpoint configurável o boto3 só fala com a AWS. R2/MinIO usam
         # a mesma API — mudar de provedor não pode exigir mudar código.
@@ -32,13 +32,13 @@ class TestSobe(unittest.TestCase):
                          "https://r2.exemplo")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b"}, clear=True)
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_sem_endpoint_usa_o_padrao_da_aws(self, boto3_mock):
         storage_temp.sobe("/tmp/video.mp4")
         self.assertIsNone(boto3_mock.client.call_args.kwargs.get("endpoint_url"))
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_assina_com_sigv4(self, boto3_mock):
         # O boto3 pode cair em SigV2, que o R2 recusa com 401 na URL assinada
         # — e aí o Instagram não baixa a mídia. O erro só apareceria na
@@ -56,7 +56,7 @@ class TestSobe(unittest.TestCase):
 
 class TestRemove(unittest.TestCase):
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_remove_pela_key_da_url(self, boto3_mock):
         s3 = boto3_mock.client.return_value
         storage_temp.remove(
@@ -65,7 +65,7 @@ class TestRemove(unittest.TestCase):
             Bucket="meu-bucket", Key="tmp-publish/abc_v.mp4")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_remove_em_url_path_style(self, boto3_mock):
         # R2 e MinIO assinam no formato /bucket/key, não bucket.host/key. Sem
         # tirar o bucket do caminho, o delete apontava para uma key que não
@@ -78,7 +78,7 @@ class TestRemove(unittest.TestCase):
             Bucket="meu-bucket", Key="tmp-publish/abc_v.mp4")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "tmp-publish"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_bucket_com_nome_do_prefixo_nao_corta_demais(self, boto3_mock):
         # Bucket chamado igual ao PREFIXO: na URL da AWS o bucket está no
         # HOST, e a key já começa em 'tmp-publish/'. Decidir pelo texto do
@@ -91,7 +91,7 @@ class TestRemove(unittest.TestCase):
             Bucket="tmp-publish", Key="tmp-publish/abc_v.mp4")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
-    @mock.patch("nvshorts.storage_temp.boto3")
+    @mock.patch("talaria.storage_temp.boto3")
     def test_falha_ao_remover_so_avisa(self, boto3_mock):
         # Resíduo no bucket é o pior caso aceitável; publicação perdida não é.
         boto3_mock.client.return_value.delete_object.side_effect = Exception("x")

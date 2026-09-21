@@ -3,7 +3,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import layout
+from talaria import layout
 
 
 class TestCaminhos(unittest.TestCase):

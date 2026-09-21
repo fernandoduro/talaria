@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import brief, layout
+from talaria import brief, layout
 
 
 class TestBrief(unittest.TestCase):

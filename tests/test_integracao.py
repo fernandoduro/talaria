@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 import unittest
 
-from nvshorts import curadoria, episodio, layout, textos, txt_parse
+from talaria import curadoria, episodio, layout, textos, txt_parse
 
 TRANSCRICAO = """0:00
 Primeira fala do host apresentando o episódio de teste.
@@ -76,7 +76,7 @@ class TestFluxoCompleto(unittest.TestCase):
 
     @unittest.skipUnless(tem_ffmpeg(), "ffmpeg não disponível")
     def test_render_com_video_sintetico(self):
-        from nvshorts import render
+        from talaria import render
 
         video = layout.garante(layout.video(self.pd))
         subprocess.run([
@@ -116,7 +116,7 @@ class TestFluxoCompleto(unittest.TestCase):
                 json.dump({"posts": [{"slug": "c1", "cards": ["Curta e boa."]}]},
                           f, ensure_ascii=False)
 
-            from nvshorts import post_instagram
+            from talaria import post_instagram
             gerados = post_instagram.gerar(proj)
             self.assertEqual(len(gerados), 1)
             self.assertTrue(os.path.exists(
@@ -134,7 +134,7 @@ class TestMigracaoAutomatica(unittest.TestCase):
         import json
         import os
         import tempfile
-        from nvshorts import layout
+        from talaria import layout
 
         with tempfile.TemporaryDirectory() as d:
             with open(os.path.join(d, "momentos.json"), "w", encoding="utf-8") as f:

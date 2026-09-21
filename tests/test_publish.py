@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from nvshorts import layout, publish
+from talaria import layout, publish
 
 ENV_OK = {"IG_PAGE_TOKEN": "t", "IG_BUSINESS_ACCOUNT_ID": "1",
           "S3_PUBLISH_BUCKET": "b", "YT_CLIENT_SECRET_PATH": "/x",
@@ -51,14 +51,14 @@ class TestPreChecagem(unittest.TestCase):
     @mock.patch.dict("os.environ", ENV_OK)
     def test_projeto_completo_passa(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         self.assertEqual(publish.pre_checa(self.pd, pares), [])
 
     @mock.patch.dict("os.environ", ENV_OK)
     def test_mp4_faltando_aponta_o_render(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         os.remove(os.path.join(layout.plataforma(self.pd, "youtube_shorts"),
                                "corte1_short.mp4"))
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
@@ -68,7 +68,7 @@ class TestPreChecagem(unittest.TestCase):
     @mock.patch.dict("os.environ", ENV_OK)
     def test_corte_sem_titulo_aponta_a_curadoria(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         _projeto(self.pd, titulo="")
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         erros = publish.pre_checa(self.pd, pares)
@@ -77,7 +77,7 @@ class TestPreChecagem(unittest.TestCase):
     @mock.patch.dict("os.environ", ENV_OK)
     def test_titulo_acima_de_100_aborta(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         _projeto(self.pd, titulo="x" * 101)
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         erros = publish.pre_checa(self.pd, pares)
@@ -86,7 +86,7 @@ class TestPreChecagem(unittest.TestCase):
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_credencial_faltando_lista_as_variaveis(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         erros = publish.pre_checa(self.pd, pares)
         texto = "\n".join(erros)
@@ -98,7 +98,7 @@ class TestPreChecagem(unittest.TestCase):
         # Typo na privacidade tem que aparecer ANTES do upload: descoberto
         # depois, o vídeo já estaria no ar com a privacidade errada.
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         erros = publish.pre_checa(self.pd, pares)
         self.assertTrue(any("YT_PRIVACY" in e for e in erros))
@@ -106,14 +106,14 @@ class TestPreChecagem(unittest.TestCase):
     @mock.patch.dict("os.environ", {**ENV_OK, "YT_PRIVACY": "unlisted"})
     def test_yt_privacy_valido_passa(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         self.assertEqual(publish.pre_checa(self.pd, pares), [])
 
     @mock.patch.dict("os.environ", ENV_OK)
     def test_png_do_post_faltando_aponta_o_gerar(self):
         import datetime as dt
-        from nvshorts import calendario
+        from talaria import calendario
         pasta = layout.posts_png(self.pd)
         for n in os.listdir(pasta):
             if n.endswith(".png"):
@@ -140,8 +140,8 @@ class TestPngsDoPost(unittest.TestCase):
 
 
 @mock.patch.dict("os.environ", ENV_OK)
-@mock.patch("nvshorts.publish.publish_instagram")
-@mock.patch("nvshorts.publish.publish_youtube")
+@mock.patch("talaria.publish.publish_instagram")
+@mock.patch("talaria.publish.publish_youtube")
 class TestExecutar(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
@@ -154,7 +154,7 @@ class TestExecutar(unittest.TestCase):
         ig.publica_post.return_value = {"id": "p1", "permalink": "https://ig/p1"}
         resultados = publish.executar(self.pd, dia=self.dia)
         self.assertEqual([r["ok"] for r in resultados], [True, True, True])
-        from nvshorts import publicado
+        from talaria import publicado
         reg = publicado.carrega(self.pd)
         self.assertTrue(publicado.ja_publicado(reg, "youtube_shorts", "corte1"))
         self.assertTrue(publicado.ja_publicado(reg, "instagram_reels", "corte1"))
@@ -174,13 +174,13 @@ class TestExecutar(unittest.TestCase):
         self.assertTrue(por_pl["instagram_reels"])
         self.assertTrue(por_pl["instagram_posts"])
         # o que falhou NÃO entra no registro — retenta amanhã
-        from nvshorts import publicado
+        from talaria import publicado
         reg = publicado.carrega(self.pd)
         self.assertFalse(publicado.ja_publicado(reg, "youtube_shorts", "corte1"))
 
     def test_registro_e_imediato_nao_no_fim_do_lote(self, yt, ig):
         # AP-06: se o processo morrer no item 2, o item 1 já está registrado.
-        from nvshorts import publicado
+        from talaria import publicado
         estado = {}
 
         def upload_ok(*a, **k):
@@ -207,7 +207,7 @@ class TestExecutar(unittest.TestCase):
         yt.upload.return_value = {"id": "v1", "url": "https://yt/v1"}
         ig.publica_reel.return_value = {"id": "r1", "permalink": "u"}
         ig.publica_post.return_value = {"id": "p1", "permalink": "u"}
-        with mock.patch("nvshorts.publish.publicado.registra",
+        with mock.patch("talaria.publish.publicado.registra",
                         side_effect=OSError("disco cheio")):
             resultados = publish.executar(self.pd, dia=self.dia)
 

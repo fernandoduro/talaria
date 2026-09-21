@@ -4,7 +4,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import config, layout, post_instagram
+from talaria import config, layout, post_instagram
 
 
 class TestConfigPost(unittest.TestCase):

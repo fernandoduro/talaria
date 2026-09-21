@@ -2,7 +2,7 @@
 import unittest
 from unittest import mock
 
-from nvshorts import publish_instagram
+from talaria import publish_instagram
 
 ENV = {"IG_PAGE_TOKEN": "tok", "IG_BUSINESS_ACCOUNT_ID": "123"}
 
@@ -45,8 +45,8 @@ class TestHostDoToken(unittest.TestCase):
 
     @mock.patch.dict("os.environ", {"IG_PAGE_TOKEN": "IGAAc0tok",
                                     "IG_BUSINESS_ACCOUNT_ID": "123"})
-    @mock.patch("nvshorts.publish_instagram.storage_temp")
-    @mock.patch("nvshorts.publish_instagram.requests")
+    @mock.patch("talaria.publish_instagram.storage_temp")
+    @mock.patch("talaria.publish_instagram.requests")
     def test_publica_no_host_certo_do_token(self, req, storage):
         storage.sobe.return_value = "https://assinada/p.png"
         req.post.side_effect = [_resposta({"id": "c1"}), _resposta({"id": "m1"})]
@@ -60,8 +60,8 @@ class TestHostDoToken(unittest.TestCase):
 
 
 @mock.patch.dict("os.environ", ENV)
-@mock.patch("nvshorts.publish_instagram.storage_temp")
-@mock.patch("nvshorts.publish_instagram.requests")
+@mock.patch("talaria.publish_instagram.storage_temp")
+@mock.patch("talaria.publish_instagram.requests")
 class TestPublicaReel(unittest.TestCase):
     def test_container_poll_publish_e_limpa(self, req, storage):
         storage.sobe.return_value = "https://assinada/v.mp4"
@@ -93,7 +93,7 @@ class TestPublicaReel(unittest.TestCase):
         req.post.side_effect = [_resposta({"id": "cont1"})]
         req.get.return_value = _resposta({"status_code": "IN_PROGRESS"})
         relogio = iter([0, 100, 200, 400])  # estoura os 300s no 4º tique
-        with mock.patch("nvshorts.publish_instagram.time") as t:
+        with mock.patch("talaria.publish_instagram.time") as t:
             t.monotonic.side_effect = relogio
             with self.assertRaises(RuntimeError) as ctx:
                 publish_instagram.publica_reel("/tmp/v.mp4", "leg")
@@ -124,8 +124,8 @@ class TestPublicaReel(unittest.TestCase):
 
 
 @mock.patch.dict("os.environ", ENV)
-@mock.patch("nvshorts.publish_instagram.storage_temp")
-@mock.patch("nvshorts.publish_instagram.requests")
+@mock.patch("talaria.publish_instagram.storage_temp")
+@mock.patch("talaria.publish_instagram.requests")
 class TestPublicaPost(unittest.TestCase):
     def test_imagem_unica_sem_carrossel(self, req, storage):
         storage.sobe.return_value = "https://assinada/p.png"
@@ -158,7 +158,7 @@ class TestPublicaPost(unittest.TestCase):
             _resposta({"status_code": "FINISHED"}),
             _resposta({"permalink": "https://ig/p/1"}),
         ]
-        with mock.patch("nvshorts.publish_instagram.POLL_INTERVALO_S", 0):
+        with mock.patch("talaria.publish_instagram.POLL_INTERVALO_S", 0):
             r = publish_instagram.publica_post(["/tmp/p.png"], "leg")
         self.assertEqual(r["id"], "media1")
         # O media_publish só sai DEPOIS do container ficar FINISHED.

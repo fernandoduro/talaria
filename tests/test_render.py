@@ -8,7 +8,7 @@ import subprocess
 import tempfile
 import unittest
 
-from nvshorts import audio, config, layout, render
+from talaria import audio, config, layout, render
 
 
 class TestValeAntes(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestAjusteRespeitaMinimo(unittest.TestCase):
     """Nem o vale nem a margem podem levar o corte abaixo da duração mínima."""
 
     def test_margem_nao_derruba_abaixo_do_minimo(self):
-        from nvshorts import config
+        from talaria import config
         inicio = 100.0
         fim = inicio + config.CORTE_MIN_S          # exatamente no limite
         self.assertGreaterEqual(
@@ -223,7 +223,7 @@ class TestWrapByPixels(unittest.TestCase):
         o design aprovado fica no teste seguinte, que exige a fonte certa.
         """
         from PIL import ImageFont
-        from nvshorts import config, render
+        from talaria import config, render
         fnt = ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE,
                                  index=config.POST_FONT_INDEX)
         linhas = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
@@ -247,7 +247,7 @@ class TestWrapByPixels(unittest.TestCase):
         um motivo que não é defeito do código.
         """
         from PIL import ImageFont
-        from nvshorts import config, render
+        from talaria import config, render
         fnt = ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE,
                                  index=config.POST_FONT_INDEX)
         familia, estilo = fnt.getname()
@@ -262,7 +262,7 @@ class TestWrapByPixels(unittest.TestCase):
                                   "ficar."])
 
     def test_wrap_sem_argumentos_mantem_o_comportamento_da_legenda(self):
-        from nvshorts import render
+        from talaria import render
         linhas = render.wrap_by_pixels("palavra " * 30)
         self.assertGreater(len(linhas), 1)
 
@@ -280,7 +280,7 @@ class TestSugereFrames(unittest.TestCase):
     """
 
     def setUp(self):
-        from nvshorts import thumbnail
+        from talaria import thumbnail
         self.thumbnail = thumbnail
         self.momentos = [{"start": s, "end": s + 60.0}
                          for s in (100.0, 500.0, 900.0, 1300.0, 1700.0, 2100.0)]
@@ -612,7 +612,7 @@ class TestOrdemCaudaVazaAntesDoCard(unittest.TestCase):
             return original(video_path, fim, *a, **kw)
 
         import unittest.mock as mock
-        with mock.patch("nvshorts.render.audio.cauda_vaza", side_effect=espiao):
+        with mock.patch("talaria.render.audio.cauda_vaza", side_effect=espiao):
             render.render_all(self.d, ["youtube"])
 
         self.assertEqual(len(duracoes_vistas), 1)

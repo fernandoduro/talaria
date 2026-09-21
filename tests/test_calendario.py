@@ -5,7 +5,7 @@ import os
 import tempfile
 import unittest
 
-from nvshorts import calendario, layout, publicado
+from talaria import calendario, layout, publicado
 
 
 def _prepara(pd, momentos=None, posts=None, agenda=None):

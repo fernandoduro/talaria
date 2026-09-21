@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import os
 
-# A raiz do repo, dois níveis acima deste arquivo (nvshorts/ambiente.py).
+# A raiz do repo, dois níveis acima deste arquivo (talaria/ambiente.py).
 PADRAO = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                       ".env")
 

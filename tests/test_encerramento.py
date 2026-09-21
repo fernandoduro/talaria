@@ -7,7 +7,7 @@ import unittest
 
 from PIL import Image
 
-from nvshorts import config, encerramento
+from talaria import config, encerramento
 
 
 class TestMontaCard(unittest.TestCase):

@@ -70,9 +70,9 @@ def has_drawtext() -> bool:
     return any(line.split()[1:2] == ["drawtext"] for line in out.splitlines() if line.strip())
 
 
-# 'drawtext' | 'overlay' — sobrescreva com NVSHORTS_CAPTION_BACKEND para forçar.
+# 'drawtext' | 'overlay' — sobrescreva com TALARIA_CAPTION_BACKEND para forçar.
 CAPTION_BACKEND = os.environ.get(
-    "NVSHORTS_CAPTION_BACKEND",
+    "TALARIA_CAPTION_BACKEND",
     "drawtext" if has_drawtext() else "overlay",
 )
 

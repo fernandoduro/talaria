@@ -97,7 +97,7 @@ Três coisas são identidade de canal e vêm neutras neste pacote:
 |---|---|
 | Prompts de curadoria e redação | `prompts/*.md` |
 | Template do post e logotipo | `assets/` |
-| Nome do programa e perfil social | `NOME_PROGRAMA` e `CARD_ARROBA` em `nvshorts/config.py` |
+| Nome do programa e perfil social | `NOME_PROGRAMA` e `CARD_ARROBA` em `talaria/config.py` |
 
 Os prompts são esqueletos: têm a estrutura e os placeholders que o código
 espera, mas o critério editorial precisa ser escrito por quem conhece o

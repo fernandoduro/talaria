@@ -1,7 +1,7 @@
 """Testes dos utilitários compartilhados."""
 import unittest
 
-from nvshorts import utils
+from talaria import utils
 
 
 class TestStripMarkup(unittest.TestCase):

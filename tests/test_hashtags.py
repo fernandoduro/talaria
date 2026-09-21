@@ -1,7 +1,7 @@
 """Testes da geração de hashtags."""
 import unittest
 
-from nvshorts import hashtags
+from talaria import hashtags
 
 
 class TestSlug(unittest.TestCase):

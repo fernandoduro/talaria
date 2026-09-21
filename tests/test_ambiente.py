@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-from nvshorts import ambiente
+from talaria import ambiente
 
 
 class TestCarrega(unittest.TestCase):

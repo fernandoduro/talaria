@@ -1,7 +1,7 @@
 """Renderiza cortes verticais 9:16 (fundo blur) com legenda queimada.
 
 O backend de legenda (drawtext ou overlay de PNGs) é escolhido em runtime por
-config.CAPTION_BACKEND — ver nvshorts/caption_png.py.
+config.CAPTION_BACKEND — ver talaria/caption_png.py.
 
 Lê transcricao.json (segmentos) + momentos.json (cortes curados) e, por corte,
 gera o MP4 vertical com legenda para as plataformas escolhidas.
@@ -272,7 +272,7 @@ def concatena_encerramento(corte_path: str, project_dir: str) -> None:
     """
     card_path = encerramento.card_cacheado(project_dir)
 
-    tmpdir = tempfile.mkdtemp(prefix="nvshorts_concat_")
+    tmpdir = tempfile.mkdtemp(prefix="talaria_concat_")
     try:
         saida = os.path.join(tmpdir, "concatenado.mp4")
         cmd = [
@@ -333,7 +333,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
             fg = _filtergraph(segments, start, end, nomes)
         else:
             # Rasteriza as legendas em PNG e sobrepõe com overlay+enable.
-            tmpdir = tempfile.mkdtemp(prefix=f"nvshorts_{slug}_")
+            tmpdir = tempfile.mkdtemp(prefix=f"talaria_{slug}_")
             items = _build_overlay_inputs(segments, start, end, tmpdir, nomes)
             seek_inputs = ["-i", video_path]
             for png, _rs, _re in items:
