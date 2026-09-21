@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Next-Video-Shorts — orquestrador CLI.
+"""Talaria — orquestrador CLI.
 
 Fluxo por vídeo (rodado por mim, Claude Code, com curadoria manual no meio):
 
@@ -382,7 +382,7 @@ def cmd_agenda(args):
 
 
 def main():
-    p = argparse.ArgumentParser(description="Next-Video-Shorts pipeline")
+    p = argparse.ArgumentParser(description="Talaria — pipeline de cortes verticais")
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def add_common(sp):
