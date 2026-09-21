@@ -674,22 +674,6 @@ In `talaria/utils.py`, the comment above `_EQUIV_FONETICA` currently lists five 
 
 After applying the table, run the full suite. Every one of these substitutions is covered by an existing assertion, so a replacement that loses a property fails a test rather than passing quietly. If anything goes red, the substitution is wrong — fix the substitution, never the assertion.
 
-- [ ] **Step 5b: Replace the company name in `talaria/utils.py`'s remaining comments**
-
-Lines 117–119 and 170 name actual guest companies. Replace with an invented name that still demonstrates the three variations the pattern handles — initial vowel, `y`/`i`, and the inserted `l`:
-
-```python
-# Trocas fonéticas que a transcrição automática faz em nome próprio. A mesma
-# empresa sai como Vynka, Vinka, Vinca e Ilvinca — varia na vogal inicial, no
-# y/i, e no `l` que a transcrição insere.
-```
-
-And at line 170, inside the `corrige_nomes` docstring:
-
-```python
-    o erro vai ao ar (Vinca/Ilvinca no lugar de Vynka).
-```
-
 - [ ] **Step 6: Replace the fixture text, preserving rendered width**
 
 `tests/test_render.py:215` `CITACAO_DO_DESIGN` and `tests/test_post_instagram.py:212-213` hold the same quote, and its rendered *width* is what the 5-line assertions prove. Use the `neutro` variant measured in Task 4 Step 9 — identical in both files:
@@ -705,12 +689,18 @@ The remaining fixtures carry no width constraint and can be reworded freely: `te
 
 ```bash
 cd /data/Code/next-video-shorts-pacote
-grep -rniE '\bEP[0-9]+\b|\bAP-[0-9]+\b|\bCA-[0-9]+\b|norvik|norvic|ilusen|eosen|yusen|nvshorts' --include='*.py' --include='*.md' . | grep -v '^./.venv/' | grep -v '^./docs/'
+# 1. History labels and the old package name.
+grep -rniE '\bEP[0-9]+\b|\bAP-[0-9]+\b|\bCA-[0-9]+\b|nvshorts' --include='*.py' --include='*.md' . | grep -v '^./.venv/' | grep -v '^./docs/'
+# 2. The organisation idiom (NOT bare `casa`, which is also a verb and a data value).
 grep -rniE '(d[ae]|desta) casa\b' --include='*.py' . | grep -v '^./.venv/'
-grep -rni 'interior' --include='*.py' . | grep -v '^./.venv/'
+# 3. Every real name from the substitution table, INCLUDING inside identifiers
+#    such as test-method names, which the earlier version of this grep missed.
+grep -rniE 'norvik|norvic|norvyk|norvyc|ilusen|eosen|yusen|gon[cç]alo|bauru|sandu[ií]che|renata|silveira|gustavo|daniel|interior' --include='*.py' --include='*.md' . | grep -v '^./.venv/' | grep -v '^./docs/'
 ```
 
-Expected: no output from any of the three. `docs/` is excluded from the first because the spec quotes these strings deliberately when explaining what was removed.
+Expected: no output from any of the three. `docs/` is excluded because the spec and this plan quote these strings deliberately, as the record of what was removed.
+
+Grep 3 must match inside identifiers, not only inside strings and comments. The first version of this step listed only the company-name variants, and an incomplete substitution therefore passed it: `def test_sao_goncalo` and `def test_sanduiche_valley` in `tests/test_hashtags.py`, plus a `#SaoGoncalo` caption fixture in `tests/test_caption.py`, all survived a "clean" verification. Renaming a test method does not change the suite count, so the test run cannot catch this either — this grep is the only guard.
 
 - [ ] **Step 8: Run the full suite**
 
