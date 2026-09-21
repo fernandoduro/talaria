@@ -216,10 +216,24 @@ Task 7 each add a test module, not because it was ever wrong.
   defect; the 1 skip is the Avenir Next guard. (Without the venv the suite
   reports 334 tests and 19 errors — four modules fail to import and their
   tests are never collected. That reading is an artifact, not a baseline.)
-- These return nothing:
-  `grep -rniE '\bEP[0-9]+\b|\bAP-[0-9]+\b|\bCA-[0-9]+\b|nvshorts|NVSHORTS|Norvik|Norvic|Ilusen|Eosen|Yusen' .`
-  and `grep -rniE '(d[ae]|desta) casa\b' .`
-  A bare `casa` grep can never come clean and is not a criterion.
+- These return nothing over `talaria/`, `tests/`, `run.py`, `README.md` and
+  `prompts/` (never over `docs/`, which quotes the removed strings as the
+  record of what was removed, nor `.venv/`):
+  - `grep -rnE '\bEP[0-9]+\b|\bAP-[0-9]+\b|\bCA-[0-9]+\b'` — **case-sensitive
+    on purpose.** The uppercase form was the originating project's episode and
+    checklist label; the lowercase `ep1`/`ep2`/`ep8` that remain are generic
+    project-directory slugs in CLI examples and a path test, and renaming them
+    would buy nothing. Case is what separates the two.
+  - `grep -rniE 'nvshorts|norvik|norvic|norvyk|norvyc|ilusen|eosen|yusen|gon[cç]alo|bauru|sandu[ií]che|renata|silveira|gustavo|daniel|interior'`
+    — must match inside identifiers, not just strings and comments: an earlier,
+    narrower version of this grep passed while two test-method names and a
+    caption fixture still carried the old city name.
+  - `grep -rniE '(d[ae]|desta) casa\b'`. A bare `casa` grep can never come
+    clean — it is also an ordinary verb and a legitimate data value — and is
+    not a criterion.
+  - No real URL or media ID: the CLI help in `run.py` carried a genuine
+    11-character YouTube video ID through two de-branding rounds because no
+    grep looked for URLs. Placeholders only (`https://youtu.be/VIDEO_ID`).
 - Repository pushed private, directory renamed.
 
 ## Out of scope for Phase 0
