@@ -1,7 +1,4 @@
 """Utilitários compartilhados: timestamps, regex de VTT, limpeza e agrupamento de texto.
-
-Consolida lógica que estava duplicada em transcribe/vtt_to_segments/
-clean_transcript/render_cortes.
 """
 import re
 
