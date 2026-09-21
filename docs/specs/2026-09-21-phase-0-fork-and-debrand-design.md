@@ -224,10 +224,22 @@ Task 7 each add a test module, not because it was ever wrong.
     checklist label; the lowercase `ep1`/`ep2`/`ep8` that remain are generic
     project-directory slugs in CLI examples and a path test, and renaming them
     would buy nothing. Case is what separates the two.
-  - `grep -rniE 'nvshorts|norvik|norvic|norvyk|norvyc|ilusen|eosen|yusen|gon[cç]alo|bauru|sandu[ií]che|renata|silveira|gustavo|daniel|interior'`
+  - `grep -rniE 'nvshorts|next.?video.?shorts|next.?squad|nextsquad|norvik|norvic|norvyk|norvyc|ilusen|eosen|yusen|gon[cç]alo|bauru|sandu[ií]che|renata|silveira|gustavo|daniel|interior'`
     — must match inside identifiers, not just strings and comments: an earlier,
     narrower version of this grep passed while two test-method names and a
     caption fixture still carried the old city name.
+
+    The `next.?video.?shorts` and `next.?squad` alternatives matter on their
+    own. The rename task searched only for the package identifier `nvshorts`
+    and its uppercase env-var form, so the originating project's hyphenated
+    human-readable name survived the rename and all four de-branding rounds in
+    three places — including `run.py`'s `argparse` description, which printed
+    it to anyone running `--help`. A project's own display name is not
+    necessarily spelled the way its import path is.
+
+    Two known false positives to keep: `talaria/config.py` names the font
+    "Avenir Next Demi Bold" (load-bearing — it is why `POST_CIT_SIZE` is 150),
+    and `talaria/vtt_parse.py` uses the `next()` builtin.
   - `grep -rniE '(d[ae]|desta) casa\b'`. A bare `casa` grep can never come
     clean — it is also an ordinary verb and a legitimate data value — and is
     not a criterion.
