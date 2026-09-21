@@ -278,3 +278,42 @@ fix corrects a crash.
 - The de-branding pass edits comments across 30 files. The test suite does not
   cover comments, so review is the only check. Keeping it in its own commits is
   what makes that review possible.
+
+
+## Verification lessons for Phases 1-4
+
+Phase 0 needed four fix rounds on the de-branding task and a further wave after
+the whole-branch review. Not one of those rounds was caused by faulty
+execution: every one closed a hole in this document's own acceptance criteria.
+The criteria were thorough about the categories already imagined and blind to
+the rest. Recorded here because the later phases touch the same files.
+
+- **A grep that returns nothing proves only that it ran.** Each round's
+  verification was accurate and useless in equal measure.
+- **Identifiers are not the only spelling of a name.** The rename searched
+  `nvshorts` and `NVSHORTS` and came back clean while the package still
+  introduced itself as "Next-Video-Shorts" in three docstrings and an
+  `argparse` description that printed on `--help`.
+- **A pattern has a prose form as well as a code form.** The criteria matched
+  `AP-\d+` and `CA-\d+` and never `seção N`, `ver spec`, `ver relato no
+  commit`, or `corte1` inside a sentence. Twenty-three citations pointed at
+  prompt sections that do not exist in the shipped skeletons; two reconstructed
+  the withheld prompt's editorial rules verbatim.
+- **Test data carries brand.** The company name was the fixture company across
+  12 test files, and a regional nickname for one startup belt sat in a slug
+  assertion. Nothing in the first criteria looked at fixtures.
+- **A criterion with no command behind it is a wish.** The URL criterion was
+  prose for two rounds, and a real 11-character YouTube video ID sat in
+  `run.py`'s CLI help the whole time.
+- **Substituting a value can silently disarm the test that guarded it.**
+  `nossa` was a genuine near-miss for `Norvik`'s phonetic pattern and fails at
+  the first character against `Zarvik`'s, so the assertion passed for any
+  input. Replacing a fixture means re-deriving what its tests prove, not just
+  confirming they still pass.
+- **A comment can become false without being touched.** Four comments
+  described a template that no longer ships; one docstring asserted a
+  concatenation strategy the code documents as broken, in the same call path.
+
+The general form: verify the *property*, not the spelling you happen to have
+thought of, and prefer a criterion that fails loudly over one that comes back
+empty.
