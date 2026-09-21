@@ -1,0 +1,85 @@
+"""Obtém o vídeo-fonte a partir de arquivo local, link do YouTube ou do Drive.
+
+Salva sempre em <projeto>/fonte/video.mp4 (ver layout.video) e retorna o caminho.
+"""
+from __future__ import annotations
+
+import os
+import re
+import shutil
+import subprocess
+
+from . import layout
+
+YT_RE = re.compile(r"(youtube\.com|youtu\.be)", re.IGNORECASE)
+DRIVE_RE = re.compile(r"drive\.google\.com", re.IGNORECASE)
+
+
+def detect_source(src: str) -> str:
+    """Classifica a fonte: 'youtube', 'drive' ou 'local'."""
+    if YT_RE.search(src):
+        return "youtube"
+    if DRIVE_RE.search(src):
+        return "drive"
+    return "local"
+
+
+def youtube_id(url: str) -> str | None:
+    m = re.search(r"(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})", url)
+    return m.group(1) if m else None
+
+
+def _ytdlp(args, capture=False):
+    ytdlp = shutil.which("yt-dlp") or os.path.expanduser("~/.local/bin/yt-dlp")
+    cmd = [ytdlp, *args]
+    if capture:
+        return subprocess.run(cmd, capture_output=True, text=True)
+    return subprocess.run(cmd, check=True)
+
+
+def acquire(src: str, project_dir: str) -> str:
+    """Baixa/copia o vídeo para layout.video(project_dir) e retorna o caminho."""
+    dest = layout.garante(layout.video(project_dir))
+    kind = detect_source(src)
+
+    if kind == "local":
+        if not os.path.exists(src):
+            raise FileNotFoundError(f"Arquivo não encontrado: {src}")
+        if os.path.abspath(src) != os.path.abspath(dest):
+            shutil.copy2(src, dest)
+        print(f"[acquire] local -> {dest}")
+        return dest
+
+    # youtube ou drive: baixa o melhor mp4 disponível
+    print(f"[acquire] baixando ({kind}) com yt-dlp...")
+    r = _ytdlp([
+        "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
+        "--merge-output-format", "mp4",
+        "-o", dest, src,
+    ], capture=True)
+    if r.returncode != 0 or not os.path.exists(dest):
+        raise RuntimeError(f"yt-dlp falhou ao baixar:\n{r.stderr[-1500:]}")
+    print(f"[acquire] {kind} -> {dest}")
+    return dest
+
+
+def fetch_youtube_captions(url: str, project_dir: str, lang="pt") -> str | None:
+    """Tenta baixar a legenda automática (VTT) do YouTube. Retorna o path do
+    .vtt ou None se não houver legenda. Muito mais rápido que transcrever."""
+    vid = youtube_id(url)
+    if not vid:
+        return None
+    pasta = layout.pasta_fonte(project_dir)
+    os.makedirs(pasta, exist_ok=True)
+    out_tpl = os.path.join(pasta, "yt_%(id)s.%(ext)s")
+    print(f"[acquire] tentando legenda automática ({lang}) do YouTube...")
+    _ytdlp([
+        "--skip-download", "--write-auto-subs", "--sub-langs", lang,
+        "--sub-format", "vtt", "-o", out_tpl, url,
+    ], capture=True)
+    vtt = os.path.join(pasta, f"yt_{vid}.{lang}.vtt")
+    if os.path.exists(vtt) and os.path.getsize(vtt) > 0:
+        print(f"[acquire] legenda encontrada -> {vtt}")
+        return vtt
+    print("[acquire] sem legenda automática disponível.")
+    return None

@@ -1,0 +1,30 @@
+0:10
+Boa tarde, pessoal, estamos gravando mais um episódio hoje.
+0:15
+Hoje a gente vai falar sobre a Acme e, como sempre, o meu co-host aqui,
+0:21
+o Fulano, conduzindo a conversa junto comigo. Prazer estar com
+0:26
+vocês.
+0:27
+>> Muito prazer. Agradeço bastante o convite de estar aqui e poder contar
+0:31
+um pouco da nossa história.
+0:35
+>> Conta pra gente como começou, então. Quando foi que vocês decidiram
+0:40
+que ia virar empresa de verdade?
+0:44
+>> Olha, no começo era só um projeto paralelo. A gente trabalhava em outro
+0:50
+lugar e mexia nisso à noite, sem pretensão nenhuma.
+0:55
+Aí um cliente perguntou se dava pra comprar, e a gente percebeu que tinha
+1:01
+alguma coisa ali que valia a pena levar a sério.
+1:02:03
+>> E olhando pra trás, o que você faria diferente hoje?
+1:02:10
+>> Eu teria validado antes de construir. A gente passou meses fazendo uma
+1:02:16
+coisa que ninguém tinha pedido, e isso custa caro.

@@ -1,0 +1,16 @@
+# Saída gerada por projeto (vídeos-fonte, cortes, thumbs) — não versionar
+projetos/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Ambiente
+.env
+
+# Sistema
+.DS_Store
+*.log
