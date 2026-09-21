@@ -194,7 +194,7 @@ become part of `channel.toml`.
 README and `.env.example` both instruct running this file; it does not exist,
 and it is the only documented route to `YT_REFRESH_TOKEN`. Installed-app OAuth2
 via `google_auth_oauthlib.flow.InstalledAppFlow`, scope
-`https://www.googleapis.com/auth/youtube.upload`, with `access_type=offline`
+`https://www.\.example\b|googleapis.com/auth/youtube.upload`, with `access_type=offline`
 and `prompt=consent` — without both, Google returns no refresh token.
 
 ### Documentation
@@ -251,7 +251,7 @@ Task 7 each add a test module, not because it was ever wrong.
     ```bash
     grep -rnoE 'https?://[^ "'"'"')]+' --include='*.py' --include='*.md' \
       talaria/ tests/ run.py README.md prompts/ \
-      | grep -viE 'googleapis|google\.com|github|python\.org|example\.com|exemplo|localhost|cloudflarestorage|myaccount\.google|graph\.facebook|graph\.instagram|youtube\.com/shorts|s3\.amazonaws|youtu\.be/(XYZ|VIDEO_ID)|linkedin\.com/in/x|https://x|assinada|instagr\.am/p/x|https://(yt|ig|a|b)[/.]'
+      | grep -viE '\.example\b|googleapis|google\.com|github|python\.org|example\.com|exemplo|localhost|cloudflarestorage|myaccount\.google|graph\.facebook|graph\.instagram|youtube\.com/shorts|s3\.amazonaws|youtu\.be/(XYZ|VIDEO_ID)|linkedin\.com/in/x|https://x|assinada|instagr\.am/p/x|https://(yt|ig|a|b)[/.]'
     ```
 
     Anything it prints is either a new placeholder to add to the allow-list or
