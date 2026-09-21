@@ -2,7 +2,7 @@
 
 Os tempos de corte saem da transcrição, cuja resolução é de 1 segundo. Um fim
 tirado dali cai em cima da fronteira entre duas palavras e deixa vazar o ataque
-da seguinte: um corte terminando em 901.0 deixava o espectador ouvir o "Poucas"
+da seguinte: o corte terminava em 901.0 e o espectador ouvia o "Poucas"
 que abre a frase seguinte.
 
 A pausa entre palavras numa fala corrida é curta (~40ms no caso medido), então

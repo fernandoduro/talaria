@@ -115,8 +115,8 @@ def _expande_contracoes(t: str) -> str:
 
 
 # Trocas fonéticas que a transcrição automática faz em nome próprio. A mesma
-# empresa sai como Zarvik, Zarvic, Zarvyk e Ilzarvik — varia na vogal interna,
-# no y/i, e no `l` que a transcrição insere.
+# empresa sai como Zarvik, Zarvic, Zarvyk e Zlarvik — varia no y/i, no c/k, e
+# no `l` que a transcrição insere.
 _EQUIV_FONETICA = [
     ("y", "[yieu]"),
     ("i", "[yieu]"),
@@ -145,7 +145,7 @@ def _padrao_fonetico(nome: str) -> str:
                 break
         else:
             partes.append(re.escape(ch))
-    # 'l' extra no meio ("Ilzarvik" para "Zarvik") é erro comum de transcrição.
+    # 'l' extra no meio ("Zlarvik" para "Zarvik") é erro comum de transcrição.
     return partes[0] + "l?" + "".join(partes[1:])
 
 
@@ -167,7 +167,7 @@ def corrige_nomes(txt: str, nomes: list) -> str:
     """Reescreve nome próprio na grafia oficial vinda do episodio.json.
 
     A transcrição erra nome próprio e a legenda é queimada no vídeo — sem isto
-    o erro vai ao ar (Zarvic/Ilzarvik no lugar de Zarvik).
+    o erro vai ao ar (Zarvic/Zlarvik no lugar de Zarvik).
 
     Só entra nome INVENTADO: quando a empresa se chama "Matriz" ou "Acho", a
     transcrição acerta sozinha e reescrever estragaria a frase ("a matriz de

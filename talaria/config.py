@@ -34,7 +34,7 @@ FONT = _fonte_versionada("DejaVuSans-Bold.ttf")
 # ---------------------------------------------------------------------------
 # Backend de legenda — detectado em runtime.
 #
-# 'drawtext' é o caminho validado, mas exige ffmpeg compilado com
+# 'drawtext' é o caminho padrão, mas exige ffmpeg compilado com
 # libfreetype. Builds mínimas (ex.: Homebrew no macOS) não têm o filtro; nesse
 # caso caímos para 'overlay': legendas rasterizadas em PNG com Pillow e
 # sobrepostas com overlay+enable. Mesmo resultado visual, sem depender de libs

@@ -15,7 +15,7 @@ class TestValeAntes(unittest.TestCase):
     """Pausa só conta como fim de fala se o silêncio DURAR.
 
     Numa fala corrida a energia mergulha entre palavras a cada ~100ms. Cortar
-    no primeiro mergulho parte a frase: o corte4 terminou numa pausa
+    no primeiro mergulho parte a frase: um corte terminou numa pausa
     interna de 80ms e a fala sumiu antes de "...projeto assim tão longo".
     """
 
@@ -64,7 +64,7 @@ class TestCaudaVaza(unittest.TestCase):
 
     Toda fala acaba com uma sílaba, então "tem energia no fim" acusa qualquer
     corte. O sinal é o decaimento: palavra terminando decai; palavra cortada
-    para de repente ainda no nível alto. Números medidos.
+    para de repente ainda no nível alto.
     """
 
     def test_limiar_separa_os_casos_medidos(self):
@@ -93,8 +93,8 @@ class TestMargemDeFim(unittest.TestCase):
     """O fim do corte precisa de folga para não pegar a palavra seguinte.
 
     Os tempos vêm da transcrição, cuja resolução é de 1 segundo — cortar
-    exatamente no limite de um bloco encosta no ataque da próxima palavra. O
-    corte b2b terminava em 901.0 e deixava vazar o "Poucas" que abre o bloco
+    exatamente no limite de um bloco encosta no ataque da próxima palavra. Um
+    corte terminava em 901.0 e deixava vazar o "Poucas" que abre o bloco
     seguinte (a pausa entre as duas palavras dura ~50ms).
     """
 
@@ -157,7 +157,7 @@ class TestSegmentsInCut(unittest.TestCase):
 
         O corte termina alguns ms depois do início do bloco seguinte (o fim vem
         do vale de áudio, não da grade da transcrição). Sem piso de duração,
-        esse bloco vira um PNG de 1 frame — o corte b2b exibia "Poucas"
+        esse bloco vira um PNG de 1 frame — o corte exibia "Poucas"
         por 20ms, justamente a palavra que o ajuste de áudio tirou.
         """
         segs = [
@@ -187,8 +187,7 @@ class TestSegmentsInCut(unittest.TestCase):
         """Fatia que para 1-2 palavras antes do ponto final deve alcançá-lo.
 
         Truncar antes da pontuação deixa a legenda pendurada ("muito mais do")
-        quando o áudio completou a frase ("muito mais do mesmo."). Caso real,
-        corte b2b.
+        quando o áudio completou a frase ("muito mais do mesmo."). Caso real.
         """
         txt = "muito mais do mesmo. para cápsula, comprimido."
         self.assertEqual(render._apara_texto(txt, 0.0, 0.25), "muito mais do mesmo.")

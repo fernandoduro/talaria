@@ -64,7 +64,7 @@ class TestCorrigeNomes(unittest.TestCase):
 
     def test_nao_altera_palavra_comum_parecida(self):
         """Correção não pode atropelar palavra do idioma."""
-        txt = "nossa origem foi essa"
+        txt = "zarpa origem foi essa"
         self.assertEqual(utils.corrige_nomes(txt, ["Zarvik"]), txt)
 
     def test_sem_nomes_nao_faz_nada(self):

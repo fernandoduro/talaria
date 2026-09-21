@@ -207,7 +207,7 @@ def valida_corte(faixa: tuple, segs: list, estado: dict) -> tuple:
     # Seção 7: o corte não pode começar NEM terminar no meio de uma frase.
     # O fim já foi só alerta, na suposição de que a cauda seria "aparada no
     # render" — o render corta no tempo exato, então nada era aparado e o
-    # vídeo saía com a última frase pela metade (corte do mar azul).
+    # vídeo saía com a última frase pela metade.
     if segs and not _fronteira_valida(start, segs):
         msgs.append(f"início {start:.1f}s não cai em fronteira de frase")
 

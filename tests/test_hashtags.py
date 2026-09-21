@@ -6,7 +6,7 @@ from talaria import hashtags
 
 class TestSlug(unittest.TestCase):
     def test_remove_acento_e_espaco(self):
-        self.assertEqual(hashtags.slug("São Carlos"), "SaoCarlos")
+        self.assertEqual(hashtags.slug("São Bento"), "SaoBento")
 
     def test_ribeirao_acai(self):
         self.assertEqual(hashtags.slug("Ribeirão Açaí"), "RibeiraoAcai")

@@ -87,7 +87,7 @@ def _drawtext_chain(segments, start, end, nomes=None) -> str:
 
 
 def _filtergraph(segments, start, end, nomes=None) -> str:
-    """9:16 com fundo blur + legendas via drawtext (pipeline validado)."""
+    """9:16 com fundo blur + legendas via drawtext."""
     draw = _drawtext_chain(segments, start, end, nomes)
     return (
         "[0:v]split=2[bg][fg];"
@@ -157,7 +157,7 @@ def _segments_in_cut(segments, start, end, nomes=None):
 # Tempo mínimo de tela para uma legenda valer a pena. O fim do corte vem do
 # vale de áudio, não da grade da transcrição, então sobram milissegundos do
 # bloco seguinte — sem este piso viravam PNG de 1 frame ("Poucas" piscando no
-# fim do corte b2b, a palavra que o ajuste de áudio tinha tirado).
+# fim do corte, a palavra que o ajuste de áudio tinha tirado).
 LEGENDA_MIN_S = 0.30
 
 
@@ -489,7 +489,7 @@ def render_all(project_dir, platforms, only=None):
 def _nomes_proprios(project_dir):
     """Nomes que a legenda deve grafar como o episodio.json manda.
 
-    A transcrição erra nome próprio (Zarvik/Zarvic/Ilzarvik) e a
+    A transcrição erra nome próprio (Zarvik/Zarvic/Zlarvik) e a
     legenda vai queimada no vídeo. Episódio sem metadados não quebra o render —
     segue sem correção.
     """

@@ -1,6 +1,6 @@
 """Hashtags da descrição — regra determinística, não julgamento editorial.
 
-Hashtags não aceitam espaço nem acento: "São Carlos" -> #SaoCarlos.
+Hashtags não aceitam espaço nem acento: "São Bento" -> #SaoBento.
 Três são fixas em todo episódio; cidade e empresa variam.
 """
 from __future__ import annotations
