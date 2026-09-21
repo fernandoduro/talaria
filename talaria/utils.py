@@ -67,7 +67,7 @@ _CONTRACOES = [
     (r"t[ôo]", "estou"),
     (r"t[ãa]o", None),      # sentinela: 'tão' NÃO é contração (ver _expande)
     # 'pra'/'pro' expandem só para 'para': a contração carrega o artigo, mas
-    # nem sempre ("vim pra junto do Gustavo" não vira "para a junto"). Inserir
+    # nem sempre ("vim pra junto do Rafael" não vira "para a junto"). Inserir
     # artigo exigiria analisar o que vem depois; 'para' está sempre correto.
     (r"pra", "para"),
     (r"pro", "para"),

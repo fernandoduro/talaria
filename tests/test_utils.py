@@ -123,10 +123,10 @@ class TestCleanCaption(unittest.TestCase):
     def test_contracao_nao_inventa_artigo(self):
         """'pra'/'pro' viram só 'para': inserir artigo erra fora do caso comum.
 
-        "vim pra junto do Gustavo" viraria "para a junto do Gustavo".
+        "vim pra junto do Rafael" viraria "para a junto do Rafael".
         """
-        self.assertEqual(utils.clean_caption("vim pra junto do Gustavo"),
-                         "vim para junto do Gustavo")
+        self.assertEqual(utils.clean_caption("vim pra junto do Rafael"),
+                         "vim para junto do Rafael")
 
     def test_contracao_respeita_fronteira_de_palavra(self):
         """'tá' dentro de outra palavra não pode ser trocado."""

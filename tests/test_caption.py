@@ -45,9 +45,9 @@ class TestEscreve(unittest.TestCase):
 
     def test_conteudo_gravado_em_utf8(self):
         peca = os.path.join(self.d, "post_x.png")
-        caption.escreve(peca, "Ação e coração.\n\n#SaoGoncalo")
+        caption.escreve(peca, "Ação e coração.\n\n#RibeiraoAcai")
         with open(os.path.join(self.d, "post_x.txt"), encoding="utf-8") as f:
-            self.assertEqual(f.read(), "Ação e coração.\n\n#SaoGoncalo")
+            self.assertEqual(f.read(), "Ação e coração.\n\n#RibeiraoAcai")
 
     def test_sobrescreve_sem_duplicar(self):
         # Regerar duas vezes deixa um arquivo só, com o conteúdo novo.

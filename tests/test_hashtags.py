@@ -8,10 +8,10 @@ class TestSlug(unittest.TestCase):
     def test_remove_acento_e_espaco(self):
         self.assertEqual(hashtags.slug("São Carlos"), "SaoCarlos")
 
-    def test_sao_goncalo(self):
+    def test_ribeirao_acai(self):
         self.assertEqual(hashtags.slug("Ribeirão Açaí"), "RibeiraoAcai")
 
-    def test_sanduiche_valley(self):
+    def test_planicie_valley(self):
         self.assertEqual(hashtags.slug("Planície Valley"), "PlanicieValley")
 
     def test_palavra_unica_mantem_capitalizacao(self):
