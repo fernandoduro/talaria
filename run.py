@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """Talaria — orquestrador CLI.
 
-Fluxo por vídeo (rodado por mim, Claude Code, com curadoria manual no meio):
+Fluxo por vídeo (rodado por um modelo de linguagem, com curadoria manual):
 
   1. ingest     : baixa o vídeo + converte a transcrição .txt -> transcricao.json
                   (ou acquire + transcribe, quando a transcrição vem do Whisper)
   2. [episodio.json]: o gestor preenche os metadados do episódio
-  3. brief      : monta o pacote de leitura (--cortes ou --materiais) p/ o Claude
+  3. brief      : monta o pacote de leitura (--cortes ou --materiais) p/ o modelo
   4. curar      : estado da curadoria iterativa; --exportar gera momentos.json
   5. render     : gera os cortes 9:16 com legenda p/ as plataformas escolhidas
   6. thumb      : gera a thumbnail (textos do JSON, flags sobrescrevem)
@@ -192,7 +192,7 @@ def cmd_ingest(args):
 
 
 def cmd_brief(args):
-    """Monta o pacote de leitura (materiais ou cortes) para o Claude."""
+    """Monta o pacote de leitura (materiais ou cortes) para o modelo."""
     pd = project_dir(args.projeto)
     # --cortes e --materiais são mutuamente exclusivas (ver add_mutually_exclusive_group);
     # sem nenhuma das duas, o default é 'materiais'.
@@ -423,7 +423,7 @@ def main():
     sp.add_argument("--transcricao", default=None, help="path do .txt com timestamps")
     sp.set_defaults(func=cmd_ingest)
 
-    sp = sub.add_parser("brief", help="monta o pacote de leitura para o Claude")
+    sp = sub.add_parser("brief", help="monta o pacote de leitura para o modelo")
     add_common(sp)
     g = sp.add_mutually_exclusive_group()
     g.add_argument("--materiais", action="store_true",

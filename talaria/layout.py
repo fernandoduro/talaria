@@ -10,7 +10,7 @@ A pasta é organizada por NATUREZA:
     <slug>/episodio.json     o gestor preenche à mão — fica na raiz de
                              propósito, para não esconder a única tarefa manual
     <slug>/fonte/            entrada: vídeo e transcrição
-    <slug>/decisoes/         o que o gestor e o Claude decidiram
+    <slug>/decisoes/         o que o gestor e o modelo decidiram
     <slug>/briefs/           pacotes de leitura, regeneráveis
     <slug>/publicar/         o que vai ao ar
 """

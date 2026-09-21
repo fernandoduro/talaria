@@ -10,10 +10,9 @@ import shutil
 # Fontes — versionadas em assets/fonts/.
 #
 # O texto é queimado no vídeo e rasterizado nos PNG, então a fonte decide o
-# resultado publicado. Resolver pelo sistema substitui em silêncio: nesta
-# máquina o fc-match devolve Noto Sans quando se pede Poppins, e o layout sai
-# errado sem nenhum erro. Arquivo no repositório = mesmo render em qualquer
-# máquina, e falta de arquivo aborta na importação.
+# resultado publicado. O fc-match substitui em silêncio: pede-se Poppins e vem
+# Noto Sans, e o layout sai errado sem nenhum erro. Arquivo no repositório =
+# mesmo render em qualquer máquina, e falta de arquivo aborta na importação.
 # ---------------------------------------------------------------------------
 _RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _DIR_FONTES = os.path.join(_RAIZ, "assets", "fonts")
@@ -140,7 +139,7 @@ CARD_DURACAO_S = 3.5
 CARD_FADE_S = 0.35
 CARD_LOGO_LARGURA = 620
 CARD_ARROBA = "@seuperfil"
-CARD_COR_ARROBA = (255, 140, 66)   # laranja da marca
+CARD_COR_ARROBA = (255, 140, 66)   # laranja
 CARD_FUNDO = (10, 10, 10)
 
 POST_W = 2160

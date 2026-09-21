@@ -268,8 +268,7 @@ class TestSugereFrames(unittest.TestCase):
     """Onde procurar frame de thumbnail: dentro dos cortes aprovados.
 
     A escolha final é visual e fica com o gestor — o que se automatiza é a
-    região. A sugestão caiu em 1619s e o frame escolhido à mão foi
-    1620s.
+    região. A sugestão caiu em 1619s e o frame escolhido à mão foi 1620s.
     """
 
     def setUp(self):

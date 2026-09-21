@@ -23,7 +23,7 @@ import os
 # destacada para quem revisa antes de publicar.
 SEPARADOR = "\n\n"
 
-# O gestor rejeita travessão em legenda: sai com cara de texto de IA, e mesmo
+# O canal não usa travessão em legenda: sai com cara de texto de IA, e mesmo
 # assim já escapou até um corte estar no ar — por isso a regra também vive
 # aqui, onde toda legenda passa.
 TRAVESSAO = "\u2014"

@@ -1,8 +1,7 @@
 """Parser correto do VTT de rolagem do YouTube.
 
 Cada cue tem 2 linhas de texto: a consolidada (repetição, sem tags) e a nova
-(com tags <c> de timing por palavra). Usamos SÓ a linha com <c> -> zero
-duplicação.
+(tags <c> de timing por palavra). Usamos SÓ a linha com <c>: zero duplicação.
 """
 from __future__ import annotations
 

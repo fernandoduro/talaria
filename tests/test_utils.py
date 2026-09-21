@@ -88,8 +88,8 @@ class TestCorrigeNomes(unittest.TestCase):
 
     def test_capitaliza_nome_em_caixa_baixa(self):
         """Transcrição escreve marca em minúscula; a legenda deve capitalizar."""
-        self.assertEqual(utils.corrige_nomes("o neoboard e o quadro", ["Neoboard"]),
-                         "o Neoboard e o quadro")
+        self.assertEqual(utils.corrige_nomes("o quibralux e o quadro", ["Quibralux"]),
+                         "o Quibralux e o quadro")
         self.assertEqual(utils.corrige_nomes("a zarvik hoje", ["Zarvik"]),
                          "a Zarvik hoje")
 

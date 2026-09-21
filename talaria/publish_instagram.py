@@ -2,9 +2,8 @@
 
 A Graph API não aceita upload binário: o container busca a mídia numa URL
 pública (storage_temp). Vídeo processa assíncrono — poll com timeout, e os
-finais ERROR/EXPIRED são falha explícita com o status literal na mensagem
-(sem isso o comando trava para sempre num vídeo que o Instagram rejeitou em
-silêncio).
+finais ERROR/EXPIRED são falha explícita com o status literal na mensagem (sem
+isso o comando trava para sempre num vídeo rejeitado em silêncio).
 """
 from __future__ import annotations
 

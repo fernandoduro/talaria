@@ -1,4 +1,4 @@
-"""Monta os pacotes de leitura que o Claude consome em sessão.
+"""Monta os pacotes de leitura que um modelo de linguagem consome em sessão.
 
 Junta prompt versionado + metadados do episódio + transcrição num arquivo
 único, substituindo a colagem manual a cada episódio.

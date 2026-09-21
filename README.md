@@ -95,7 +95,8 @@ OAuth do Google Cloud Console precisa ser do tipo **Desktop**, não Web.
 
 ## Personalizar
 
-Quatro coisas são identidade de canal e vêm neutras neste pacote:
+Seis coisas são identidade de canal. As quatro primeiras vêm neutras neste
+pacote; paleta e textos fixos vêm com valores de exemplo.
 
 | O quê | Onde |
 |---|---|
@@ -103,6 +104,8 @@ Quatro coisas são identidade de canal e vêm neutras neste pacote:
 | Template do post e logotipo | `assets/` |
 | Nome do programa e perfil social | `NOME_PROGRAMA` e `CARD_ARROBA` em `talaria/config.py` |
 | Fontes do render e do post | `assets/fonts/` |
+| Paleta da thumb e dos cards | `THUMB_ORANGE`, `CARD_COR_ARROBA` e os `POST_COR_*` em `talaria/config.py` |
+| Hashtags fixas e a chamada do episódio | `FIXAS` em `talaria/hashtags.py` e `PREFIXO_EPISODIO` em `talaria/caption.py` |
 
 Os prompts são esqueletos: têm a estrutura e os placeholders que o código
 espera, mas o critério editorial precisa ser escrito por quem conhece o
@@ -114,7 +117,7 @@ próprio canal. É a parte que mais afeta o resultado.
 python3 -m unittest discover -s tests -v
 ```
 
-São 387 testes, sem dependência de rede: as chamadas de API (YouTube,
+São 388 testes, sem dependência de rede: as chamadas de API (YouTube,
 Instagram, S3) são mockadas. Rode dentro do venv.
 
 ## Notas

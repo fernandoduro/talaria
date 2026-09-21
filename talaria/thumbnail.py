@@ -54,7 +54,7 @@ def build_thumbnail(frame_path, out_path, *, selo, chamada_l1, chamada_l2,
                     creditos="", subtitulo=""):
     """Monta a thumbnail. Textos totalmente parametrizados.
 
-    selo:        faixa laranja superior esquerda (ex.: 'MEU PODCAST • T2 E02')
+    selo:        faixa laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
     chamada_l1:  1ª linha grande (branca)
     chamada_l2:  2ª linha grande (laranja)
     creditos:    canto superior direito (ex.: nomes dos convidados)
