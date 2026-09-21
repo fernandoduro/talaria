@@ -14,10 +14,10 @@ Fluxo por vídeo (rodado por mim, Claude Code, com curadoria manual no meio):
                   --gerar renderiza os PNGs a partir do posts.json
 
 Exemplos:
-  python run.py acquire  --projeto ep2 --src "https://youtu.be/ZUFW4LtsPN0"
-  python run.py transcribe --projeto ep2 --src "https://youtu.be/ZUFW4LtsPN0"
+  python run.py acquire  --projeto ep2 --src "https://youtu.be/VIDEO_ID"
+  python run.py transcribe --projeto ep2 --src "https://youtu.be/VIDEO_ID"
   python run.py render   --projeto ep2 --youtube --instagram
-  python run.py ingest   --projeto ep2 --src "https://youtu.be/ZUFW4LtsPN0" \\
+  python run.py ingest   --projeto ep2 --src "https://youtu.be/VIDEO_ID" \\
       --transcricao ~/Downloads/ep2.txt
   python run.py brief    --projeto ep2 --cortes
   python run.py curar    --projeto ep2 --meta 5
@@ -26,7 +26,7 @@ Exemplos:
   python run.py post     --projeto ep2 --gerar
 
   # acquire + transcribe de uma vez (para antes da curadoria):
-  python run.py prep     --projeto ep2 --src "https://youtu.be/ZUFW4LtsPN0"
+  python run.py prep     --projeto ep2 --src "https://youtu.be/VIDEO_ID"
 """
 from __future__ import annotations
 
