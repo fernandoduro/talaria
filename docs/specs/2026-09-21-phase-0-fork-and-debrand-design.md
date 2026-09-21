@@ -194,7 +194,7 @@ become part of `channel.toml`.
 README and `.env.example` both instruct running this file; it does not exist,
 and it is the only documented route to `YT_REFRESH_TOKEN`. Installed-app OAuth2
 via `google_auth_oauthlib.flow.InstalledAppFlow`, scope
-`https://www.\.example\b|googleapis.com/auth/youtube.upload`, with `access_type=offline`
+`https://www.googleapis.com/auth/youtube.upload`, with `access_type=offline`
 and `prompt=consent` — without both, Google returns no refresh token.
 
 ### Documentation
