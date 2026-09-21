@@ -20,14 +20,23 @@ def valida_client_secret(caminho: str) -> dict:
     já contar com ele.
     """
     if not os.path.exists(caminho):
-        raise SystemExit(f"{caminho} não existe.")
+        raise SystemExit(
+            f"{caminho} não existe. Confira o caminho passado na linha "
+            f"de comando."
+        )
     try:
         with open(caminho, encoding="utf-8") as f:
             dados = json.load(f)
     except (json.JSONDecodeError, OSError) as e:
-        raise SystemExit(f"{caminho} não é um JSON legível: {e}") from None
-    if "installed" not in dados:
-        tipo = ", ".join(sorted(dados)) or "vazio"
+        raise SystemExit(
+            f"{caminho} não é um JSON legível: {e}. Baixe o arquivo de "
+            f"novo no Google Cloud Console."
+        ) from None
+    if not isinstance(dados, dict) or "installed" not in dados:
+        if isinstance(dados, dict):
+            tipo = ", ".join(sorted(dados)) or "vazio"
+        else:
+            tipo = "não é um objeto"
         raise SystemExit(
             f"{caminho} não é um client Desktop (tem: {tipo}). No Google "
             f"Cloud Console, crie a credencial OAuth com tipo de aplicativo "

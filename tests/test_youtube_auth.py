@@ -40,12 +40,20 @@ class TestValidaClientSecret(unittest.TestCase):
     def test_recusa_json_invalido(self):
         with tempfile.TemporaryDirectory() as d:
             caminho = _escreve(d, "nao e json {")
-            with self.assertRaises(SystemExit):
+            with self.assertRaises(SystemExit) as ctx:
                 youtube_auth.valida_client_secret(caminho)
+            self.assertIn("Console", str(ctx.exception))
 
     def test_recusa_arquivo_ausente(self):
-        with self.assertRaises(SystemExit):
+        with self.assertRaises(SystemExit) as ctx:
             youtube_auth.valida_client_secret("/nao/existe.json")
+        self.assertIn("comando", str(ctx.exception))
+
+    def test_recusa_json_nao_objeto(self):
+        with tempfile.TemporaryDirectory() as d:
+            caminho = _escreve(d, "42")
+            with self.assertRaises(SystemExit):
+                youtube_auth.valida_client_secret(caminho)
 
     def test_escopo_e_exatamente_o_do_publish(self):
         from talaria import publish_youtube
