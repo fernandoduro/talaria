@@ -231,9 +231,20 @@ Task 7 each add a test module, not because it was ever wrong.
   - `grep -rniE '(d[ae]|desta) casa\b'`. A bare `casa` grep can never come
     clean — it is also an ordinary verb and a legitimate data value — and is
     not a criterion.
-  - No real URL or media ID: the CLI help in `run.py` carried a genuine
-    11-character YouTube video ID through two de-branding rounds because no
-    grep looked for URLs. Placeholders only (`https://youtu.be/VIDEO_ID`).
+  - No real URL or media ID. This one needs to be runnable, not prose — the
+    CLI help in `run.py` carried a genuine 11-character YouTube video ID
+    through two de-branding rounds precisely because this criterion had no
+    command behind it:
+
+    ```bash
+    grep -rnoE 'https?://[^ "'"'"')]+' --include='*.py' --include='*.md' \
+      talaria/ tests/ run.py README.md prompts/ \
+      | grep -viE 'googleapis|google\.com|github|python\.org|example\.com|exemplo|localhost|cloudflarestorage|myaccount\.google|graph\.facebook|graph\.instagram|youtube\.com/shorts|s3\.amazonaws|youtu\.be/(XYZ|VIDEO_ID)|linkedin\.com/in/x|https://x|assinada|instagr\.am/p/x|https://(yt|ig|a|b)[/.]'
+    ```
+
+    Anything it prints is either a new placeholder to add to the allow-list or
+    a real leftover. Judge each one; do not widen the allow-list to silence a
+    hit without reading it.
 - Repository pushed private, directory renamed.
 
 ## Out of scope for Phase 0
