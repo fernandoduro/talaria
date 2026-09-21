@@ -1,4 +1,4 @@
-# Pipeline Next-Video-Shorts — dependências Python
+# Talaria — dependências Python
 # Instalar num venv:  python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
 # (ffmpeg e ffprobe são dependências de SISTEMA — instalar via apt/brew, não aqui.
 #  ffmpeg também mede o envelope de áudio para ajustar o fim dos cortes: sem ele

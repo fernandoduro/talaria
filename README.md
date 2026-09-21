@@ -1,4 +1,7 @@
-# Video Shorts Pipeline
+# Talaria
+
+Pipeline de vídeo que transforma episódios de videocast em cortes verticais
+para redes sociais.
 
 Transforma um episódio de videocast em cortes verticais 9:16 (YouTube Shorts /
 Instagram Reels), posts de citação para o feed, thumbnail e textos de
@@ -87,17 +90,19 @@ aborta **antes** do primeiro upload.
 exige conta Business (Creator não publica pela API) e não aceita upload
 binário: ele busca a mídia numa URL pública, então o arquivo sobe para um
 bucket compatível com S3, é publicado e removido em seguida. Para o YouTube,
-rode uma vez `python scripts/youtube_auth.py <client_secret.json>`.
+rode uma vez `python scripts/youtube_auth.py <client_secret.json>`. O client
+OAuth do Google Cloud Console precisa ser do tipo **Desktop**, não Web.
 
 ## Personalizar
 
-Três coisas são identidade de canal e vêm neutras neste pacote:
+Quatro coisas são identidade de canal e vêm neutras neste pacote:
 
 | O quê | Onde |
 |---|---|
 | Prompts de curadoria e redação | `prompts/*.md` |
 | Template do post e logotipo | `assets/` |
 | Nome do programa e perfil social | `NOME_PROGRAMA` e `CARD_ARROBA` em `talaria/config.py` |
+| Fontes do render e do post | `assets/fonts/` |
 
 Os prompts são esqueletos: têm a estrutura e os placeholders que o código
 espera, mas o critério editorial precisa ser escrito por quem conhece o
@@ -109,7 +114,7 @@ próprio canal. É a parte que mais afeta o resultado.
 python3 -m unittest discover -s tests -v
 ```
 
-São 377 testes, sem dependência de rede: as chamadas de API (YouTube,
+São 387 testes, sem dependência de rede: as chamadas de API (YouTube,
 Instagram, S3) são mockadas. Rode dentro do venv.
 
 ## Notas
@@ -118,3 +123,6 @@ Instagram, S3) são mockadas. Rode dentro do venv.
 - `projetos/` é ignorado pelo git (vídeos não entram no repositório).
 - O ffmpeg de algumas máquinas não tem `drawtext`; nesse caso o pipeline
   rasteriza as legendas em PNG e as sobrepõe com `overlay`, automaticamente.
+- Código e documentação estão em português nesta fase; tradução para inglês
+  está planejada — ver
+  [`docs/specs/2026-09-21-phase-0-fork-and-debrand-design.md`](docs/specs/2026-09-21-phase-0-fork-and-debrand-design.md).
