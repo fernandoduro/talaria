@@ -42,7 +42,7 @@ class TestValidaClientSecret(unittest.TestCase):
             caminho = _escreve(d, "nao e json {")
             with self.assertRaises(SystemExit) as ctx:
                 youtube_auth.valida_client_secret(caminho)
-            self.assertIn("Console", str(ctx.exception))
+            self.assertIn("Baixe", str(ctx.exception))
 
     def test_recusa_arquivo_ausente(self):
         with self.assertRaises(SystemExit) as ctx:

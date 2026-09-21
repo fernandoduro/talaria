@@ -34,11 +34,11 @@ def valida_client_secret(caminho: str) -> dict:
         ) from None
     if not isinstance(dados, dict) or "installed" not in dados:
         if isinstance(dados, dict):
-            tipo = ", ".join(sorted(dados)) or "vazio"
+            parte = f"tem: {', '.join(sorted(dados)) or 'vazio'}"
         else:
-            tipo = "não é um objeto"
+            parte = "não é um objeto JSON"
         raise SystemExit(
-            f"{caminho} não é um client Desktop (tem: {tipo}). No Google "
+            f"{caminho} não é um client Desktop ({parte}). No Google "
             f"Cloud Console, crie a credencial OAuth com tipo de aplicativo "
             f"'Desktop app' e baixe o JSON dela."
         )
