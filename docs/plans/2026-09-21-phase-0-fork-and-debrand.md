@@ -15,6 +15,10 @@
 - The codebase stays **Portuguese** in this phase. Do not translate identifiers, comments, docstrings or strings. Full English is Phase 1.
 - Tests run with `unittest`, never pytest: `.venv/bin/python -m unittest discover -s tests`.
 - Never squash. Never force-push. Commit after each task.
+- Every commit message ends with these two lines, exactly:
+  `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>`
+  `Claude-Session: https://claude.ai/code/session_01FYUKtLNnaBxLFdweWDYo4g`
+- Do not number list items as `#1` `#2` in commit messages or docs — GitHub autolinks `#N` to unrelated issues. Use `1.` or bullets.
 - Code comments: a comment earns its place only by stating a constraint the code cannot show. When removing a history label, do not replace it with a longer explanation — shorten.
 - `run.py` is the only CLI entry point. Do not add new top-level commands in this phase.
 - Render output changes only where the spec decided it: the vendored fonts, and `POST_CIT_SIZE` 160 → 150 (spec, Fonts section — Poppins at 160 overflows the quote to a 6th line that crosses the rule at y=2242). Any other change to rendered output is out of scope.
