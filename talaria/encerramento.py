@@ -18,7 +18,6 @@ from PIL import Image, ImageDraw, ImageFont
 
 from . import config, layout
 
-_FONT_ARROBA = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
 _TAMANHO_ARROBA = 50
 
 
@@ -41,7 +40,7 @@ def monta_card() -> Image.Image:
     logo_h = int(logo.height * logo_w / logo.width)
     logo_r = logo.resize((logo_w, logo_h))
 
-    fonte = ImageFont.truetype(_FONT_ARROBA, _TAMANHO_ARROBA)
+    fonte = ImageFont.truetype(config.FONT, _TAMANHO_ARROBA)
     d = ImageDraw.Draw(frame)
     bbox = d.textbbox((0, 0), config.CARD_ARROBA, font=fonte)
     arroba_h = bbox[3] - bbox[1]

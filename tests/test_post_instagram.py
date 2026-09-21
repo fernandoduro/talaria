@@ -27,7 +27,7 @@ class TestConfigPost(unittest.TestCase):
 
 class TestEncaixe(unittest.TestCase):
     def test_citacao_do_design_cabe_em_5_linhas(self):
-        txt = ("A gente descobriu que não precisava sair do interior "
+        txt = ("A gente descobriu que não precisava mudar de cidade "
                "para construir algo grande. Precisava ficar.")
         r = post_instagram.valida_card(txt)
         self.assertTrue(r["cabe"])

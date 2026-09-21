@@ -7,45 +7,29 @@ import os
 import shutil
 
 # ---------------------------------------------------------------------------
-# Fonte (usada em render e thumbnail). Detecta DejaVu Sans Bold em locais comuns.
+# Fontes — versionadas em assets/fonts/.
+#
+# O texto é queimado no vídeo e rasterizado nos PNG, então a fonte decide o
+# resultado publicado. Resolver pelo sistema substitui em silêncio: nesta
+# máquina o fc-match devolve Noto Sans quando se pede Poppins, e o layout sai
+# errado sem nenhum erro. Arquivo no repositório = mesmo render em qualquer
+# máquina, e falta de arquivo aborta na importação.
 # ---------------------------------------------------------------------------
-_FONT_CANDIDATES = [
-    # Linux (DejaVu — usada na validação do EP2)
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-    "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
-    # macOS — DejaVu, se instalada via `brew install --cask font-dejavu`
-    "/Library/Fonts/DejaVuSans-Bold.ttf",
-    os.path.expanduser("~/Library/Fonts/DejaVuSans-Bold.ttf"),
-    # macOS — fontes nativas (métrica próxima da DejaVu, não exige instalar nada)
-    "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
-    "/System/Library/Fonts/Supplemental/Verdana Bold.ttf",
-    "/System/Library/Fonts/Supplemental/Tahoma Bold.ttf",
-]
+_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_DIR_FONTES = os.path.join(_RAIZ, "assets", "fonts")
 
 
-def find_font() -> str:
-    for p in _FONT_CANDIDATES:
-        if os.path.exists(p):
-            return p
-    # fallback: qualquer bold do fontconfig
-    fc = shutil.which("fc-match")
-    if fc:
-        import subprocess
-        try:
-            out = subprocess.check_output(
-                ["fc-match", "-f", "%{file}", "DejaVu Sans:bold"], text=True
-            ).strip()
-            if out:
-                return out
-        except Exception:
-            pass
-    raise FileNotFoundError(
-        "Nenhuma fonte bold encontrada. Linux: apt install fonts-dejavu | "
-        "macOS: brew install --cask font-dejavu"
-    )
+def _fonte_versionada(nome: str) -> str:
+    caminho = os.path.join(_DIR_FONTES, nome)
+    if not os.path.exists(caminho):
+        raise FileNotFoundError(
+            f"fonte {nome} não encontrada em assets/fonts — o arquivo é "
+            f"versionado; restaure com 'git checkout assets/fonts/{nome}'."
+        )
+    return caminho
 
 
-FONT = find_font()
+FONT = _fonte_versionada("DejaVuSans-Bold.ttf")
 
 # ---------------------------------------------------------------------------
 # Backend de legenda — detectado em runtime.
@@ -144,7 +128,6 @@ THUMB_CONTRAST = 1.08
 # pixel a pixel: o arquivo já traz logo, aspas, filete e barra desenhados, e o
 # código só escreve citação, nome e cargo por cima.
 # ---------------------------------------------------------------------------
-_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 POST_TEMPLATE = os.path.join(_RAIZ, "assets", "template_instagram.png")
 
 # ---------------------------------------------------------------------------
@@ -184,7 +167,10 @@ NOME_PROGRAMA = "MEU PODCAST"
 POST_NOME_Y = 2338
 POST_CARGO_Y = 2459
 
-POST_CIT_SIZE = 160
+# 150 e não 160: a Poppins é mais larga que a Avenir Next Demi Bold em que o
+# layout foi medido, e a 160 a citação de referência vira 6 linhas — a 6ª
+# cruzaria o filete em y=2242. A 150 sobram 83px na linha mais cheia.
+POST_CIT_SIZE = 150
 POST_NOME_SIZE = 62
 POST_CARGO_SIZE = 38
 
@@ -192,33 +178,12 @@ POST_COR_CITACAO = (245, 242, 234)
 POST_COR_NOME = (255, 255, 255)
 POST_COR_CARGO = (154, 149, 144)
 
-# Fonte da citação. O design usa uma geométrica (Poppins/Montserrat); quando
-# não está instalada cai na Avenir Next Demi Bold, a mais próxima do sistema.
-# Avenir Next é .ttc e o Demi Bold é o índice 2 — sem o índice o Pillow carrega
-# o Bold, mais pesado que o design.
-_POST_FONT_CANDIDATES = [
-    (os.path.expanduser("~/Library/Fonts/Poppins-SemiBold.ttf"), 0),
-    (os.path.expanduser("~/Library/Fonts/Montserrat-SemiBold.ttf"), 0),
-    ("/Library/Fonts/Poppins-SemiBold.ttf", 0),
-    ("/System/Library/Fonts/Avenir Next.ttc", 2),
-]
-
-_POST_MONO_CANDIDATES = [
-    ("/System/Library/Fonts/Menlo.ttc", 0),
-    ("/System/Library/Fonts/Supplemental/Courier New.ttf", 0),
-]
-
-
-def _primeira_fonte(candidatas, fallback):
-    """(caminho, índice) da primeira fonte existente. Índice importa em .ttc."""
-    for caminho, idx in candidatas:
-        if os.path.exists(caminho):
-            return caminho, idx
-    return fallback, 0
-
-
-POST_FONT, POST_FONT_INDEX = _primeira_fonte(_POST_FONT_CANDIDATES, FONT)
-POST_MONO, POST_MONO_INDEX = _primeira_fonte(_POST_MONO_CANDIDATES, FONT)
+# Fonte da citação e do rodapé do post. Índice 0 em .ttf — a distinção só
+# importava enquanto a cadeia de candidatas podia cair num .ttc do macOS.
+POST_FONT = _fonte_versionada("Poppins-SemiBold.ttf")
+POST_FONT_INDEX = 0
+POST_MONO = _fonte_versionada("DejaVuSansMono-Bold.ttf")
+POST_MONO_INDEX = 0
 
 # ---------------------------------------------------------------------------
 # Publicação agendada

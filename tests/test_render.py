@@ -212,7 +212,7 @@ class TestSegmentsInCut(unittest.TestCase):
 class TestWrapByPixels(unittest.TestCase):
     """wrap_by_pixels serve a legenda queimada E o post de citação."""
 
-    CITACAO_DO_DESIGN = ("A gente descobriu que não precisava sair do interior "
+    CITACAO_DO_DESIGN = ("A gente descobriu que não precisava mudar de cidade "
                          "para construir algo grande. Precisava ficar.")
 
     def test_wrap_aceita_fonte_e_largura_alternativas(self):
@@ -238,28 +238,23 @@ class TestWrapByPixels(unittest.TestCase):
         self.assertEqual(" ".join(linhas), self.CITACAO_DO_DESIGN)
 
     def test_quebra_do_design_com_a_fonte_do_design(self):
-        """A citação aprovada quebra em 5 linhas — o layout que o gestor validou.
+        """A citação de referência quebra em 5 linhas na fonte versionada.
 
-        Depende da fonte: o `config.POST_FONT` resolve por cadeia de candidatas
-        e cada máquina pode ter uma. Em Verdana Bold, por exemplo, o mesmo texto
-        vira 6 linhas e estouraria o card. Por isso o teste confere QUAL fonte
-        resolveu e só cobra o layout quando é a esperada — em vez de falhar por
-        um motivo que não é defeito do código.
+        Não há mais cadeia de candidatas: a fonte vem de assets/fonts/, então
+        a quebra é a mesma em qualquer máquina e o teste cobra o layout em vez
+        de pular.
         """
         from PIL import ImageFont
         from talaria import config, render
-        fnt = ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE,
-                                 index=config.POST_FONT_INDEX)
-        familia, estilo = fnt.getname()
-        if (familia, estilo) != ("Avenir Next", "Demi Bold"):
-            self.skipTest(f"fonte do design ausente; resolveu {familia} {estilo}")
+        fnt = ImageFont.truetype(config.POST_FONT, config.POST_CIT_SIZE)
+        self.assertEqual(fnt.getname(), ("Poppins", "SemiBold"))
         linhas = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
                                        largura=config.POST_LARGURA_UTIL)
         self.assertEqual(linhas, ["A gente descobriu que",
-                                  "não precisava sair do",
-                                  "interior para construir",
-                                  "algo grande. Precisava",
-                                  "ficar."])
+                                  "não precisava mudar",
+                                  "de cidade para",
+                                  "construir algo grande.",
+                                  "Precisava ficar."])
 
     def test_wrap_sem_argumentos_mantem_o_comportamento_da_legenda(self):
         from talaria import render
