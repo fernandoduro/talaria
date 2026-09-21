@@ -3,8 +3,8 @@
 A Graph API não aceita upload binário: o container busca a mídia numa URL
 pública (storage_temp). Vídeo processa assíncrono — poll com timeout, e os
 finais ERROR/EXPIRED são falha explícita com o status literal na mensagem
-(AP-03/AP-21: sem isso o comando trava para sempre num vídeo que o Instagram
-rejeitou em silêncio).
+(sem isso o comando trava para sempre num vídeo que o Instagram rejeitou em
+silêncio).
 """
 from __future__ import annotations
 
@@ -130,7 +130,7 @@ def publica_post(png_paths: list, legenda: str) -> dict:
     """Imagem única ou carrossel (2-10), conforme o número de PNGs.
 
     O container de IMAGEM também processa assíncrono, ao contrário do que
-    esta função presumia: no EP9 o `media_publish` respondeu "Media ID is not
+    esta função presumia: o `media_publish` respondeu "Media ID is not
     available" porque o container ainda estava `IN_PROGRESS` (ficou FINISHED
     ~3s depois). Todo container espera o `_espera_processar` antes de
     publicar, como o Reel já fazia — a diferença entre imagem e vídeo é

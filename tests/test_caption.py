@@ -50,7 +50,7 @@ class TestEscreve(unittest.TestCase):
             self.assertEqual(f.read(), "Ação e coração.\n\n#SaoGoncalo")
 
     def test_sobrescreve_sem_duplicar(self):
-        # CA-6: regerar duas vezes deixa um arquivo só, com o conteúdo novo.
+        # Regerar duas vezes deixa um arquivo só, com o conteúdo novo.
         peca = os.path.join(self.d, "corte1_short.mp4")
         caption.escreve(peca, "primeira")
         caption.escreve(peca, "segunda")
@@ -65,7 +65,7 @@ class TestEscreve(unittest.TestCase):
         self.assertTrue(os.path.exists(out))
 
     def test_nome_base_do_carrossel_vem_de_quem_chama(self):
-        # CA-2: o .txt do carrossel usa o slug do post, não o nome do card.
+        # O .txt do carrossel usa o slug do post, não o nome do card.
         # Quem chama passa o caminho-base; escreve() só troca a extensão.
         base = os.path.join(self.d, "post_corte2.png")
         out = caption.escreve(base, "legenda do carrossel")
@@ -100,7 +100,7 @@ class TestValidaTexto(unittest.TestCase):
         self.assertIsNone(caption.valida("legenda", None, "c1"))
 
 class TestTravessao(unittest.TestCase):
-    """A casa não usa travessão em legenda: sai com cara de texto de IA."""
+    """O canal não usa travessão em legenda: sai com cara de texto de IA."""
 
     def _valida(self, valor):
         buf = io.StringIO()

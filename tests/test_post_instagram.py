@@ -74,7 +74,7 @@ class TestRender(unittest.TestCase):
             out = os.path.join(d, "post.png")
             post_instagram.compoe_card(
                 "O mar azul estava do lado.",
-                {"nome": "Renata Silveira", "cargo": "Sócio", "empresa": "Norvik"},
+                {"nome": "Marina Siqueira", "cargo": "Sócio", "empresa": "Zarvik"},
                 out,
             )
             self.assertTrue(os.path.exists(out))
@@ -108,9 +108,9 @@ class TestRender(unittest.TestCase):
 def _projeto_falso(d):
     """Cria um projeto mínimo com episodio.json preenchido."""
     ep = {
-        "temporada": 2, "episodio": 8, "empresa": "Norvik",
-        "cidade": "São Gonçalo", "uf": "SP",
-        "convidados": [{"nome": "Renata Silveira", "cargo": "Sócio",
+        "temporada": 2, "episodio": 8, "empresa": "Zarvik",
+        "cidade": "Ribeirão Açaí", "uf": "SP",
+        "convidados": [{"nome": "Marina Siqueira", "cargo": "Sócio",
                         "linkedin": "https://exemplo"}],
         "temas": [],
     }
@@ -124,9 +124,9 @@ class TestAutorETexto(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             _projeto_falso(d)
             a = post_instagram.autor_do_episodio(d)
-            self.assertEqual(a["nome"], "Renata Silveira")
+            self.assertEqual(a["nome"], "Marina Siqueira")
             self.assertEqual(a["cargo"], "Sócio")
-            self.assertEqual(a["empresa"], "Norvik")
+            self.assertEqual(a["empresa"], "Zarvik")
 
     def test_episodio_sem_convidado_usa_a_empresa(self):
         with tempfile.TemporaryDirectory() as d:
@@ -137,7 +137,7 @@ class TestAutorETexto(unittest.TestCase):
             with open(os.path.join(d, "episodio.json"), "w", encoding="utf-8") as f:
                 json.dump(ep, f, ensure_ascii=False)
             a = post_instagram.autor_do_episodio(d)
-            self.assertEqual(a["nome"], "Norvik")
+            self.assertEqual(a["nome"], "Zarvik")
             self.assertEqual(a["cargo"], "")
 
     def test_episodio_com_dois_convidados_permite_escolher_quem_assina(self):
@@ -150,15 +150,15 @@ class TestAutorETexto(unittest.TestCase):
             _projeto_falso(d)
             with open(os.path.join(d, "episodio.json"), encoding="utf-8") as f:
                 ep = json.load(f)
-            ep["convidados"].append({"nome": "Gustavo Reis", "cargo": "CEO"})
+            ep["convidados"].append({"nome": "Rafael Nunes", "cargo": "CEO"})
             with open(os.path.join(d, "episodio.json"), "w", encoding="utf-8") as f:
                 json.dump(ep, f, ensure_ascii=False)
 
             padrao = post_instagram.autor_do_episodio(d)
-            self.assertEqual(padrao["nome"], "Renata Silveira")
+            self.assertEqual(padrao["nome"], "Marina Siqueira")
 
-            segundo = post_instagram.autor_do_episodio(d, quem="Gustavo Reis")
-            self.assertEqual(segundo["nome"], "Gustavo Reis")
+            segundo = post_instagram.autor_do_episodio(d, quem="Rafael Nunes")
+            self.assertEqual(segundo["nome"], "Rafael Nunes")
             self.assertEqual(segundo["cargo"], "CEO")
 
     def test_autor_desconhecido_da_erro_em_vez_de_atribuir_errado(self):
@@ -167,7 +167,7 @@ class TestAutorETexto(unittest.TestCase):
             with self.assertRaises(ValueError) as ctx:
                 post_instagram.autor_do_episodio(d, quem="Quem Nao Existe")
             self.assertIn("Quem Nao Existe", str(ctx.exception))
-            self.assertIn("Renata Silveira", str(ctx.exception))
+            self.assertIn("Marina Siqueira", str(ctx.exception))
 
     def test_contracoes_sao_expandidas(self):
         t = post_instagram.limpa_citacao("A oportunidade tá do seu lado", [])
@@ -175,9 +175,9 @@ class TestAutorETexto(unittest.TestCase):
         self.assertNotIn(" tá ", f" {t} ")
 
     def test_nome_da_empresa_e_corrigido(self):
-        t = post_instagram.limpa_citacao("A Norvic cresceu rápido", ["Norvik"])
-        self.assertIn("Norvik", t)
-        self.assertNotIn("Norvic", t)
+        t = post_instagram.limpa_citacao("A Zarvic cresceu rápido", ["Zarvik"])
+        self.assertIn("Zarvik", t)
+        self.assertNotIn("Zarvic", t)
 
 
 class TestGerar(unittest.TestCase):
@@ -249,7 +249,7 @@ class TestGerar(unittest.TestCase):
             post_instagram.gerar(d)
             # Não dá para ler texto do PNG; o contrato é a função de autor.
             self.assertEqual(post_instagram.autor_do_episodio(d)["nome"],
-                             "Renata Silveira")
+                             "Marina Siqueira")
 
 
 if __name__ == "__main__":
@@ -263,7 +263,7 @@ class TestCaptionDoPost(unittest.TestCase):
         self.d = tempfile.mkdtemp()
 
     def test_card_unico_tem_txt_com_o_slug(self):
-        # CA-2/CA-3: post simples -> post_<slug>.txt
+        # Post simples -> post_<slug>.txt
         saida = self.d
         escritos = post_instagram.escreve_captions(
             saida, [("corte1", "A legenda do post.")], "#Um #Dois")
@@ -273,7 +273,7 @@ class TestCaptionDoPost(unittest.TestCase):
             self.assertEqual(f.read(), "A legenda do post.\n\n#Um #Dois")
 
     def test_carrossel_gera_um_unico_txt(self):
-        # CA-2: 2 cards, 1 caption. É a borda principal desta feature.
+        # 2 cards, 1 caption. É a borda principal desta feature.
         escritos = post_instagram.escreve_captions(
             self.d, [("corte2", "Legenda do carrossel.")], "#Um")
         self.assertEqual(len(escritos), 1)
@@ -281,7 +281,7 @@ class TestCaptionDoPost(unittest.TestCase):
         self.assertEqual(nomes, ["post_corte2.txt"])
 
     def test_sem_legenda_avisa_e_grava_hashtags(self):
-        # AP-03: mesmo contrato do corte — não some em silêncio.
+        # Mesmo contrato do corte — não some em silêncio.
         import contextlib
         import io
         buf = io.StringIO()
@@ -300,7 +300,7 @@ class TestCaptionDoPost(unittest.TestCase):
         self.assertNotIn("..", os.path.basename(escritos[0]))
 
     def test_legenda_nao_texto_e_rejeitada(self):
-        # AP-13: valida tipo, como gerar() já faz com os cards.
+        # Valida tipo, como gerar() já faz com os cards.
         with self.assertRaises(ValueError) as e:
             post_instagram.escreve_captions(self.d, [("corte1", 123)], "")
         self.assertIn("corte1", str(e.exception))
@@ -318,7 +318,7 @@ class TestLegendaValidaAntesDeEscrever(unittest.TestCase):
         self.d = tempfile.mkdtemp()
         ep = layout.garante(layout.episodio(self.d))
         with open(ep, "w", encoding="utf-8") as f:
-            json.dump({"temporada": 2, "episodio": 1, "cidade": "Bauru",
+            json.dump({"temporada": 2, "episodio": 1, "cidade": "Pedra Nova",
                        "uf": "SP", "empresa": "Acme", "convidados":
                        [{"nome": "Fulano de Tal", "cargo": "CEO"}]}, f)
 

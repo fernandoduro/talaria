@@ -15,7 +15,7 @@ class TestValeAntes(unittest.TestCase):
     """Pausa só conta como fim de fala se o silêncio DURAR.
 
     Numa fala corrida a energia mergulha entre palavras a cada ~100ms. Cortar
-    no primeiro mergulho parte a frase: no EP8 o corte4 terminou numa pausa
+    no primeiro mergulho parte a frase: o corte4 terminou numa pausa
     interna de 80ms e a fala sumiu antes de "...projeto assim tão longo".
     """
 
@@ -64,7 +64,7 @@ class TestCaudaVaza(unittest.TestCase):
 
     Toda fala acaba com uma sílaba, então "tem energia no fim" acusa qualquer
     corte. O sinal é o decaimento: palavra terminando decai; palavra cortada
-    para de repente ainda no nível alto. Números medidos no EP8.
+    para de repente ainda no nível alto. Números medidos.
     """
 
     def test_limiar_separa_os_casos_medidos(self):
@@ -93,9 +93,9 @@ class TestMargemDeFim(unittest.TestCase):
     """O fim do corte precisa de folga para não pegar a palavra seguinte.
 
     Os tempos vêm da transcrição, cuja resolução é de 1 segundo — cortar
-    exatamente no limite de um bloco encosta no ataque da próxima palavra. No
-    EP8 o corte b2b terminava em 901.0 e deixava vazar o "Poucas" que abre o
-    bloco seguinte (a pausa entre as duas palavras dura ~50ms).
+    exatamente no limite de um bloco encosta no ataque da próxima palavra. O
+    corte b2b terminava em 901.0 e deixava vazar o "Poucas" que abre o bloco
+    seguinte (a pausa entre as duas palavras dura ~50ms).
     """
 
     def test_recua_o_fim_pela_margem(self):
@@ -118,7 +118,7 @@ class TestSegmentsInCut(unittest.TestCase):
 
     Os tempos já eram aparados pelo corte (min/max), mas o TEXTO ia inteiro
     para o PNG: um segmento aparado em 1.4s continuava mostrando as 150
-    letras do bloco original. No EP8 o corte fechava em "vai conseguir
+    letras do bloco original. O corte fechava em "vai conseguir
     reproduzir" e a tela seguia exibindo "Acho que isso é uma um primeiro
     ponto..." — frase que o espectador nunca ouve.
     """
@@ -157,7 +157,7 @@ class TestSegmentsInCut(unittest.TestCase):
 
         O corte termina alguns ms depois do início do bloco seguinte (o fim vem
         do vale de áudio, não da grade da transcrição). Sem piso de duração,
-        esse bloco vira um PNG de 1 frame — no EP8 o corte b2b exibia "Poucas"
+        esse bloco vira um PNG de 1 frame — o corte b2b exibia "Poucas"
         por 20ms, justamente a palavra que o ajuste de áudio tirou.
         """
         segs = [
@@ -187,8 +187,8 @@ class TestSegmentsInCut(unittest.TestCase):
         """Fatia que para 1-2 palavras antes do ponto final deve alcançá-lo.
 
         Truncar antes da pontuação deixa a legenda pendurada ("muito mais do")
-        quando o áudio completou a frase ("muito mais do mesmo."). Caso real do
-        EP8, corte b2b.
+        quando o áudio completou a frase ("muito mais do mesmo."). Caso real,
+        corte b2b.
         """
         txt = "muito mais do mesmo. para cápsula, comprimido."
         self.assertEqual(render._apara_texto(txt, 0.0, 0.25), "muito mais do mesmo.")
@@ -269,7 +269,7 @@ class TestSugereFrames(unittest.TestCase):
     """Onde procurar frame de thumbnail: dentro dos cortes aprovados.
 
     A escolha final é visual e fica com o gestor — o que se automatiza é a
-    região. No EP8 a sugestão caiu em 1619s e o frame escolhido à mão foi
+    região. A sugestão caiu em 1619s e o frame escolhido à mão foi
     1620s.
     """
 
@@ -312,7 +312,7 @@ class TestCaptionDoCorte(unittest.TestCase):
             json.dump({"url_youtube": url}, f)
 
     def test_grava_txt_para_cada_plataforma(self):
-        # CA-1: cada peça renderizada ganha um .txt irmão.
+        # Cada peça renderizada ganha um .txt irmão.
         self._textos({"hashtags": "#Um #Dois"})
         pecas = [os.path.join(self.d, "youtube_shorts", "c1_short.mp4"),
                  os.path.join(self.d, "instagram_reels", "c1_reel.mp4")]
@@ -325,7 +325,7 @@ class TestCaptionDoCorte(unittest.TestCase):
                 self.assertEqual(f.read(), "A frase.\n\n#Um #Dois")
 
     def test_sem_legenda_post_avisa_e_grava_hashtags(self):
-        # CA-4 / AP-03: ausência não pode passar silenciosa.
+        # Ausência não pode passar silenciosa.
         self._textos({"hashtags": "#Um"})
         peca = os.path.join(self.d, "youtube_shorts", "c5_short.mp4")
         buf = io.StringIO()
@@ -347,7 +347,7 @@ class TestCaptionDoCorte(unittest.TestCase):
         self.assertEqual(buf.getvalue(), "")
 
     def test_sem_textos_json_nao_quebra(self):
-        # CA-5: episódio sem textos.json ainda rende caption.
+        # Episódio sem textos.json ainda rende caption.
         peca = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         render.escreve_captions(self.d, {"slug": "c1",
                                          "legenda_post": "A frase."}, [peca])
@@ -548,7 +548,7 @@ class TestConcatenaEncerramento(unittest.TestCase):
 
     @unittest.skipUnless(_tem_ffmpeg(), "ffmpeg não disponível")
     def test_caminho_com_apostrofo_nao_quebra(self):
-        # AP-13: slug de projeto digitado à mão pode ter apóstrofo.
+        # Slug de projeto digitado à mão pode ter apóstrofo.
         subdir = os.path.join(self.d, "proj's episodio")
         os.makedirs(subdir, exist_ok=True)
         corte = os.path.join(subdir, "corte.mp4")

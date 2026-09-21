@@ -2,7 +2,7 @@
 
 OAuth2 com refresh token: a autorização (consentimento do dono do canal) é
 manual e única, via scripts/youtube_auth.py — o pipeline nunca abre browser.
-O upload custa ~1600 unidades da quota diária de 10k; no volume da casa
+O upload custa ~1600 unidades da quota diária de 10k; no volume típico
 (poucos Shorts por semana) isso não encosta no limite.
 """
 from __future__ import annotations

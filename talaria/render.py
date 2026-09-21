@@ -33,7 +33,7 @@ def wrap_by_pixels(txt: str, fnt=None, largura: float | None = None) -> list[str
     """Quebra o texto por LARGURA REAL EM PIXELS (não por nº de caracteres).
 
     Garante que nenhuma linha ultrapasse a largura. Usa quantas linhas precisar
-    — melhor 3 linhas curtas que texto cortado nas laterais (bug do EP2).
+    — melhor 3 linhas curtas que texto cortado nas laterais.
 
     Sem argumentos, quebra a legenda queimada do vídeo (fonte e SAFE_W do
     config). Com `fnt`/`largura`, serve também o post de citação, que tem fonte
@@ -87,7 +87,7 @@ def _drawtext_chain(segments, start, end, nomes=None) -> str:
 
 
 def _filtergraph(segments, start, end, nomes=None) -> str:
-    """9:16 com fundo blur + legendas via drawtext (pipeline validado no EP2)."""
+    """9:16 com fundo blur + legendas via drawtext (pipeline validado)."""
     draw = _drawtext_chain(segments, start, end, nomes)
     return (
         "[0:v]split=2[bg][fg];"
@@ -132,7 +132,7 @@ def _segments_in_cut(segments, start, end, nomes=None):
 
     Quando o corte apara um segmento (começa ou termina no meio dele), o TEXTO
     é aparado na mesma proporção. Sem isso a legenda mostra fala que o áudio do
-    corte não alcança: no EP8 o último segmento ficava 1.4s na tela exibindo os
+    corte não alcança: o último segmento ficava 1.4s na tela exibindo os
     150 caracteres do bloco inteiro, enquanto o áudio só dizia as 4 primeiras
     palavras.
     """
@@ -156,8 +156,8 @@ def _segments_in_cut(segments, start, end, nomes=None):
 
 # Tempo mínimo de tela para uma legenda valer a pena. O fim do corte vem do
 # vale de áudio, não da grade da transcrição, então sobram milissegundos do
-# bloco seguinte — sem este piso viravam PNG de 1 frame (EP8: "Poucas"
-# piscando no fim do corte b2b, a palavra que o ajuste de áudio tinha tirado).
+# bloco seguinte — sem este piso viravam PNG de 1 frame ("Poucas" piscando no
+# fim do corte b2b, a palavra que o ajuste de áudio tinha tirado).
 LEGENDA_MIN_S = 0.30
 
 
@@ -184,8 +184,8 @@ def ajusta_fim_por_audio(video_path, start, end):
     """Move o fim do corte para a pausa de fala mais próxima.
 
     Os tempos vêm da transcrição, que tem resolução de 1 segundo — o fim cai em
-    cima da fronteira entre duas palavras e vaza o ataque da seguinte (EP8:
-    "Poucas"). Esta é a correção que antes se fazia medindo o envelope à mão.
+    cima da fronteira entre duas palavras e vaza o ataque da seguinte
+    ("Poucas"). Esta é a correção que antes se fazia medindo o envelope à mão.
 
     Recua no máximo AJUSTE_AUDIO_MAX_S e nunca abaixo da duração mínima; sem
     ffmpeg, cai na margem fixa.
@@ -489,7 +489,7 @@ def render_all(project_dir, platforms, only=None):
 def _nomes_proprios(project_dir):
     """Nomes que a legenda deve grafar como o episodio.json manda.
 
-    A transcrição erra nome próprio (EP8: Norvik/Norvic/Ilusen/Eosen/Yusen) e a
+    A transcrição erra nome próprio (Zarvik/Zarvic/Ilzarvik) e a
     legenda vai queimada no vídeo. Episódio sem metadados não quebra o render —
     segue sem correção.
     """

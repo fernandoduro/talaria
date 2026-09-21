@@ -17,17 +17,17 @@ class TestEpisodio(unittest.TestCase):
 
     def test_le_episodio_valido(self):
         d = self._escreve({
-            "temporada": 2, "episodio": 7, "empresa": "Norvik",
-            "cidade": "São Gonçalo", "uf": "SP",
-            "convidados": [{"nome": "Daniel", "cargo": "CTO", "linkedin": "https://x"}],
+            "temporada": 2, "episodio": 7, "empresa": "Zarvik",
+            "cidade": "Ribeirão Açaí", "uf": "SP",
+            "convidados": [{"nome": "Teresa", "cargo": "CTO", "linkedin": "https://x"}],
         })
         ep = episodio.load(d)
-        self.assertEqual(ep["empresa"], "Norvik")
+        self.assertEqual(ep["empresa"], "Zarvik")
 
     def test_codigo_com_dois_digitos(self):
         d = self._escreve({
-            "temporada": 2, "episodio": 7, "empresa": "Norvik",
-            "cidade": "São Gonçalo", "uf": "SP", "convidados": [],
+            "temporada": 2, "episodio": 7, "empresa": "Zarvik",
+            "cidade": "Ribeirão Açaí", "uf": "SP", "convidados": [],
         })
         ep = episodio.load(d)
         self.assertEqual(episodio.codigo(ep), "T2E07")
@@ -35,7 +35,7 @@ class TestEpisodio(unittest.TestCase):
     def test_codigo_nao_trunca_episodio_grande(self):
         d = self._escreve({
             "temporada": 2, "episodio": 12, "empresa": "X",
-            "cidade": "Bauru", "uf": "SP", "convidados": [],
+            "cidade": "Pedra Nova", "uf": "SP", "convidados": [],
         })
         self.assertEqual(episodio.codigo(episodio.load(d)), "T2E12")
 
@@ -66,12 +66,12 @@ class TestEpisodio(unittest.TestCase):
 
     def test_save_load_roundtrip_preserva_acento(self):
         d = tempfile.mkdtemp()
-        dados = {"temporada": 2, "episodio": 7, "empresa": "Norvik",
-                 "cidade": "São Gonçalo", "uf": "SP", "convidados": []}
+        dados = {"temporada": 2, "episodio": 7, "empresa": "Zarvik",
+                 "cidade": "Ribeirão Açaí", "uf": "SP", "convidados": []}
         path = episodio.save(d, dados)
         self.assertTrue(os.path.exists(path))
         with open(path, encoding="utf-8") as f:
-            self.assertIn("São Gonçalo", f.read())
+            self.assertIn("Ribeirão Açaí", f.read())
         self.assertEqual(episodio.load(d), dados)
 
     def test_template_em_branco_e_recusado(self):
@@ -84,8 +84,8 @@ class TestEpisodio(unittest.TestCase):
     def test_zero_conta_como_nao_preenchido(self):
         """Não existe temporada 0 nem episódio 0 — o template semeia ambos com 0."""
         d = self._escreve({
-            "temporada": 0, "episodio": 0, "empresa": "Norvik",
-            "cidade": "Bauru", "uf": "SP", "convidados": [],
+            "temporada": 0, "episodio": 0, "empresa": "Zarvik",
+            "cidade": "Pedra Nova", "uf": "SP", "convidados": [],
         })
         with self.assertRaises(ValueError) as ctx:
             episodio.load(d)
@@ -95,17 +95,17 @@ class TestEpisodio(unittest.TestCase):
         self.assertIn("episodio", msg)
 
     def test_convidados_vazio_e_aceito(self):
-        """Episódio só com os apresentadores é caso real do prompt da casa."""
+        """Episódio só com os apresentadores é caso real do prompt de materiais."""
         d = self._escreve({
-            "temporada": 2, "episodio": 7, "empresa": "Norvik",
-            "cidade": "Bauru", "uf": "SP", "convidados": [],
+            "temporada": 2, "episodio": 7, "empresa": "Zarvik",
+            "cidade": "Pedra Nova", "uf": "SP", "convidados": [],
         })
         self.assertEqual(episodio.load(d)["convidados"], [])
 
     def test_tipo_errado_da_erro_claro(self):
         d = self._escreve({
-            "temporada": "dois", "episodio": 7, "empresa": "Norvik",
-            "cidade": "Bauru", "uf": "SP", "convidados": [],
+            "temporada": "dois", "episodio": 7, "empresa": "Zarvik",
+            "cidade": "Pedra Nova", "uf": "SP", "convidados": [],
         })
         with self.assertRaises(ValueError) as ctx:
             episodio.load(d)
@@ -117,8 +117,8 @@ class TestEpisodio(unittest.TestCase):
         """Sem convidado externo, `empresa` pode ficar vazia (seção 1 do prompt)."""
         d = self._escreve({
             "temporada": 3, "episodio": 1, "empresa": "",
-            "cidade": "Bauru", "uf": "SP", "convidados": [],
-            "temas": ["ecossistema do interior"],
+            "cidade": "Pedra Nova", "uf": "SP", "convidados": [],
+            "temas": ["ecossistema local de startups"],
         })
         ep = episodio.load(d)
         self.assertEqual(ep["empresa"], "")
@@ -127,7 +127,7 @@ class TestEpisodio(unittest.TestCase):
         """Sem empresa, o tema é a origem da linha 1 da thumb e da hashtag."""
         d = self._escreve({
             "temporada": 3, "episodio": 1, "empresa": "",
-            "cidade": "Bauru", "uf": "SP", "convidados": [], "temas": [],
+            "cidade": "Pedra Nova", "uf": "SP", "convidados": [], "temas": [],
         })
         with self.assertRaises(ValueError) as ctx:
             episodio.load(d)
@@ -136,8 +136,8 @@ class TestEpisodio(unittest.TestCase):
     def test_com_convidado_empresa_continua_obrigatoria(self):
         d = self._escreve({
             "temporada": 2, "episodio": 7, "empresa": "",
-            "cidade": "Bauru", "uf": "SP",
-            "convidados": [{"nome": "Daniel", "cargo": "sócio", "linkedin": ""}],
+            "cidade": "Pedra Nova", "uf": "SP",
+            "convidados": [{"nome": "Teresa", "cargo": "sócio", "linkedin": ""}],
         })
         with self.assertRaises(ValueError):
             episodio.load(d)

@@ -13,17 +13,17 @@ class TestTextos(unittest.TestCase):
         self.d = tempfile.mkdtemp()
         with open(os.path.join(self.d, "episodio.json"), "w", encoding="utf-8") as f:
             json.dump({
-                "temporada": 2, "episodio": 7, "empresa": "Norvik",
-                "cidade": "São Gonçalo", "uf": "SP",
-                "convidados": [{"nome": "Daniel", "cargo": "sócio", "linkedin": ""}],
+                "temporada": 2, "episodio": 7, "empresa": "Zarvik",
+                "cidade": "Ribeirão Açaí", "uf": "SP",
+                "convidados": [{"nome": "Teresa", "cargo": "sócio", "linkedin": ""}],
             }, f)
 
     def test_thumb_args_a_partir_do_episodio(self):
         args = textos.thumb_args(self.d)
-        self.assertEqual(args["l1"], "Norvik")
+        self.assertEqual(args["l1"], "Zarvik")
         self.assertEqual(args["l2"], "T2E07")
-        self.assertIn("São Gonçalo", args["subtitulo"])
-        self.assertIn("Daniel", args["creditos"])
+        self.assertIn("Ribeirão Açaí", args["subtitulo"])
+        self.assertIn("Teresa", args["creditos"])
 
     def test_textos_json_sobrescreve_episodio(self):
         with open(layout.garante(layout.textos(self.d)), "w", encoding="utf-8") as f:
@@ -49,11 +49,11 @@ class TestTextos(unittest.TestCase):
         with open(os.path.join(d, "episodio.json"), "w", encoding="utf-8") as f:
             json.dump({
                 "temporada": 3, "episodio": 1, "empresa": "",
-                "cidade": "Bauru", "uf": "SP", "convidados": [],
-                "temas": ["ecossistema do interior", "outro"],
+                "cidade": "Pedra Nova", "uf": "SP", "convidados": [],
+                "temas": ["ecossistema local de startups", "outro"],
             }, f)
         args = textos.thumb_args(d)
-        self.assertEqual(args["l1"], "ecossistema do interior")
+        self.assertEqual(args["l1"], "ecossistema local de startups")
 
     def test_build_kwargs_bate_com_a_assinatura_do_thumbnail(self):
         """Traduz l1/l2 -> chamada_l1/chamada_l2 sem perder campo em silêncio."""
@@ -65,9 +65,9 @@ class TestTextos(unittest.TestCase):
 
     def test_build_kwargs_traduz_os_valores(self):
         kwargs = textos.build_kwargs(self.d)
-        self.assertEqual(kwargs["chamada_l1"], "Norvik")
+        self.assertEqual(kwargs["chamada_l1"], "Zarvik")
         self.assertEqual(kwargs["chamada_l2"], "T2E07")
-        self.assertIn("Daniel", kwargs["creditos"])
+        self.assertIn("Teresa", kwargs["creditos"])
 
 
 if __name__ == "__main__":

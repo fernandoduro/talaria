@@ -5,9 +5,6 @@ Gerá-lo dentro do filtergraph de cada render obrigaria refazer o mesmo PNG a
 cada corte; em vez disso ele é montado uma vez com Pillow e cacheado como um
 `.mp4` mudo no mesmo codec/resolução do pipeline, para o `render_cut`
 concatenar sem reencode (`concat demuxer -c copy`).
-
-Formato validado em protótipo manual e aprovado pelo gestor antes de virar
-padrão (EP9, corte1).
 """
 from __future__ import annotations
 

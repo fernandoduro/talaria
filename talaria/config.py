@@ -1,4 +1,4 @@
-"""Configuração central do pipeline. Valores validados no EP2.
+"""Configuração central do pipeline.
 
 Todas as constantes de render/thumbnail/transcrição ficam aqui — nada de path
 absoluto ou texto específico de episódio espalhado pelo código.
@@ -34,7 +34,7 @@ FONT = _fonte_versionada("DejaVuSans-Bold.ttf")
 # ---------------------------------------------------------------------------
 # Backend de legenda — detectado em runtime.
 #
-# 'drawtext' é o caminho validado no EP2, mas exige ffmpeg compilado com
+# 'drawtext' é o caminho validado, mas exige ffmpeg compilado com
 # libfreetype. Builds mínimas (ex.: Homebrew no macOS) não têm o filtro; nesse
 # caso caímos para 'overlay': legendas rasterizadas em PNG com Pillow e
 # sobrepostas com overlay+enable. Mesmo resultado visual, sem depender de libs
@@ -95,7 +95,7 @@ ABITRATE = "160k"
 # ---------------------------------------------------------------------------
 # Transcrição
 # ---------------------------------------------------------------------------
-WHISPER_MODEL = "small"   # seguro p/ GPUs de 4GB; 'medium' estourou a GTX 1650 no EP2
+WHISPER_MODEL = "small"   # seguro p/ GPUs de 4GB; 'medium' estourou uma GTX 1650
 WHISPER_LANG = "pt"
 
 # Agrupamento de palavras -> frases (parser VTT e Whisper)
@@ -133,8 +133,6 @@ POST_TEMPLATE = os.path.join(_RAIZ, "assets", "template_instagram.png")
 # ---------------------------------------------------------------------------
 # Marca d'água e card de encerramento
 # ---------------------------------------------------------------------------
-# Validado em protótipo manual e aprovado pelo gestor (EP9, corte1) antes de
-# virar padrão do pipeline.
 LOGO_PATH = os.path.join(_RAIZ, "assets", "logo.png")
 MARCA_DAGUA_LARGURA = 170
 MARCA_DAGUA_MARGEM = 40
@@ -186,5 +184,5 @@ POST_MONO = _fonte_versionada("DejaVuSansMono-Bold.ttf")
 # Publicação agendada
 # ---------------------------------------------------------------------------
 # Fuso da publicação — explícito porque máquina em UTC perto da meia-noite
-# mudaria o dia da publicação em silêncio (AP-13: data sempre com zona).
+# mudaria o dia da publicação em silêncio — data sempre com zona.
 FUSO_PUBLICACAO = "America/Sao_Paulo"

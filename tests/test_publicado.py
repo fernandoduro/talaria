@@ -16,7 +16,7 @@ class TestCarrega(unittest.TestCase):
         self.assertEqual(publicado.carrega(self.pd), {})
 
     def test_corrompido_aborta_fail_closed(self):
-        # AP-21: JSON inválido NUNCA vira "nada publicado" — republicaria tudo.
+        # JSON inválido NUNCA vira "nada publicado" — republicaria tudo.
         path = layout.garante(layout.publicado(self.pd))
         with open(path, "w", encoding="utf-8") as f:
             f.write("{metade de um json")

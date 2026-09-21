@@ -136,7 +136,7 @@ def fala_do_corte(project_dir: str, corte: dict) -> str:
     a mesma regra do `render._segments_in_cut`, para que o pacote mostre a fala
     que virou vídeo.
 
-    Exigir contenção total escondia a última frase de todo corte do EP8, porque
+    Exigir contenção total escondia a última frase de todo corte, porque
     a transcrição tem blocos de ~8s e a fronteira quase nunca coincide com eles.
     Era justamente onde costuma estar a frase de impacto: no corte1 o pacote
     terminava em "chegou lá na fábrica, você não" enquanto o vídeo seguia.

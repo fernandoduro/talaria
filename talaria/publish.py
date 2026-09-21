@@ -4,7 +4,7 @@ Pré-checagem completa ANTES do primeiro upload — o mesmo contrato do
 post_instagram.gerar(), pelo mesmo motivo: descobrir no item 3 que faltou
 renderizar, com os itens 1-2 já no ar, é o estado que este módulo proíbe.
 
-Cada sucesso é registrado NA HORA em publicado.json (AP-06); falha numa
+Cada sucesso é registrado NA HORA em publicado.json; falha numa
 plataforma não trava as outras — o resumo final conta o que foi e o que não.
 """
 from __future__ import annotations
@@ -15,7 +15,7 @@ import re
 from . import (calendario, caption, layout, post_instagram, publicado,
                publish_instagram, publish_youtube)
 
-# Limites das plataformas (AP-13): validados aqui, antes de chamar a API.
+# Limites das plataformas: validados aqui, antes de chamar a API.
 YT_TITULO_MAX = 100
 YT_DESCRICAO_MAX = 5000
 IG_LEGENDA_MAX = 2200

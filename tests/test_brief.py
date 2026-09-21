@@ -12,9 +12,9 @@ class TestBrief(unittest.TestCase):
         self.d = tempfile.mkdtemp()
         with open(layout.garante(layout.episodio(self.d)), "w", encoding="utf-8") as f:
             json.dump({
-                "temporada": 2, "episodio": 7, "empresa": "Norvik",
-                "cidade": "São Gonçalo", "uf": "SP",
-                "convidados": [{"nome": "Daniel", "cargo": "sócio",
+                "temporada": 2, "episodio": 7, "empresa": "Zarvik",
+                "cidade": "Ribeirão Açaí", "uf": "SP",
+                "convidados": [{"nome": "Teresa", "cargo": "sócio",
                                 "linkedin": "https://linkedin.com/in/x"}],
                 "temas": ["biotech", "B2B para B2C"],
             }, f)
@@ -31,10 +31,10 @@ class TestBrief(unittest.TestCase):
 
     def test_metadados_formatados(self):
         m = brief.metadados_legiveis(self.d)
-        self.assertIn("Norvik", m)
+        self.assertIn("Zarvik", m)
         self.assertIn("T2E07", m)
-        self.assertIn("São Gonçalo", m)
-        self.assertIn("Daniel", m)
+        self.assertIn("Ribeirão Açaí", m)
+        self.assertIn("Teresa", m)
 
     def test_substitui_placeholder_de_transcricao(self):
         tpl = "PROMPT AQUI\n\n{{TRANSCRICAO}}\n"
@@ -83,9 +83,9 @@ class TestBriefPosts(unittest.TestCase):
         self.d = tempfile.mkdtemp()
         with open(layout.garante(layout.episodio(self.d)), "w", encoding="utf-8") as f:
             json.dump({
-                "temporada": 2, "episodio": 8, "empresa": "Norvik",
-                "cidade": "São Gonçalo", "uf": "SP", "temas": [],
-                "convidados": [{"nome": "Renata Silveira", "cargo": "Sócio"}],
+                "temporada": 2, "episodio": 8, "empresa": "Zarvik",
+                "cidade": "Ribeirão Açaí", "uf": "SP", "temas": [],
+                "convidados": [{"nome": "Marina Siqueira", "cargo": "Sócio"}],
             }, f, ensure_ascii=False)
         with open(layout.garante(layout.transcricao(self.d)), "w", encoding="utf-8") as f:
             json.dump({"segments": [
@@ -108,7 +108,7 @@ class TestBriefPosts(unittest.TestCase):
     def test_traz_a_fala_do_segmento_que_atravessa_a_fronteira(self):
         """Segmento cortado ao meio pela fronteira ainda é fala do corte.
 
-        Exigir contenção total escondia a ÚLTIMA frase de todo corte do EP8 —
+        Exigir contenção total escondia a ÚLTIMA frase de todo corte —
         justamente onde costuma estar a frase de impacto. O vídeo mostra essa
         fala (render._segments_in_cut apara o texto), então o pacote de leitura
         precisa mostrá-la também.
@@ -132,7 +132,7 @@ class TestBriefPosts(unittest.TestCase):
         out = brief.montar_posts(self.d, [self.corte])
         with open(out, encoding="utf-8") as f:
             texto = f.read()
-        self.assertIn("Renata Silveira", texto)
+        self.assertIn("Marina Siqueira", texto)
         self.assertIn("100 caracteres", texto)
         # os placeholders do prompt têm que ter sido substituídos
         self.assertNotIn("{{", texto)

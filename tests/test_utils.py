@@ -48,30 +48,30 @@ class TestCorrigeNomes(unittest.TestCase):
     """A legenda tem que grafar nome próprio como o episodio.json manda.
 
     A transcrição automática erra nome próprio: a mesma empresa aparece como
-    Norvik, Norvic, Norvyk e Norvyc no mesmo documento. Sem correção, a
+    Zarvik, Zarvic, Zarvyk e Zarvyc no mesmo documento. Sem correção, a
     legenda queimada leva o erro para o vídeo publicado.
     """
 
     def test_corrige_variantes_foneticas(self):
-        for errado in ("Norvic", "Norvyk", "Norvyc"):
+        for errado in ("Zarvic", "Zarvyk", "Zarvyc"):
             self.assertEqual(
-                utils.corrige_nomes(f"a gente montou a {errado}, né", ["Norvik"]),
-                "a gente montou a Norvik, né")
+                utils.corrige_nomes(f"a gente montou a {errado}, né", ["Zarvik"]),
+                "a gente montou a Zarvik, né")
 
     def test_preserva_grafia_correta(self):
-        self.assertEqual(utils.corrige_nomes("a Norvik hoje", ["Norvik"]),
-                         "a Norvik hoje")
+        self.assertEqual(utils.corrige_nomes("a Zarvik hoje", ["Zarvik"]),
+                         "a Zarvik hoje")
 
     def test_nao_altera_palavra_comum_parecida(self):
         """Correção não pode atropelar palavra do idioma."""
         txt = "nossa origem foi essa"
-        self.assertEqual(utils.corrige_nomes(txt, ["Norvik"]), txt)
+        self.assertEqual(utils.corrige_nomes(txt, ["Zarvik"]), txt)
 
     def test_sem_nomes_nao_faz_nada(self):
         self.assertEqual(utils.corrige_nomes("texto qualquer", []), "texto qualquer")
 
     def test_respeita_fronteira_de_palavra(self):
-        self.assertEqual(utils.corrige_nomes("Norvikzinho", ["Norvik"]), "Norvikzinho")
+        self.assertEqual(utils.corrige_nomes("Zarvikzinho", ["Zarvik"]), "Zarvikzinho")
 
     def test_nao_altera_nome_que_e_palavra_do_idioma(self):
         """Cliente chamado 'Matriz' ou 'Acho' não pode reescrever a frase.
@@ -90,13 +90,13 @@ class TestCorrigeNomes(unittest.TestCase):
         """Transcrição escreve marca em minúscula; a legenda deve capitalizar."""
         self.assertEqual(utils.corrige_nomes("o neoboard e o quadro", ["Neoboard"]),
                          "o Neoboard e o quadro")
-        self.assertEqual(utils.corrige_nomes("a norvik hoje", ["Norvik"]),
-                         "a Norvik hoje")
+        self.assertEqual(utils.corrige_nomes("a zarvik hoje", ["Zarvik"]),
+                         "a Zarvik hoje")
 
     def test_ainda_corrige_nome_inventado(self):
         """O caso que motivou a função continua funcionando."""
-        self.assertEqual(utils.corrige_nomes("montar a Norvic", ["Norvik"]),
-                         "montar a Norvik")
+        self.assertEqual(utils.corrige_nomes("montar a Zarvic", ["Zarvik"]),
+                         "montar a Zarvik")
 
 
 class TestCleanCaption(unittest.TestCase):

@@ -67,9 +67,9 @@ class TestFluxoCompleto(unittest.TestCase):
 
     def test_thumb_args_do_episodio(self):
         episodio.save(self.pd, {
-            "temporada": 2, "episodio": 7, "empresa": "Norvik",
-            "cidade": "São Gonçalo", "uf": "SP",
-            "convidados": [{"nome": "Daniel", "cargo": "sócio", "linkedin": ""}],
+            "temporada": 2, "episodio": 7, "empresa": "Zarvik",
+            "cidade": "Ribeirão Açaí", "uf": "SP",
+            "convidados": [{"nome": "Teresa", "cargo": "sócio", "linkedin": ""}],
         })
         args = textos.thumb_args(self.pd)
         self.assertEqual(args["l2"], "T2E07")
@@ -108,9 +108,9 @@ class TestFluxoCompleto(unittest.TestCase):
             proj = os.path.join(base, "epteste")
             os.makedirs(proj)
             with open(layout.garante(layout.episodio(proj)), "w", encoding="utf-8") as f:
-                json.dump({"temporada": 2, "episodio": 8, "empresa": "Norvik",
-                           "cidade": "São Gonçalo", "uf": "SP", "temas": [],
-                           "convidados": [{"nome": "Renata Silveira",
+                json.dump({"temporada": 2, "episodio": 8, "empresa": "Zarvik",
+                           "cidade": "Ribeirão Açaí", "uf": "SP", "temas": [],
+                           "convidados": [{"nome": "Marina Siqueira",
                                            "cargo": "Sócio"}]}, f, ensure_ascii=False)
             with open(layout.garante(layout.posts(proj)), "w", encoding="utf-8") as f:
                 json.dump({"posts": [{"slug": "c1", "cards": ["Curta e boa."]}]},

@@ -179,7 +179,7 @@ class TestExecutar(unittest.TestCase):
         self.assertFalse(publicado.ja_publicado(reg, "youtube_shorts", "corte1"))
 
     def test_registro_e_imediato_nao_no_fim_do_lote(self, yt, ig):
-        # AP-06: se o processo morrer no item 2, o item 1 já está registrado.
+        # Se o processo morrer no item 2, o item 1 já está registrado.
         from talaria import publicado
         estado = {}
 

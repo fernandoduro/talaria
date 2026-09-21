@@ -56,7 +56,7 @@ class TestCarrega(unittest.TestCase):
             calendario.carrega(self.pd)
 
     def test_data_impossivel_aborta(self):
-        # AP-13: valida a data REAL, não só o formato — 30 de fevereiro passa
+        # Valida a data REAL, não só o formato — 30 de fevereiro passa
         # num regex e publicaria nunca.
         _prepara(self.pd, MOMENTOS, POSTS,
                  [{"data": "2026-02-30", "tipo": "corte", "slug": "corte1"}])
@@ -170,7 +170,7 @@ class TestPendente(unittest.TestCase):
         self.assertEqual(len(pares), 3)  # corte (2 plataformas) + post
 
     def test_meio_publicado_retenta_so_o_que_faltou(self):
-        # AP-06: YouTube passou, Instagram falhou → amanhã só o Instagram.
+        # YouTube passou, Instagram falhou → amanhã só o Instagram.
         publicado.registra(self.pd, "youtube_shorts", "corte1", "a", "u")
         pares = calendario.pendente(self.pd, dia=dt.date(2026, 8, 24))
         self.assertEqual([(i["slug"], pl) for i, pl in pares],

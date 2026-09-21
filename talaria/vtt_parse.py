@@ -2,7 +2,7 @@
 
 Cada cue tem 2 linhas de texto: a consolidada (repetição, sem tags) e a nova
 (com tags <c> de timing por palavra). Usamos SÓ a linha com <c> -> zero
-duplicação. Baseado no clean_transcript.py validado no EP2.
+duplicação. Baseado no clean_transcript.py validado.
 """
 from __future__ import annotations
 

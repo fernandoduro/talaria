@@ -14,7 +14,7 @@ FIXAS = ["#MeuPodcast", "#Empreendedorismo", "#Startups"]
 
 
 def slug(texto: str) -> str:
-    """'São Gonçalo' -> 'SaoGoncalo'. Remove acento e não-alfanumérico."""
+    """'Ribeirão Açaí' -> 'RibeiraoAcai'. Remove acento e não-alfanumérico."""
     if not texto:
         return ""
     sem_acento = "".join(

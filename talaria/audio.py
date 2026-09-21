@@ -2,7 +2,7 @@
 
 Os tempos de corte saem da transcrição, cuja resolução é de 1 segundo. Um fim
 tirado dali cai em cima da fronteira entre duas palavras e deixa vazar o ataque
-da seguinte: no EP8 o corte terminava em 901.0 e o espectador ouvia o "Poucas"
+da seguinte: um corte terminando em 901.0 deixava o espectador ouvir o "Poucas"
 que abre a frase seguinte.
 
 A pausa entre palavras numa fala corrida é curta (~40ms no caso medido), então
@@ -58,7 +58,7 @@ LIMIAR_PAUSA_DB = -35.0
 
 # Silêncio mínimo para uma pausa contar como FIM DE FALA. Abaixo disto é pausa
 # interna — respiração, hesitação, separação entre palavras — e cortar ali deixa
-# a frase pela metade (EP8 corte4: o vale de 80ms em 2341.56 era interno; a
+# a frase pela metade (vale de 80ms em 2341.56 era interno; a
 # frase só terminava em 2342.26, com 660ms de silêncio depois).
 SILENCIO_MIN_S = 0.25
 
@@ -125,7 +125,7 @@ def cauda_vaza(video_path: str, fim: float, limiar_db: float = -25.0,
         return False
     dbs = [db for _, db in pontos]
     # Fala terminando decai; fala cortada para de repente ainda no nível alto.
-    # Medido no EP8: corte defeituoso fica em -31/-28/-31 dB (estável); os
+    # Corte defeituoso fica em -31/-28/-31 dB (estável); os
     # corretos ou terminam abaixo de -35 dB ou despencam mais de 10 dB na
     # última janela ("importadas": -25.8 -> -39.4).
     if dbs[-1] <= limiar_db - 10.0:

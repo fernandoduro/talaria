@@ -207,7 +207,7 @@ def valida_corte(faixa: tuple, segs: list, estado: dict) -> tuple:
     # Seção 7: o corte não pode começar NEM terminar no meio de uma frase.
     # O fim já foi só alerta, na suposição de que a cauda seria "aparada no
     # render" — o render corta no tempo exato, então nada era aparado e o
-    # vídeo saía com a última frase pela metade (EP8, corte do mar azul).
+    # vídeo saía com a última frase pela metade (corte do mar azul).
     if segs and not _fronteira_valida(start, segs):
         msgs.append(f"início {start:.1f}s não cai em fronteira de frase")
 
@@ -240,7 +240,7 @@ def atribuicao_confiavel(segs: list) -> bool:
     """False quando o campo `speaker` parece trocado no episódio inteiro.
 
     O parser resolve o falante uma vez, sobre o episódio todo; um backchannel
-    curto do host pode desalinhar tudo dali em diante (EP8: trechos 100% do
+    curto do host pode desalinhar tudo dali em diante (trechos 100% do
     convidado saíram como "host"). Alertas que leem `speaker` mentiriam, e
     alerta que mente treina o operador a ignorar a saída — melhor calar.
     """
@@ -258,7 +258,7 @@ def atribuicao_confiavel(segs: list) -> bool:
 
 
 # Segundos de host na abertura a partir dos quais o corte vira pergunta com
-# resposta em vez de resposta. No EP8 um corte abria com 47s de pergunta.
+# resposta em vez de resposta. Um corte abria com 47s de pergunta.
 ABERTURA_HOST_MAX_S = 8.0
 
 
@@ -288,7 +288,7 @@ def alertas_corte(faixa: tuple, segs: list) -> list:
         if tem_hesitacao_numerica(s["text"]):
             alertas.append(f"número aproximado em {s['start']:.0f}s: \"{s['text'][:60]}\"")
     # Os dois alertas abaixo leem `speaker`; sem atribuição confiável eles
-    # acusariam corte bom (EP8). Avisa uma vez que a checagem não rodou.
+    # acusariam corte bom. Avisa uma vez que a checagem não rodou.
     if not atribuicao_confiavel(segs):
         return alertas       # avisado uma vez por episódio, em cmd_curar
 
@@ -313,7 +313,7 @@ def aprovar(estado: dict, corte: dict) -> dict:
     """Registra um corte aprovado. Ajuste de tempo não é rejeição.
 
     Recusa corte que se sobreponha a outro JÁ APROVADO: dois vídeos com o mesmo
-    trecho competem entre si na distribuição. No EP8 dois aprovados dividiam 74s
+    trecho competem entre si na distribuição. Dois aprovados dividiam 74s
     porque nada checava isso aqui — `valida_corte` olha faixa queimada, que
     inclui aprovados, mas quem chama `aprovar()` direto escapava da checagem.
 

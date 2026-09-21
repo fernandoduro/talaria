@@ -14,7 +14,7 @@ from . import layout
 CAMPOS_OBRIGATORIOS = ["temporada", "episodio", "empresa", "cidade", "uf", "convidados"]
 
 # Subconjunto que também precisa ter valor. `convidados` pode ser lista vazia:
-# episódio só com os apresentadores é caso real previsto no prompt da casa.
+# episódio só com os apresentadores é caso real previsto no prompt de materiais.
 # `empresa` sai daqui e é checada à parte, porque no episódio host-only ela
 # pode legitimamente ficar vazia (ver _valida_empresa_ou_tema).
 CAMPOS_OBRIGATORIOS_PREENCHIDOS = [c for c in CAMPOS_OBRIGATORIOS
@@ -100,7 +100,7 @@ def load(project_dir: str) -> dict:
     if faltando:
         raise ValueError(f"episodio.json incompleto — falta: {', '.join(faltando)}")
 
-    # `convidados` fica fora da checagem de vazio de propósito: o prompt da casa
+    # `convidados` fica fora da checagem de vazio de propósito: o prompt de materiais
     # prevê "episódio sem convidado externo, só com os apresentadores", então
     # lista vazia é preenchimento legítimo, não campo esquecido.
     vazios = [c for c in CAMPOS_OBRIGATORIOS_PREENCHIDOS

@@ -24,8 +24,8 @@ import os
 SEPARADOR = "\n\n"
 
 # O gestor rejeita travessão em legenda: sai com cara de texto de IA. A regra
-# está no CLAUDE.md, e no EP9 escapou assim mesmo até o corte 1 estar no ar —
-# por isso ela também vive aqui, onde toda legenda passa.
+# está no CLAUDE.md, e mesmo assim já escapou até um corte estar no ar — por
+# isso ela também vive aqui, onde toda legenda passa.
 TRAVESSAO = "\u2014"
 
 
@@ -50,7 +50,7 @@ def valida(campo: str, valor, peca: str) -> None:
         # correção é reescrever a frase — trocar o caractere por outro no
         # código deixaria a mesma construção de IA, só com outra pontuação.
         # Abortar aqui travaria um render por questão de estilo.
-        print(f"[caption] !! {peca}: '{campo}' tem travessão — a casa não "
+        print(f"[caption] !! {peca}: '{campo}' tem travessão — o canal não "
               f"usa em legenda (sai com cara de texto de IA). Reescreva a "
               f"frase antes de publicar.")
 

@@ -101,7 +101,7 @@ class TestFimEmFraseCompleta(unittest.TestCase):
     A transcrição do YouTube quebra os blocos por TEMPO, não por pontuação:
     um bloco pode terminar no meio de uma frase. Conferir apenas o limite do
     bloco deixava passar corte que termina em palavra solta — foi o que
-    aconteceu no EP8 (bloco 1655-1663 fecha em "...transferência de tecnologia
+    aconteceu (bloco 1655-1663 fecha em "...transferência de tecnologia
     o dos", frase que só termina no bloco seguinte).
     """
 
@@ -169,7 +169,7 @@ class TestSobreposicaoEntreAprovados(unittest.TestCase):
     """Dois aprovados no mesmo trecho competem entre si na distribuição.
 
     `valida_corte` já barrava, mas quem chamava `aprovar()` direto escapava —
-    no EP8 dois cortes dividiram 74s por isso.
+    dois cortes dividiram 74s por isso.
     """
 
     def setUp(self):

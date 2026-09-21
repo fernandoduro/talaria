@@ -5,7 +5,7 @@ Os módulos de publicação leem credencial de `os.environ`, mas quem escreve o
 `publish` reclama de variável não definida, que é o erro mais confuso possível
 (a resposta está no arquivo aberto na tela).
 
-É um parser mínimo de propósito: o `.env` desta casa tem uma dúzia de linhas
+É um parser mínimo de propósito: o `.env` tem uma dúzia de linhas
 `CHAVE=valor` escritas à mão. Não interpola `${OUTRA}`, não expande `~`, não
 lê multilinha — cada uma dessas seria uma regra a mais para o gestor lembrar
 ao colar um token, e nenhuma delas apareceu em uso.

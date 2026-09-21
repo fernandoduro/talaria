@@ -9,13 +9,13 @@ class TestSlug(unittest.TestCase):
         self.assertEqual(hashtags.slug("São Carlos"), "SaoCarlos")
 
     def test_sao_goncalo(self):
-        self.assertEqual(hashtags.slug("São Gonçalo"), "SaoGoncalo")
+        self.assertEqual(hashtags.slug("Ribeirão Açaí"), "RibeiraoAcai")
 
     def test_sanduiche_valley(self):
-        self.assertEqual(hashtags.slug("Sanduíche Valley"), "SanduicheValley")
+        self.assertEqual(hashtags.slug("Planície Valley"), "PlanicieValley")
 
     def test_palavra_unica_mantem_capitalizacao(self):
-        self.assertEqual(hashtags.slug("Norvik"), "Norvik")
+        self.assertEqual(hashtags.slug("Zarvik"), "Zarvik")
 
     def test_remove_pontuacao(self):
         self.assertEqual(hashtags.slug("A.B.C. Tech"), "ABCTech")
@@ -26,25 +26,25 @@ class TestSlug(unittest.TestCase):
 
 class TestBuild(unittest.TestCase):
     def test_inclui_as_tres_fixas(self):
-        tags = hashtags.build(cidade="São Gonçalo", empresa="Norvik")
+        tags = hashtags.build(cidade="Ribeirão Açaí", empresa="Zarvik")
         for fixa in hashtags.FIXAS:
             self.assertIn(fixa, tags)
 
     def test_inclui_cidade_e_empresa(self):
-        tags = hashtags.build(cidade="São Gonçalo", empresa="Norvik")
-        self.assertIn("#SaoGoncalo", tags)
-        self.assertIn("#Norvik", tags)
+        tags = hashtags.build(cidade="Ribeirão Açaí", empresa="Zarvik")
+        self.assertIn("#RibeiraoAcai", tags)
+        self.assertIn("#Zarvik", tags)
 
     def test_sem_empresa_usa_fallback(self):
-        tags = hashtags.build(cidade="Bauru", empresa="", fallback_tema="Inovação")
+        tags = hashtags.build(cidade="Pedra Nova", empresa="", fallback_tema="Inovação")
         self.assertIn("#Inovacao", tags)
 
     def test_sem_duplicatas(self):
-        tags = hashtags.build(cidade="Empreendedorismo", empresa="Norvik")
+        tags = hashtags.build(cidade="Empreendedorismo", empresa="Zarvik")
         self.assertEqual(len(tags), len(set(tags)))
 
     def test_retorna_string_formatada(self):
-        s = hashtags.format_line(cidade="Bauru", empresa="Norvik")
+        s = hashtags.format_line(cidade="Pedra Nova", empresa="Zarvik")
         self.assertTrue(s.startswith("#"))
         self.assertIn(" ", s)
 

@@ -26,7 +26,7 @@ CARROSSEL_MAX = 10
 
 
 def hoje() -> dt.date:
-    """A data corrente no fuso da casa — nunca a data ingênua da máquina."""
+    """A data corrente no fuso configurado — nunca a data ingênua da máquina."""
     return dt.datetime.now(ZoneInfo(config.FUSO_PUBLICACAO)).date()
 
 
@@ -135,8 +135,8 @@ def pendente(pd: str, dia: dt.date = None, only: list = None,
     """Pares (item, plataforma) devidos até `dia` e ainda não publicados.
 
     A unidade é (slug, plataforma), não o item: um corte publica em YouTube E
-    Reels, e se só uma passou, o retry publica só a que faltou (AP-06 —
-    pendência por item republicaria a que já foi).
+    Reels, e se só uma passou, o retry publica só a que faltou — pendência
+    por item republicaria a que já foi.
 
     `only` ignora o filtro de data (antecipar, testar), mas NUNCA a trava do
     publicado.json — republicar é editar o registro à mão, de propósito, não

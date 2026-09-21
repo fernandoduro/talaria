@@ -1,6 +1,6 @@
 """Utilitários compartilhados: timestamps, regex de VTT, limpeza e agrupamento de texto.
 
-Consolida lógica que no EP2 estava duplicada em transcribe/vtt_to_segments/
+Consolida lógica que estava duplicada em transcribe/vtt_to_segments/
 clean_transcript/render_cortes.
 """
 import re
@@ -114,9 +114,9 @@ def _expande_contracoes(t: str) -> str:
     return t
 
 
-# Trocas fonéticas que a transcrição automática faz em nome próprio. No EP8 a
-# mesma empresa saiu como Norvik, Norvic, Ilusen, Eosen e Yusen — todas variam nas
-# vogais iniciais e no y/i, que soam igual em português.
+# Trocas fonéticas que a transcrição automática faz em nome próprio. A mesma
+# empresa sai como Zarvik, Zarvic, Zarvyk e Ilzarvik — varia na vogal interna,
+# no y/i, e no `l` que a transcrição insere.
 _EQUIV_FONETICA = [
     ("y", "[yieu]"),
     ("i", "[yieu]"),
@@ -135,7 +135,7 @@ def _padrao_fonetico(nome: str) -> str:
 
     Só as letras internas viram classe de caractere; consoante fora da tabela
     entra literal, para o padrão não ficar frouxo a ponto de casar palavra
-    comum ("nossa" não pode virar "Norvik").
+    comum ("zarpa" não pode virar "Zarvik").
     """
     partes = []
     for ch in nome.lower():
@@ -145,7 +145,7 @@ def _padrao_fonetico(nome: str) -> str:
                 break
         else:
             partes.append(re.escape(ch))
-    # 'l' extra no meio ("Ilusen" para "Norvik") é erro comum de transcrição.
+    # 'l' extra no meio ("Ilzarvik" para "Zarvik") é erro comum de transcrição.
     return partes[0] + "l?" + "".join(partes[1:])
 
 
@@ -167,7 +167,7 @@ def corrige_nomes(txt: str, nomes: list) -> str:
     """Reescreve nome próprio na grafia oficial vinda do episodio.json.
 
     A transcrição erra nome próprio e a legenda é queimada no vídeo — sem isto
-    o erro vai ao ar (EP8: Norvic/Ilusen/Eosen/Yusen no lugar de Norvik).
+    o erro vai ao ar (Zarvic/Ilzarvik no lugar de Zarvik).
 
     Só entra nome INVENTADO: quando a empresa se chama "Matriz" ou "Acho", a
     transcrição acerta sozinha e reescrever estragaria a frase ("a matriz de

@@ -2,7 +2,7 @@
 
 A unidade do registro é (plataforma, slug): um corte publica em YouTube E
 Reels, e se só uma das duas passou, o retry do dia seguinte publica só a que
-faltou (AP-06 — pendência por item republicaria a que já foi).
+faltou: pendência por item republicaria a que já foi.
 
 Cada sucesso grava NA HORA, atomicamente. Registrar só no fim do lote deixa
 uma janela: processo morto no meio e a próxima execução duplica o que já
@@ -19,7 +19,7 @@ from . import config, layout
 
 
 def carrega(pd: str) -> dict:
-    """Lê o registro. Arquivo corrompido ABORTA — fail closed (AP-21).
+    """Lê o registro. Arquivo corrompido ABORTA — fail closed.
 
     JSON inválido nunca é tratado como "nada publicado ainda": isso
     republicaria o histórico inteiro. `projetos/` é git-ignored, então não há

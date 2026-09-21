@@ -79,7 +79,7 @@ class TestPublicaReel(unittest.TestCase):
         storage.remove.assert_called_once_with("https://assinada/v.mp4")
 
     def test_status_error_vira_falha_com_o_status_na_mensagem(self, req, storage):
-        # AP-03/AP-21: ERROR/EXPIRED são finais — sem isso o poll roda pra sempre.
+        # ERROR/EXPIRED são finais — sem isso o poll roda pra sempre.
         storage.sobe.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [_resposta({"id": "cont1"})]
         req.get.side_effect = [_resposta({"status_code": "ERROR"})]
@@ -147,7 +147,7 @@ class TestPublicaPost(unittest.TestCase):
     def test_imagem_espera_o_container_ficar_pronto(self, req, storage):
         # O container de IMAGEM também processa assíncrono. Publicar com ele
         # ainda IN_PROGRESS devolve "Media ID is not available" — foi o que
-        # derrubou o post do EP9, porque esta função presumia upload síncrono.
+        # derrubou o post, porque esta função presumia upload síncrono.
         storage.sobe.return_value = "https://assinada/p.png"
         req.post.side_effect = [
             _resposta({"id": "cont1"}),
