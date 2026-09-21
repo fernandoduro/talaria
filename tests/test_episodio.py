@@ -114,7 +114,7 @@ class TestEpisodio(unittest.TestCase):
         self.assertIn("inteiro", msg)
 
     def test_episodio_so_com_apresentadores_e_aceito(self):
-        """Sem convidado externo, `empresa` pode ficar vazia (seção 1 do prompt)."""
+        """Sem convidado externo, `empresa` pode ficar vazia."""
         d = self._escreve({
             "temporada": 3, "episodio": 1, "empresa": "",
             "cidade": "Pedra Nova", "uf": "SP", "convidados": [],

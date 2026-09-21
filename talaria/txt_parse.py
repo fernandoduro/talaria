@@ -9,7 +9,7 @@ Formato esperado — timestamp sozinho numa linha, texto nas linhas seguintes:
 
 O marcador ">>" indica troca de interlocutor e é preservado como flag no
 segmento (turn=True), útil na curadoria: corte que começa em troca de turno
-tende a ter fronteira natural (seção 7 do prompt de cortes).
+tende a ter fronteira natural.
 
 Atenção: ">>" diz QUE trocou de interlocutor, não QUEM passou a falar. Por
 isso a identidade é resolvida uma única vez, sobre o episódio inteiro
@@ -89,7 +89,7 @@ def regroup_into_sentences(blocks: list) -> list:
     A transcrição do YouTube quebra a cada ~5s, no meio da frase ("...o meu
     co-host aqui, o" / "Fulano, fazendo..."). Isso quebra duas coisas:
     a legenda queimada (texto cortado na tela) e a validação de fronteira de
-    corte (seção 7 do prompt de cortes exige início/fim em frase completa).
+    corte (que exige início/fim em frase completa).
 
     Junta blocos até encontrar pontuação final, troca de interlocutor (>>),
     ou os limites de duração/tamanho de config.

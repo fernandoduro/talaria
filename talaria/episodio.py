@@ -1,8 +1,7 @@
 """Metadados do episódio — fonte da verdade para nomes próprios e numeração.
 
-A seção 4 do prompt de materiais é categórica: não inventar, e transcrição
-automática erra nome próprio. Estes campos são entrada explícita do gestor,
-nunca inferência a partir do áudio.
+Não inventar: transcrição automática erra nome próprio. Estes campos são
+entrada explícita do gestor, nunca inferência a partir do áudio.
 """
 from __future__ import annotations
 
@@ -14,7 +13,7 @@ from . import layout
 CAMPOS_OBRIGATORIOS = ["temporada", "episodio", "empresa", "cidade", "uf", "convidados"]
 
 # Subconjunto que também precisa ter valor. `convidados` pode ser lista vazia:
-# episódio só com os apresentadores é caso real previsto no prompt de materiais.
+# episódio só com os apresentadores é caso real.
 # `empresa` sai daqui e é checada à parte, porque no episódio host-only ela
 # pode legitimamente ficar vazia (ver _valida_empresa_ou_tema).
 CAMPOS_OBRIGATORIOS_PREENCHIDOS = [c for c in CAMPOS_OBRIGATORIOS
@@ -43,12 +42,8 @@ def template() -> dict:
 def _valida_empresa_ou_tema(ep: dict) -> None:
     """Exige `empresa`, exceto no episódio só com os apresentadores.
 
-    O prompt de materiais prevê o caso em três pontos: a seção 1 descreve o
-    "episódio sem convidado externo, só com os apresentadores"; a seção 5 diz
-    que nesse caso a linha 1 da thumb recebe o tema do episódio; e a seção 2
-    manda substituir a hashtag da empresa por uma pertinente ao tema. Ou seja,
-    sem empresa o tema é que sustenta thumb e hashtag — por isso ele passa a
-    ser obrigatório exatamente aí.
+    Sem convidado externo não há empresa, e é o tema que sustenta a linha 1 da
+    thumb e a hashtag — por isso ele passa a ser obrigatório exatamente aí.
     """
     tem_convidado = bool(ep.get("convidados"))
     tem_empresa = bool(str(ep.get("empresa") or "").strip())

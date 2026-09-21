@@ -105,7 +105,7 @@ SEG_MAX_CHARS = 75        # nº máx. de caracteres antes de quebrar
 SEG_END_PAD = 0.4         # padding no fim de cada segmento (s)
 
 # ---------------------------------------------------------------------------
-# Curadoria (seções 3 e 5 do prompt de cortes)
+# Curadoria
 # ---------------------------------------------------------------------------
 CORTE_MIN_S = 60         # duração mínima de um corte
 CORTE_MAX_S = 90         # duração máxima

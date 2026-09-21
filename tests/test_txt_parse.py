@@ -160,7 +160,7 @@ class TestResolucaoDeFalante(unittest.TestCase):
         transcrição real o backchannel ('>> Maravilha.') aparece com 29s de
         duração — o `end` vem do timestamp seguinte, não da fala — e tem
         falantes DIFERENTES dos dois lados, então nem duração nem "mesmo
-        falante em volta" o identificam. Ver relato no commit.
+        falante em volta" o identificam.
         """
         blocks = [
             _bloco(0.0, 5.0, "Pergunta do host?"),

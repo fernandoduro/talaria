@@ -285,7 +285,7 @@ class TestHesitacaoNumerica(unittest.TestCase):
 
 
 class TestProtagonismo(unittest.TestCase):
-    """Seção 5 do prompt de cortes — protagonismo do convidado.
+    """Protagonismo do convidado.
 
     A atribuição de fala é ABSOLUTA: vem do campo `speaker`, resolvido
     globalmente no parse sobre o episódio inteiro. Não se deduz de '>>'

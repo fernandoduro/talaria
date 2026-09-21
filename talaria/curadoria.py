@@ -1,6 +1,6 @@
 """Estado da curadoria iterativa — rodadas até fechar a meta de cortes aprovados.
 
-Regras de estado (ver spec):
+Regras de estado:
 - trecho rejeitado fica queimado permanentemente, não volta em nenhuma rodada;
 - exclusão por SOBREPOSIÇÃO DE TEMPO, não por texto — um corte 10s adiante de
   um rejeitado é essencialmente o mesmo trecho;
@@ -74,7 +74,7 @@ def save(project_dir: str, estado: dict) -> str:
     return path
 
 
-# Marcadores de número aproximado — seção 6 do prompt de cortes.
+# Marcadores de número aproximado.
 # Isolado num corte, "uns 570, 580" vira afirmação categórica que a pessoa
 # não fez.
 RE_HESITACAO = re.compile(
@@ -124,7 +124,7 @@ def segmentos_no_corte(faixa: tuple, segs: list) -> list:
 
 
 def fracao_convidado(faixa: tuple, segs: list) -> float:
-    """Fração do tempo do corte em que o convidado fala (seção 5).
+    """Fração do tempo do corte em que o convidado fala.
 
     Lê o campo `speaker`, resolvido globalmente no parse (txt_parse.
     resolve_speakers). NÃO deduz o falante alternando um booleano dentro da
@@ -204,7 +204,7 @@ def valida_corte(faixa: tuple, segs: list, estado: dict) -> tuple:
     elif dur > config.CORTE_MAX_S:
         msgs.append(f"duração {dur:.0f}s acima do máximo de {config.CORTE_MAX_S}s")
 
-    # Seção 7: o corte não pode começar NEM terminar no meio de uma frase.
+    # O corte não pode começar NEM terminar no meio de uma frase.
     # O fim já foi só alerta, na suposição de que a cauda seria "aparada no
     # render" — o render corta no tempo exato, então nada era aparado e o
     # vídeo saía com a última frase pela metade.
@@ -300,12 +300,12 @@ def alertas_corte(faixa: tuple, segs: list) -> list:
     if seg_host >= ABERTURA_HOST_MAX_S:
         alertas.append(
             f"corte abre com {seg_host:.0f}s de fala do host — o espectador frio "
-            f"desiste antes do convidado falar (seção 1 do prompt)"
+            "desiste antes do convidado falar"
         )
     return alertas
 
 
-# Tipos de corte, em ordem de preferência (seção 4 do prompt de cortes).
+# Tipos de corte, em ordem de preferência.
 TIPOS = ["historia", "tese", "conselho", "pessoal"]
 
 
@@ -351,7 +351,7 @@ def rejeitar(estado: dict, corte: dict, motivo: str) -> dict:
 
 
 def composicao(estado: dict) -> dict:
-    """Quantos cortes aprovados de cada tipo (seção 5 — diversidade)."""
+    """Quantos cortes aprovados de cada tipo (diversidade)."""
     comp = {t: 0 for t in TIPOS}
     for c in estado["aprovados"]:
         t = c.get("tipo")
@@ -385,7 +385,7 @@ def para_momentos(estado: dict) -> list:
     """Converte os aprovados no momentos.json que o render consome.
 
     O render usa só slug/start/end; os demais campos são conteúdo de produção
-    (seção 8 do prompt) que precisa sobreviver até a publicação.
+    que precisa sobreviver até a publicação.
     """
     if not estado.get("aprovados"):
         raise ValueError("nenhum corte aprovado — nada a exportar")

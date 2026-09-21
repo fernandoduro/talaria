@@ -44,7 +44,7 @@ class TestTextos(unittest.TestCase):
         self.assertEqual(textos.load(tempfile.mkdtemp()), {})
 
     def test_l1_cai_no_tema_quando_nao_ha_empresa(self):
-        """Seção 5: sem convidado externo, a linha 1 recebe o tema do episódio."""
+        """Sem convidado externo, a linha 1 recebe o tema do episódio."""
         d = tempfile.mkdtemp()
         with open(os.path.join(d, "episodio.json"), "w", encoding="utf-8") as f:
             json.dump({

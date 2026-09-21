@@ -1,9 +1,9 @@
 """textos.json — materiais de publicação e alimentação da thumbnail.
 
 O texto da thumb é derivado do episodio.json (linha 1 = empresa, ou o primeiro
-tema quando não há empresa; linha 2 = T[N]E[NN], seção 5 do prompt de
-materiais), mas o textos.json pode sobrescrever
-qualquer campo quando o Claude propõe algo melhor na etapa de materiais.
+tema quando não há empresa; linha 2 = T[N]E[NN]), mas o textos.json pode
+sobrescrever qualquer campo quando o modelo propõe algo melhor na etapa de
+materiais.
 """
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def thumb_args(project_dir: str) -> dict:
     convidados = ep.get("convidados") or []
     creditos = " & ".join(c.get("nome", "") for c in convidados if c.get("nome"))
 
-    # Seção 5: em episódio sem convidado externo (logo, sem empresa), a linha 1
+    # Em episódio sem convidado externo (logo, sem empresa), a linha 1
     # recebe o tema do episódio.
     temas = ep.get("temas") or []
     l1 = ep.get("empresa", "") or (temas[0] if temas else "")

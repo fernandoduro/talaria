@@ -28,7 +28,7 @@ def transcricao_legivel(project_dir: str) -> str:
 
 
 def metadados_legiveis(project_dir: str) -> str:
-    """Seção 7 do prompt de materiais, preenchida a partir do episodio.json."""
+    """Bloco de metadados do prompt, preenchido a partir do episodio.json."""
     ep = episodio.load(project_dir)
     convidados = ep.get("convidados") or []
     nomes = "; ".join(
@@ -59,7 +59,7 @@ def preencher(template: str, transcricao: str, metadados: str,
 
 
 def curadoria_legivel(estado: dict) -> str:
-    """Estado da curadoria em texto, injetado na seção 10 do prompt de cortes."""
+    """Estado da curadoria em texto, injetado no prompt de cortes."""
     aprovados = estado.get("aprovados", [])
     rejeitados = estado.get("rejeitados", [])
 
@@ -138,7 +138,7 @@ def fala_do_corte(project_dir: str, corte: dict) -> str:
 
     Exigir contenção total escondia a última frase de todo corte, porque
     a transcrição tem blocos de ~8s e a fronteira quase nunca coincide com eles.
-    Era justamente onde costuma estar a frase de impacto: no corte1 o pacote
+    Era justamente onde costuma estar a frase de impacto: num corte o pacote
     terminava em "chegou lá na fábrica, você não" enquanto o vídeo seguia.
 
     O texto vem CRU (sem `clean_caption`): a escolha do recorte é feita sobre o
