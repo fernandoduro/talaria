@@ -113,7 +113,8 @@ determines whether output is reproducible. Two defects today:
 
 - `encerramento.py:21` hardcodes `/System/Library/Fonts/Supplemental/Arial
   Bold.ttf` with no fallback. On Linux the closing card cannot be built at all —
-  9 errors in `test_encerramento`, plus the render integration test.
+  9 errors in `test_encerramento`, 5 in `test_render`, plus the render
+  integration test.
 - `POST_FONT` and `POST_MONO` have no Linux candidates, and `find_font`'s
   `fc-match` fallback never fails: probed on this machine it substituted Noto
   Sans for both `Poppins:semibold` and `Montserrat:semibold`. On Linux
@@ -178,16 +179,23 @@ and `prompt=consent` — without both, Google returns no refresh token.
 
 ### Documentation
 
-README corrections: the test count (it claims 377; 334 are collected), the
-Personalizar table (now also fonts), and `scripts/youtube_auth.py` once it
-exists.
+README corrections: the Personalizar table (now also fonts), and a note that
+the codebase is still Portuguese with English planned.
+
+The README's "São 377 testes" is **correct** — verified 377 collected with
+dependencies installed. An earlier reading of 334 was an artifact of running
+without a venv, where four test modules failed to import and contributed no
+tests. The count still needs updating at the end of Phase 0 because Task 4 and
+Task 7 each add a test module, not because it was ever wrong.
 
 ## Done criteria
 
-- venv created, `requirements.txt` installed, full suite green on Arch. Baseline
-  before this work: `Ran 334 tests — FAILED (failures=1, errors=19, skipped=1)`,
-  of which 15 are the macOS font defect and 4 are import errors from missing
-  dependencies.
+- venv created, `requirements.txt` installed, full suite green on Arch.
+  Measured baseline in the venv: `Ran 377 tests — FAILED (failures=1,
+  errors=15, skipped=1)`. All 15 errors and the 1 failure are the macOS font
+  defect; the 1 skip is the Avenir Next guard. (Without the venv the suite
+  reports 334 tests and 19 errors — four modules fail to import and their
+  tests are never collected. That reading is an artifact, not a baseline.)
 - These return nothing:
   `grep -rniE '\bEP[0-9]+\b|\bAP-[0-9]+\b|\bCA-[0-9]+\b|nvshorts|NVSHORTS|Norvik|Norvic|Ilusen|Eosen|Yusen' .`
   and `grep -rniE '(d[ae]|desta) casa\b' .`

@@ -126,7 +126,7 @@ cd /data/Code/next-video-shorts-pacote
 .venv/bin/python -m unittest discover -s tests 2>&1 | tail -3
 ```
 
-Write the exact line into the task notes. Expected shape: `Ran 3NN tests` with roughly 15 errors and 1 failure remaining — the 4 import errors from the pre-venv baseline (`Ran 334 tests — FAILED (failures=1, errors=19, skipped=1)`) should now be gone and the collected count should *rise*, because those 4 modules now load their tests.
+Write the exact line into the task notes. Measured: `Ran 377 tests in 11.238s` / `FAILED (failures=1, errors=15, skipped=1)`. Confirmed independently by the controller. This is the number Task 3 must leave unchanged.
 
 - [ ] **Step 4: Confirm the remaining failures are the known font defect**
 
@@ -926,7 +926,7 @@ client would complete consent and then fail at the first upload."
 
 Three are known:
 
-- The test count: it says `São 377 testes`. Replace with the real number from the final run in Step 4 below. Do this *after* Step 4 so the number is measured, not guessed.
+- The test count: it says `São 377 testes`, which was **correct** for the package as received (verified: 377 collected once dependencies are installed). It is stale only because Task 4 added `tests/test_fontes.py` and Task 7 added `tests/test_youtube_auth.py`. Replace it with the number measured in Step 4 below — do this *after* Step 4 so the number is measured, not guessed.
 - The `## Personalizar` table lists three customisation points. Add a fourth row for the vendored fonts: `| Fontes do render e do post | assets/fonts/ |`.
 - Retitle the project from `# Video Shorts Pipeline` to `# Talaria`, with one line saying what it is.
 
