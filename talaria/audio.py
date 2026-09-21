@@ -125,9 +125,9 @@ def cauda_vaza(video_path: str, fim: float, limiar_db: float = -25.0,
         return False
     dbs = [db for _, db in pontos]
     # Fala terminando decai; fala cortada para de repente ainda no nível alto.
-    # Corte defeituoso fica em -31/-28/-31 dB (estável); os
-    # corretos ou terminam abaixo de -35 dB ou despencam mais de 10 dB na
-    # última janela ("importadas": -25.8 -> -39.4).
+    # Medido: corte defeituoso fica em -31/-28/-31 dB (estável); os corretos
+    # ou terminam abaixo de -35 dB ou despencam mais de 10 dB na última
+    # janela ("importadas": -25.8 -> -39.4).
     if dbs[-1] <= limiar_db - 10.0:
         return False                     # terminou em silêncio
     return (dbs[0] - dbs[-1]) < 8.0      # não decaiu o bastante

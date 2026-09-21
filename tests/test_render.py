@@ -64,7 +64,7 @@ class TestCaudaVaza(unittest.TestCase):
 
     Toda fala acaba com uma sílaba, então "tem energia no fim" acusa qualquer
     corte. O sinal é o decaimento: palavra terminando decai; palavra cortada
-    para de repente ainda no nível alto.
+    para de repente ainda no nível alto. Números medidos.
     """
 
     def test_limiar_separa_os_casos_medidos(self):
@@ -219,7 +219,7 @@ class TestWrapByPixels(unittest.TestCase):
 
         Mede propriedades que valem em QUALQUER fonte: nenhuma linha passa da
         largura, e nenhuma palavra some ou troca de ordem. A conferência contra
-        o design aprovado fica no teste seguinte, que exige a fonte certa.
+        a quebra de referência fica no teste seguinte, que exige a fonte certa.
         """
         from PIL import ImageFont
         from talaria import config, render

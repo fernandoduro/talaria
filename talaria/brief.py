@@ -194,7 +194,7 @@ def montar_posts(project_dir: str, cortes: list) -> str:
     from . import config
     limite = (
         f"Máximo de {config.POST_CIT_MAX_LINHAS} linhas por card, cerca de "
-        f"100 caracteres. O exemplo aprovado do design tem 97.\n"
+        f"100 caracteres. A citação de referência tem 96.\n"
     )
     conteudo = preencher(
         _ler_prompt("posts.md"),
