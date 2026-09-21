@@ -1,9 +1,9 @@
-"""Post de citação para Instagram (4:5), escrito sobre o template do design.
+"""Post de citação para Instagram (4:5), escrito sobre o template do canal.
 
-O template (assets/template_instagram.png) já traz logo, gradiente, aspas,
-filete e barra. Este módulo escreve por cima apenas o que muda por post:
-citação, nome e cargo. Não conhece vídeo nem ffmpeg — recebe texto e devolve
-PNG.
+O template (assets/template_instagram.png) traz o fundo: gradiente, filete e
+barra. Logo e aspas são do canal. Este módulo escreve por cima apenas o que
+muda por post: citação, nome e cargo. Não conhece vídeo nem ffmpeg — recebe
+texto e devolve PNG.
 """
 from __future__ import annotations
 
@@ -77,9 +77,8 @@ def autor_do_episodio(project_dir: str, quem: str = "") -> dict:
     Nome próprio vem daqui, nunca da transcrição — é a mesma regra da legenda
     queimada. Sem convidado externo, a empresa assina a citação.
 
-    `quem` escolhe o convidado quando o episódio tem mais de um (o prompt de
-    materiais prevê "dois convidados da mesma empresa"). Sem `quem`, assina o
-    primeiro. Nome que não está no episodio.json levanta erro em vez de cair no
+    `quem` escolhe o convidado quando o episódio tem mais de um. Sem `quem`,
+    assina o primeiro. Nome que não está no episodio.json levanta erro em vez de cair no
     primeiro: publicar a frase de uma pessoa com o nome de outra é o erro mais
     caro desta etapa, e silêncio aqui produziria exatamente isso.
     """
@@ -150,7 +149,7 @@ def compoe_card(texto: str, autor: dict, out_path: str, template: str = None):
         d.text((config.POST_MARGEM_X, y), linha, font=fcit,
                fill=config.POST_COR_CITACAO)
 
-    # Rodapé (o filete laranja já vem desenhado no template)
+    # Rodapé (o filete já vem desenhado no template)
     fnome = _fonte(config.POST_FONT, config.POST_NOME_SIZE)
     d.text((config.POST_MARGEM_X, config.POST_NOME_Y), autor["nome"],
            font=fnome, fill=config.POST_COR_NOME)

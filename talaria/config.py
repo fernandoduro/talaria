@@ -125,8 +125,8 @@ THUMB_CONTRAST = 1.08
 # Post de citação para Instagram (4:5)
 #
 # As medidas saem do próprio template (assets/template_instagram.png), medido
-# pixel a pixel: o arquivo já traz logo, aspas, filete e barra desenhados, e o
-# código só escreve citação, nome e cargo por cima.
+# pixel a pixel. O placeholder traz gradiente, filete e barra; logo e aspas
+# são do canal. O código escreve citação, nome e cargo por cima.
 # ---------------------------------------------------------------------------
 POST_TEMPLATE = os.path.join(_RAIZ, "assets", "template_instagram.png")
 
@@ -149,8 +149,8 @@ POST_H = 2700
 POST_MARGEM_X = 195       # margem esquerda de todo o texto
 POST_LARGURA_UTIL = 1800  # largura máx. da linha da citação
 
-# Citação. A 1ª linha começa 211px abaixo das aspas (que terminam em y=933),
-# mesmo respiro do design aprovado. As linhas empilham para BAIXO.
+# Citação. As linhas empilham para BAIXO a partir de POST_CIT_Y, herdado do
+# layout original: o placeholder não desenha nada nessa altura para conferir.
 POST_CIT_Y = 1144
 POST_CIT_PASSO = 190      # distância entre inícios de linha consecutivos
 POST_CIT_ALTURA = 160     # altura de uma linha de texto

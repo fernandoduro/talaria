@@ -18,7 +18,7 @@ class TestConfigPost(unittest.TestCase):
             self.assertEqual(im.size, (config.POST_W, config.POST_H))
 
     def test_citacao_nao_invade_o_filete(self):
-        # 5 linhas cabem; a 6ª invadiria o filete laranja em y=2242.
+        # 5 linhas cabem; a 6ª invadiria o filete em y=2242.
         fim_5 = config.POST_CIT_Y + 4 * config.POST_CIT_PASSO + config.POST_CIT_ALTURA
         fim_6 = config.POST_CIT_Y + 5 * config.POST_CIT_PASSO + config.POST_CIT_ALTURA
         self.assertLess(fim_5, config.POST_FILETE_Y)
