@@ -78,9 +78,9 @@ def autor_do_episodio(project_dir: str, quem: str = "") -> dict:
     queimada. Sem convidado externo, a empresa assina a citação.
 
     `quem` escolhe o convidado quando o episódio tem mais de um. Sem `quem`,
-    assina o primeiro. Nome que não está no episodio.json levanta erro em vez de cair no
-    primeiro: publicar a frase de uma pessoa com o nome de outra é o erro mais
-    caro desta etapa, e silêncio aqui produziria exatamente isso.
+    assina o primeiro. Nome que não está no episodio.json levanta erro em vez
+    de cair no primeiro: publicar a frase de uma pessoa com o nome de outra é
+    o erro mais caro desta etapa, e silêncio aqui produziria exatamente isso.
     """
     ep = episodio.load(project_dir)
     convidados = ep.get("convidados") or []
