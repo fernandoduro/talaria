@@ -10,6 +10,7 @@ import os
 import sys
 
 ESCOPO = ["https://www.googleapis.com/auth/youtube.upload"]
+CHAVES_INSTALLED = ("client_id", "client_secret", "token_uri")
 
 
 def valida_client_secret(caminho: str) -> dict:
@@ -17,7 +18,8 @@ def valida_client_secret(caminho: str) -> dict:
 
     O publish lê client_secret["installed"]: um client do tipo Web passa pelo
     consentimento inteiro e só quebra no primeiro upload, depois de a agenda
-    já contar com ele.
+    já contar com ele. Um `installed` sem as chaves que
+    `publish_youtube._credenciais` lê quebra do mesmo jeito.
     """
     if not os.path.exists(caminho):
         raise SystemExit(
@@ -42,7 +44,16 @@ def valida_client_secret(caminho: str) -> dict:
             f"Cloud Console, crie a credencial OAuth com tipo de aplicativo "
             f"'Desktop app' e baixe o JSON dela."
         )
-    return dados["installed"]
+    installed = dados["installed"]
+    campos = installed if isinstance(installed, dict) else {}
+    faltando = [k for k in CHAVES_INSTALLED if not campos.get(k)]
+    if faltando:
+        raise SystemExit(
+            f"{caminho} tem o bloco 'installed' incompleto (falta "
+            f"{', '.join(faltando)}). No Google Cloud Console, gere a "
+            f"credencial OAuth de novo e salve o JSON inteiro."
+        )
+    return installed
 
 
 def main(argv: list) -> int:

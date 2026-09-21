@@ -49,6 +49,16 @@ class TestValidaClientSecret(unittest.TestCase):
             youtube_auth.valida_client_secret("/nao/existe.json")
         self.assertIn("comando", str(ctx.exception))
 
+    def test_recusa_installed_truncado(self):
+        with tempfile.TemporaryDirectory() as d:
+            caminho = _escreve(d, json.dumps({"installed": {"client_id": "x"}}))
+            with self.assertRaises(SystemExit) as ctx:
+                youtube_auth.valida_client_secret(caminho)
+            msg = str(ctx.exception)
+            self.assertIn("incompleto", msg)
+            self.assertIn("client_secret", msg)
+            self.assertIn("token_uri", msg)
+
     def test_recusa_json_nao_objeto(self):
         with tempfile.TemporaryDirectory() as d:
             caminho = _escreve(d, "42")
@@ -61,9 +71,12 @@ class TestValidaClientSecret(unittest.TestCase):
 
 
 class TestMain(unittest.TestCase):
-    def test_sem_argumento_explica_o_uso(self):
-        with self.assertRaises(SystemExit):
-            youtube_auth.main([])
+    def test_numero_errado_de_argumentos_explica_o_uso(self):
+        for argv in ([], ["cs.json", "sobrando"]):
+            with self.subTest(argv=argv):
+                with self.assertRaises(SystemExit) as ctx:
+                    youtube_auth.main(argv)
+                self.assertIn("uso:", str(ctx.exception))
 
 
 if __name__ == "__main__":
