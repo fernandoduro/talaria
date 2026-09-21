@@ -3,8 +3,9 @@
 O card é estático — igual em todo corte, não depende do conteúdo do vídeo.
 Gerá-lo dentro do filtergraph de cada render obrigaria refazer o mesmo PNG a
 cada corte; em vez disso ele é montado uma vez com Pillow e cacheado como um
-`.mp4` mudo no mesmo codec/resolução do pipeline, para o `render_cut`
-concatenar sem reencode (`concat demuxer -c copy`).
+`.mp4` mudo no mesmo codec/resolução do pipeline, que o `render_cut`
+concatena com o concat filter — o porquê está em
+`render.concatena_encerramento`.
 """
 from __future__ import annotations
 

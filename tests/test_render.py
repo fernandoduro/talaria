@@ -503,7 +503,7 @@ class TestMarcaDaguaECardIntegracao(unittest.TestCase):
 
 
 class TestConcatenaEncerramento(unittest.TestCase):
-    """Concatenação corte + card, sem reencode (concat demuxer -c copy)."""
+    """Concatenação corte + card pelo concat filter."""
 
     def setUp(self):
         self.d = tempfile.mkdtemp()
