@@ -749,8 +749,8 @@ TestCaminhos	1	renamed	-> TestPaths (global); class name
 TestMigracao	1	renamed	-> TestMigration (global); class name
 TestMigracaoDefensiva	1	renamed	-> TestDefensiveMigration (global); class name
 TestCaminhosPublicacao	1	renamed	-> TestPublishPaths (global); class name
-ANTIGOS	1	renamed	-> OLD_NAMES (global); uppercase constant, test_layout.py
-_projeto_antigo	1	renamed	-> _old_project (global); compound, test helper method name
+ANTIGOS	1	renamed	-> FLAT_NAMES (global); uppercase constant, test_layout.py (OLD_NAMES until the final fix wave)
+_projeto_antigo	1	renamed	-> _flat_project (global); compound, test helper method name (_old_project until the final fix wave)
 na_raiz	1	renamed	-> at_root (global); compound (protected from bare raiz), test_layout.py local
 move_que_morre	1	renamed	-> move_that_dies (global); test mock function name
 sobreviventes	1	renamed	-> survivors (global); test_layout.py local

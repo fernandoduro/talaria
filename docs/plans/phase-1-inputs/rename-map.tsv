@@ -285,7 +285,7 @@ function	pasta	folder	manual	fix-round-1/2: local in render._is_youtube_output, 
 function	tamanho	size	manual	fix-round-1 gap: parameter on post_instagram._truetype (2nd) only; also pervasive prose ("tamanho da fonte", "tamanho do clip") elsewhere - leave those, out of scope here
 filename	brief_materiais.md	brief_materials.md	global	legacy _MIGRATION source key in layout.py, left half-renamed after the cortes/materiais manual pass; fix-round-1 Finding 5 - rename for internal consistency, table is untested against real data
 filename	brief_cortes.md	brief_clips.md	global	legacy _MIGRATION source key in layout.py, left half-renamed after the cortes/materiais manual pass; fix-round-1 Finding 5 - rename for internal consistency, table is untested against real data
-constant	ANTIGOS	OLD_NAMES	global	fix-round-2 gap (789-identifier inventory): uppercase constant, test_layout.py
+constant	ANTIGOS	FLAT_NAMES	global	fix-round-2 gap (789-identifier inventory): uppercase constant, test_layout.py; the final fix wave renamed it again, OLD_NAMES -> FLAT_NAMES, because _MIGRATION's source keys were translated and the constant held CURRENT names under a name that said old
 constant	CITACAO_DO_DESIGN	DESIGN_QUOTE	global	fix-round-2 gap (789-identifier inventory): uppercase constant, test_render.py
 class	TestAberturaDoHost	TestHostOpening	global	fix-round-2 gap (789-identifier inventory): class name, matches host_opening()
 class	TestAjusteRespeitaMinimo	TestAdjustRespectsMinimum	global	fix-round-2 gap (789-identifier inventory): class name
@@ -348,7 +348,7 @@ class	TestValidaClientSecret	TestValidateClientSecret	global	fix-round-2 gap (78
 class	TestValidaTexto	TestValidateText	global	fix-round-2 gap (789-identifier inventory): class name
 class	TestValidacoes	TestValidations	global	fix-round-2 gap (789-identifier inventory): class name
 function	_episodio	_episode	global	fix-round-2 gap (789-identifier inventory): private local named after episode module
-function	_projeto_antigo	_old_project	global	fix-round-2 gap (789-identifier inventory): compound, test helper method name
+function	_projeto_antigo	_flat_project	global	fix-round-2 gap (789-identifier inventory): compound, test helper method name; renamed again with FLAT_NAMES in the final fix wave - the fixture recreates the pre-subfolder flat layout, not an older one
 function	_textos	_texts	global	fix-round-2 gap (789-identifier inventory): private local named after texts module
 function	_valida	_validate	global	fix-round-2 gap (789-identifier inventory): test helper method name, test_caption.py
 function	achado	matches	global	fix-round-2 gap (789-identifier inventory): post_instagram.py filtered-guest-matches list (named singular in the original despite being a list)
