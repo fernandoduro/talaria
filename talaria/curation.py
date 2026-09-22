@@ -78,6 +78,12 @@ def save(project_dir: str, state: dict) -> str:
 # 580" reads as a categorical claim the speaker never made. The digit must
 # follow within the same sentence, so the 40-character window stops before
 # sentence-ending punctuation.
+#
+# "about" and "some" are also an ordinary preposition and determiner, so
+# "we talked about 3 things" warns falsely where no Portuguese marker could
+# ("uns", "cerca de" have no second sense). Zero false positives on
+# tests/fixtures/example.txt, and the alert fires before the attribution gate,
+# so the base rate is recorded rather than narrowed.
 RE_HEDGED_NUMBER = re.compile(
     r"\b(about|around|approximately|roughly|some|maybe|I think|"
     r"if I remember|more or less|or so|give or take)\b"
@@ -230,22 +236,24 @@ def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
 # Markers of someone speaking about their OWN company in the first person. If a
 # segment labelled "host" is full of them, the speaker there is the guest and
 # the attribution has slipped.
+#
+# Bare we/our/us are deliberately absent: host register uses them constantly
+# ("tell us how it started", "we are recording another episode"), which put the
+# host first-person fraction of tests/fixtures/example.txt at 0.606 against the
+# 0.30 threshold below. Narrowed to own-company phrases the same fixture
+# measures 0.000; a host segment carrying swapped guest speech still measures
+# 0.857. The trade is recall: a guest stretch that only says "we worked
+# somewhere else" no longer registers, and no transcript with genuinely swapped
+# labels exists here to measure that loss on.
 RE_FIRST_PERSON = re.compile(
-    r"\b(we|our|us|my company|my co-?founder|I joined|I started)\b",
+    r"\b(my company|our company|our team|our own|my co-?founder|"
+    r"our first hire)\b",
     re.IGNORECASE,
 )
 
-# Above this fraction the attribution does not deserve trust.
-#
-# OPEN QUESTION: 0.30 was tuned against Portuguese, where the markers were
-# "a gente" and "nosso". The English alternation includes bare we/our/us,
-# which host register uses constantly ("tell us about", "we talked about"),
-# so a well-attributed episode can now score far above 0.30 and the warning
-# would fire on every episode. Re-deriving the fraction needs a real English
-# transcript with known-good speaker labels to measure the base rate on;
-# there is none in this repo, so the number is left as it was rather than
-# replaced by a guess. Narrowing the marker set to own-company phrases is
-# the other candidate fix.
+# Above this fraction the attribution does not deserve trust. 0.30 was tuned
+# against the Portuguese markers ("a gente", "nosso"); the English set above is
+# narrowed to a comparable base rate, measured on the repository's own fixture.
 SUSPECT_ATTRIBUTION_THRESHOLD = 0.30
 
 

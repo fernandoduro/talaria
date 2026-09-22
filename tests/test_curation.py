@@ -1,7 +1,10 @@
 """Tests for the iterative curation state."""
+import os
 import unittest
 
-from talaria import curation
+from talaria import curation, txt_parse
+
+FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "example.txt")
 
 
 class TestOverlap(unittest.TestCase):
@@ -227,13 +230,35 @@ class TestAttributionTrustworthy(unittest.TestCase):
     """A lying alert trains the operator to ignore the output."""
 
     def test_well_attributed_episode(self):
+        """Ordinary host register must not trip the gate.
+
+        The host segments below are 60s of we/our/us question-asking plus 20s
+        that does carry a real own-company marker, so the measured fraction is
+        0.25 -- under the threshold but not zero. A marker set that counts bare
+        we/our/us scores this near 1.0, and a threshold lowered towards zero
+        scores it as suspect; both fail here instead of passing vacuously.
+        """
         segs = [
             {"start": 0.0, "end": 30.0, "speaker": "host",
-             "text": "How did the company get started?"},
-            {"start": 30.0, "end": 90.0, "speaker": "guest",
+             "text": "How did the company get started? Tell us about that."},
+            {"start": 30.0, "end": 50.0, "speaker": "host",
+             "text": "Before we get into it: our team put this list together."},
+            {"start": 50.0, "end": 80.0, "speaker": "host",
+             "text": "So we are going to talk about the early days, right?"},
+            {"start": 80.0, "end": 140.0, "speaker": "guest",
              "text": "We built our first product in a garage."},
         ]
+        self.assertTrue(
+            curation.RE_FIRST_PERSON.search(segs[1]["text"]),
+            "the fixture must carry one real marker, or any positive "
+            "threshold passes and the test proves nothing",
+        )
         self.assertTrue(curation.attribution_trustworthy(segs))
+
+    def test_real_transcript_is_well_attributed(self):
+        """The repository's own English transcript, with >>-derived labels."""
+        self.assertTrue(
+            curation.attribution_trustworthy(txt_parse.parse_txt(FIXTURE)))
 
     def test_host_talking_about_own_company_is_suspect(self):
         segs = [
@@ -243,9 +268,16 @@ class TestAttributionTrustworthy(unittest.TestCase):
         ]
         self.assertFalse(curation.attribution_trustworthy(segs))
 
-    def test_first_person_plural_is_detected(self):
-        for txt in ("we built it here", "our first hire", "my co-founder left"):
+    def test_own_company_phrases_are_detected(self):
+        for txt in ("our team shipped it", "our first hire", "my co-founder left",
+                    "we set up our own studio"):
             self.assertTrue(bool(curation.RE_FIRST_PERSON.search(txt)), txt)
+
+    def test_bare_first_person_plural_is_not_a_marker(self):
+        """Host register is built from we/our/us; counting it warns always."""
+        for txt in ("tell us how it started", "we are recording another episode",
+                    "today we are going to talk about it"):
+            self.assertFalse(bool(curation.RE_FIRST_PERSON.search(txt)), txt)
 
     def test_third_person_is_not_detected(self):
         self.assertFalse(bool(curation.RE_FIRST_PERSON.search(
