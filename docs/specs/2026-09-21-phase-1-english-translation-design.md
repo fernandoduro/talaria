@@ -91,13 +91,40 @@ The em-dash check in `caption.py` stays. It flags a caption containing an
 em-dash because that reads as machine-written text — as true in English as in
 Portuguese, arguably more so. Only its message is translated.
 
-## The two language-bound rewrites
+## Scope is not the same as context
 
-These are not translations. Both are rewrites whose properties must be
+The rename map's `scope` column separates words with one sense from words with
+two. It does **not** separate an identifier from the same word appearing inside
+a Portuguese sentence, and that distinction turned out to matter: a mechanical
+substitution of a single-sense word inside prose produces
+`"'{line}' nao fits na largura do card"`. Roughly 23 such occurrences were
+reverted during Task 3 and left for the prose and string passes, which
+translate the whole sentence rather than one word of it.
+
+One of those substitutions was a functional bug, not merely ugly: the
+first-person marker regex had `"minha empresa"` rewritten to `"minha company"`,
+which silently breaks speaker-attribution detection. A word-boundary
+substitution is safe for identifiers and unsafe for regex alternations and
+prose, and nothing in the map's shape expressed that.
+
+Consequence for verification: between the map pass and the string pass, a
+"every map entry is gone" check is expected to report survivors. They are only
+all gone once the prose and string passes have run.
+
+## The five language-bound rewrites
+
+These are not translations. All five are rewrites whose properties must be
 re-derived by measurement, because a replacement that reads plausibly can
 silently stop working — Phase 0 lost a near-miss test exactly this way, when
 `nossa` was replaced by a word that failed the pattern at its first character
 instead of its fourth.
+
+An earlier draft of this spec named only the first two. The other three were
+found when a blind substitution corrupted one of them, which is its own lesson:
+**grep for `re.compile` before assuming you have found every piece of
+language-specific logic.** Timestamp and punctuation patterns
+(`RE_TS`, `RE_CUE`, `RE_INLINE`, `RE_TS_LINE`, `RE_SENTENCE_END`) are
+language-neutral and need no rewrite.
 
 ### `utils.corrige_nomes` → `fix_proper_nouns`
 
@@ -138,6 +165,47 @@ English behaviour:
 - Keep the word-repetition dedup unchanged — it is language-neutral.
 - The Latin-phrase guard and its tests are deleted. English has no `pro`
   collision, so the guard would protect against nothing.
+
+### `curation.RE_FIRST_PERSON`
+
+Portuguese: `a gente|nosso|nossa|nossos|nossas|eu vim|meu sócio|minha empresa`.
+It gates `attribution_trustworthy`, which warns the operator when a clip's
+speaker labels look wrong — the host talking about "our company" is a signal
+the transcript attributed guest speech to the host.
+
+English needs the equivalent first-person-plural and possessive markers: `we`,
+`our`, `us`, `my company`, `my co-founder`, `I joined`, `I started`. `we` and
+`our` are far more frequent in English than `a gente` is in Portuguese, so the
+threshold this feeds (`SUSPECT_ATTRIBUTION_THRESHOLD`) may need re-deriving
+against a real transcript rather than carried over. Say so if it does; do not
+silently keep a number that was tuned for a different base rate.
+
+### `curation.RE_HEDGED_NUMBER`
+
+Portuguese: `uns|umas|aproximadamente|cerca de|por volta de|acho que|se (eu)
+não me engano|mais ou menos`, followed within 40 characters by a digit. It
+warns that a clip states an approximate figure as if it were exact.
+
+English: `about|around|approximately|roughly|some|maybe|I think|if I
+remember|more or less|or so|give or take`, same digit proximity.
+
+This is the regex behind the near-miss pair the classification artifact
+identified as this codebase's own `nossa`: `test_texto_sem_numero_nao_alerta`
+asserts that a hedging marker with **no** number does not warn. Its English
+fixture must still contain a marker the new pattern recognises, or it passes
+for the trivial reason and stops testing anything.
+
+### `utils.RE_SOUND_TAG`
+
+Already partly bilingual — `music|laughter|applause` sit alongside the
+Portuguese terms. Drop the Portuguese alternatives and complete the English
+set: `music`, `laughter`, `applause`, `noise`, `silence`, `inaudible`,
+`crosstalk`. The cheapest of the five.
+
+Note that `tests/test_txt_parse.py:61` asserts sound-tag stripping against a
+fixture containing no sound tag, so it cannot fail today. Phase 0's spec records
+it as carried forward; do not translate it into a test that looks like it proves
+something.
 
 ## Test integrity
 

@@ -117,7 +117,7 @@ Report the entry count per `kind`, and every entry where you chose a non-literal
 
 **Interfaces:**
 - Consumes: `docs/plans/phase-1-inputs/content-assertion-sites.md` (94 sites, 75 tests, plus 13 width-dependent additions) and the rename map from Task 1.
-- Produces: `assertion-classification.tsv` — columns `file`, `line`, `test`, `class`, `proves`, `derivation`. Tasks 4, 5 and 7 consult it for every site they touch.
+- Produces: `assertion-classification.tsv` — columns `file`, `line`, `test`, `class`, `proves`, `derivation`. Tasks 4, 5, 6 and 8 consult it for every site they touch.
 
 This is the safety-critical artifact of the phase. Phase 0 lost a test to a symmetric edit: `nossa` was a genuine near-miss for the old pattern and fails the new one at its first character, so the assertion passed for any input and proved nothing. That edit looked correct in review.
 
@@ -280,7 +280,7 @@ grep -rohE 'mock\.patch\("talaria\.[a-z_]+' tests/*.py | sed 's/.*"talaria\.//' 
 done
 ```
 
-The `global` check and the `mock.patch` check must both print nothing. The `manual` listing will show remaining occurrences — that is expected, and you confirm each surviving one is genuinely the other sense of the word. A broken `mock.patch` target fails loudly at test time, but this catches it before the suite runs and tells you which one.
+The `mock.patch` check must print nothing. The `global` check is EXPECTED to report survivors — around 23 — because the map's `scope` column separates one-sense words from two-sense words but does not separate an identifier from the same word inside a Portuguese sentence. Substituting one word of a sentence that Tasks 7 and 8 translate wholesale produces `"nao fits na largura"`. Confirm each survivor sits inside prose or a regex alternation, not in an identifier, and leave it. They are gone only after the prose and string passes. The `manual` listing will show remaining occurrences — that is expected, and you confirm each surviving one is genuinely the other sense of the word. A broken `mock.patch` target fails loudly at test time, but this catches it before the suite runs and tells you which one.
 
 - [ ] **Step 5: Run the suite**
 
@@ -503,7 +503,137 @@ has no pro collision for it to protect against."
 
 ---
 
-### Task 6: Translate comments and docstrings
+### Task 6: Rewrite the three remaining language-bound regexes
+
+**Files:**
+- Modify: `talaria/curation.py` (`RE_FIRST_PERSON`, `RE_HEDGED_NUMBER`)
+- Modify: `talaria/utils.py` (`RE_SOUND_TAG`)
+- Modify: `tests/test_curadoria.py` (renamed by Task 3), `tests/test_utils.py`, `tests/test_txt_parse.py`
+- Modify: `docs/plans/phase-1-inputs/assertion-classification.tsv`
+- Test: the three test modules, then the whole suite
+
+**Interfaces:**
+- Consumes: Tasks 4 and 5's `utils.py`.
+- Produces: `curation.RE_FIRST_PERSON`, `curation.RE_HEDGED_NUMBER`, `utils.RE_SOUND_TAG` matching English speech. `has_hedged_number(text) -> bool` and `attribution_trustworthy(...)` keep their signatures.
+
+These three were not in the spec's original draft. They were found when Task 3's blind substitution rewrote `"minha empresa"` to `"minha company"` inside `RE_FIRST_PERSON` — a silent break of speaker-attribution detection. The lesson is recorded in the spec: grep for `re.compile` before assuming you have found every piece of language-specific logic.
+
+- [ ] **Step 1: Confirm nothing else is language-bound**
+
+```bash
+cd /data/Code/talaria
+grep -rnE 're\.compile' --include='*.py' talaria/
+```
+
+Five patterns are language-neutral and must NOT be touched: `RE_TS`, `RE_CUE`, `RE_INLINE` (WebVTT timestamps), `RE_TS_LINE` (`M:SS` timestamps), `RE_SENTENCE_END` (punctuation). If you find a sixth language-bound pattern this plan does not name, stop and report it rather than rewriting it unasked.
+
+- [ ] **Step 2: Write the failing tests for `RE_HEDGED_NUMBER`**
+
+This is the one with a near-miss guard, and the classification artifact flags it as this codebase's own `nossa` pair. Read its rows before writing anything.
+
+```python
+    def test_detects_approximate_figure(self):
+        for txt in ("about 2005", "roughly 570 users", "I think 12 people"):
+            self.assertTrue(curation.has_hedged_number(txt), txt)
+
+    def test_exact_figure_does_not_warn(self):
+        self.assertFalse(curation.has_hedged_number("founded in 2006"))
+
+    def test_marker_without_a_number_does_not_warn(self):
+        self.assertFalse(curation.has_hedged_number("I think this matters"))
+```
+
+`test_marker_without_a_number_does_not_warn` is the guard. `"I think"` MUST be a marker the new pattern recognises, or the test passes because there is no marker at all rather than because there is no number — which is exactly the defect Phase 0 shipped. **Verify it by printing the pattern and confirming `"I think"` matches the marker alternation on its own**, then confirming the full pattern does not match without a digit.
+
+- [ ] **Step 3: Write the failing tests for `RE_FIRST_PERSON`**
+
+```python
+    def test_first_person_plural_is_detected(self):
+        for txt in ("we built it here", "our first hire", "my co-founder left"):
+            self.assertTrue(bool(curation.RE_FIRST_PERSON.search(txt)), txt)
+
+    def test_third_person_is_not_detected(self):
+        self.assertFalse(bool(curation.RE_FIRST_PERSON.search(
+            "the company hired three people")))
+```
+
+- [ ] **Step 4: Write the failing test for `RE_SOUND_TAG`**
+
+```python
+    def test_strips_english_sound_tags(self):
+        self.assertEqual(
+            utils.strip_markup("[music] we shipped it [laughter]"),
+            "we shipped it")
+
+    def test_keeps_bracketed_content_that_is_not_a_sound_tag(self):
+        txt = "[important] this stays"
+        self.assertEqual(utils.strip_markup(txt), txt)
+```
+
+The second test already exists in Portuguese form and is the reason the tag list is an explicit alternation rather than "anything in brackets" — keep that property.
+
+- [ ] **Step 5: Run them and watch them fail**
+
+Run: `.venv/bin/python -m unittest tests.test_curation tests.test_utils -v 2>&1 | tail -20`
+Expected: the new tests fail. The patterns still match Portuguese markers.
+
+- [ ] **Step 6: Replace the three patterns**
+
+```python
+RE_FIRST_PERSON = re.compile(
+    r"\b(we|our|us|my company|my co-?founder|I joined|I started)\b",
+    re.IGNORECASE,
+)
+
+RE_HEDGED_NUMBER = re.compile(
+    r"\b(about|around|approximately|roughly|some|maybe|I think|"
+    r"if I remember|more or less|or so|give or take)\b"
+    r"[^.!?]{0,40}?\d",
+    re.IGNORECASE,
+)
+
+RE_SOUND_TAG = re.compile(
+    r"\[\s*(music|laughter|applause|noise|silence|inaudible|crosstalk)\s*\]",
+    re.IGNORECASE,
+)
+```
+
+- [ ] **Step 7: Re-derive `SUSPECT_ATTRIBUTION_THRESHOLD`, or say why you did not**
+
+`we` and `our` are far more frequent in English than `a gente` is in Portuguese, so the fraction-of-host-speech threshold this feeds was tuned against a different base rate. Read the constant, read `attribution_trustworthy`, and decide whether the number still means what it meant. Report your reasoning either way — **silently keeping a threshold tuned for another language is the failure mode here**, and it produces a warning that either never fires or always does.
+
+If you conclude it needs changing but cannot derive a new value without a real English transcript, say exactly that and leave the number alone with a comment recording the open question. That is an acceptable outcome; pretending the number transferred is not.
+
+- [ ] **Step 8: Run the tests, then the suite**
+
+```bash
+cd /data/Code/talaria
+.venv/bin/python -m unittest tests.test_curation tests.test_utils tests.test_txt_parse -v 2>&1 | tail -6
+.venv/bin/python -m unittest discover -s tests 2>&1 | tail -3
+```
+The count will change — you are replacing Portuguese-marker tests with English ones. Report the exact number and account for the delta.
+
+- [ ] **Step 9: Record derivations and commit**
+
+Fill `derivation` for every `B` row in the classification belonging to these three patterns.
+
+```bash
+cd /data/Code/talaria
+git add talaria/curation.py talaria/utils.py tests/ docs/plans/phase-1-inputs/assertion-classification.tsv
+git commit -m "feat: English markers for first-person, hedged-number and sound-tag detection
+
+Three language-bound patterns the spec's first draft missed, found when a
+blind substitution rewrote minha empresa to minha company inside the
+first-person alternation and silently broke speaker-attribution detection.
+
+The hedged-number near-miss test's fixture was verified to contain a
+marker the new pattern recognises, so it still fails for the right reason
+rather than for the absence of a marker."
+```
+
+---
+
+### Task 7: Translate comments and docstrings
 
 **Files:**
 - Modify: all 27 modules, 23 test modules, `run.py`, `scripts/youtube_auth.py`
@@ -548,7 +678,7 @@ Commit in groups of related modules, not one commit for everything.
 
 ---
 
-### Task 7: Translate user-facing strings, prompts and README
+### Task 8: Translate user-facing strings, prompts and README
 
 **Files:**
 - Modify: every module with a user-facing message, `run.py`, `scripts/youtube_auth.py`
@@ -616,7 +746,7 @@ expected string. Derivations are recorded in the classification file."
 
 ---
 
-### Task 8: Final acceptance
+### Task 9: Final acceptance
 
 **Files:**
 - Modify: `README.md` (test count only, after measuring)
