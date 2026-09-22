@@ -1,0 +1,262 @@
+kind	old	new	note
+cli_verb	agenda	schedule	run.py local agenda would shadow the schedule module
+cli_verb	curar	curate	
+constant	ABERTURA_HOST_MAX_S	HOST_OPENING_MAX_S	
+constant	AJUSTE_AUDIO_MAX_S	AUDIO_ADJUST_MAX_S	
+constant	BUSCA_S	SEARCH_S	
+constant	CAMPOS_OBRIGATORIOS	REQUIRED_FIELDS	
+constant	CAMPOS_OBRIGATORIOS_PREENCHIDOS	REQUIRED_NONEMPTY_FIELDS	subset that must also be non-empty
+constant	CARD_ARROBA	CARD_HANDLE	arroba here means the @handle text
+constant	CARD_COR_ARROBA	CARD_HANDLE_COLOR	arroba here means the @handle text
+constant	CARD_DURACAO_S	CARD_DURATION_S	
+constant	CARD_FUNDO	CARD_BG	
+constant	CARD_LOGO_LARGURA	CARD_LOGO_W	
+constant	CARROSSEL_MAX	CAROUSEL_MAX	
+constant	CATEGORIA	CATEGORY_ID	holds YouTube's numeric categoryId
+constant	CHAVES_INSTALLED	INSTALLED_KEYS	keys required inside the installed block
+constant	_CONTRACOES	_CONTRACTIONS	
+constant	CONVIDADO	GUEST	
+constant	CORTE_MAX_S	CLIP_MAX_S	
+constant	CORTE_MIN_S	CLIP_MIN_S	
+constant	_CREDENCIAIS	_CREDENTIALS	
+constant	DECISOES	DECISIONS	
+constant	_DIR_FONTES	_FONTS_DIR	
+constant	_EQUIV_FONETICA	_PHONETIC_EQUIVALENTS	
+constant	ESCOPO	SCOPES	plural: the value is a list of scopes
+constant	ESPERADAS	EXPECTED	
+constant	FALA_CONVIDADO_MIN	GUEST_SPEECH_MIN	
+constant	FIXAS	CHANNEL_TAGS	the channel's always-present hashtags
+constant	FONTE	SOURCE	
+constant	FUSO_PUBLICACAO	PUBLISH_TZ	name only; the value stays America/Sao_Paulo
+constant	IG_LEGENDA_MAX	IG_CAPTION_MAX	
+constant	JANELA_PONTUACAO	PUNCTUATION_WINDOW	
+constant	JANELA_S	WINDOW_S	
+constant	LEGENDA_MIN_S	CAPTION_MIN_S	
+constant	LIMIAR_ATRIBUICAO_SUSPEITA	SUSPECT_ATTRIBUTION_THRESHOLD	
+constant	LIMIAR_PAUSA_DB	PAUSE_THRESHOLD_DB	
+constant	LIMIAR_SOBREPOSICAO	OVERLAP_THRESHOLD	
+constant	_LIXO	_JUNK	
+constant	MARCA_DAGUA_LARGURA	WATERMARK_W	
+constant	MARCA_DAGUA_MARGEM	WATERMARK_MARGIN	
+constant	MARGEM_FIM_S	END_MARGIN_S	
+constant	_MIGRACAO	_MIGRATION	
+constant	MOMENTOS	MOMENTS	
+constant	NOME_ARQUIVO	FILE_NAME	
+constant	NOME_PROGRAMA	SHOW_NAME	programa is the show, not a computer program
+constant	PADRAO	DEFAULT_PATH	it holds the default .env path
+constant	_PALAVRAS_COMUNS	_COMMON_WORDS	
+constant	_PASTAS_PUBLICAR	_PUBLISH_DIRS	
+constant	PLATAFORMAS	PLATFORMS	
+constant	POLL_INTERVALO_S	POLL_INTERVAL_S	
+constant	POST_CARGO_SIZE	POST_ROLE_SIZE	
+constant	POST_CARGO_Y	POST_ROLE_Y	
+constant	POST_CIT_ALTURA	POST_QUOTE_LINE_H	height of one quote line, not the block
+constant	POST_CIT_MAX_LINHAS	POST_QUOTE_MAX_LINES	
+constant	POST_CIT_PASSO	POST_QUOTE_STEP	
+constant	POST_CIT_SIZE	POST_QUOTE_SIZE	
+constant	POST_CIT_Y	POST_QUOTE_Y	
+constant	POST_COR_CARGO	POST_ROLE_COLOR	
+constant	POST_COR_CITACAO	POST_QUOTE_COLOR	
+constant	POST_COR_NOME	POST_NAME_COLOR	
+constant	POST_FILETE_Y	POST_RULE_Y	filete is the template's hairline rule
+constant	POST_LARGURA_UTIL	POST_TEXT_W	max line width for the quote text
+constant	POST_MARGEM_X	POST_MARGIN_X	
+constant	POST_NOME_SIZE	POST_NAME_SIZE	
+constant	POST_NOME_Y	POST_NAME_Y	
+constant	PREFIXO	PREFIX	
+constant	PREFIXO_EPISODIO	EPISODE_PREFIX	
+constant	PRIVACIDADE_PADRAO	DEFAULT_PRIVACY	
+constant	PRIVACIDADES	PRIVACY_VALUES	accepted privacyStatus values
+constant	PROJETOS	PROJECTS	
+constant	PUBLICAR	PUBLISH	
+constant	_RAIZ	_ROOT	
+constant	RE_FIM_DE_FRASE	RE_SENTENCE_END	
+constant	RE_HESITACAO	RE_HEDGED_NUMBER	matches hedging words followed by a number
+constant	RE_PRIMEIRA_PESSOA	RE_FIRST_PERSON	
+constant	RE_SOM	RE_SOUND_TAG	matches bracketed sound annotations
+constant	SEPARADOR	SEPARATOR	
+constant	SILENCIO_MIN_S	SILENCE_MIN_S	
+constant	_SUFIXO_MP4	_MP4_SUFFIX	
+constant	_TAMANHO_ARROBA	_HANDLE_SIZE	arroba here means the @handle text
+constant	TAXA_HZ	RATE_HZ	
+constant	TIPOS	KINDS	kind, not type: type shadows the builtin
+constant	TRANSCRICAO	TRANSCRIPT	
+constant	TRAVESSAO	EM_DASH	
+constant	VALIDADE_S	EXPIRY_S	how long the signed URL stays valid
+constant	YT_DESCRICAO_MAX	YT_DESCRIPTION_MAX	
+constant	YT_TITULO_MAX	YT_TITLE_MAX	
+dir	decisoes	decisions	
+dir	fonte	source	dir only; fonte elsewhere means font, not source
+dir	projetos	projects	
+dir	publicar	publish	
+function	abertura_do_host	host_opening	
+function	_ajusta_ate_pontuacao	_snap_to_punctuation	snaps the slice end to nearby punctuation
+function	ajusta_fim_por_audio	adjust_end_by_audio	
+function	alertas_corte	clip_warnings	warnings, not alerts: they do not block
+function	_apara_texto	_trim_text	
+function	aplica_margem_fim	apply_end_margin	
+function	aprovar	approve	
+function	atribuicao_confiavel	attribution_trustworthy	
+function	autor_do_episodio	episode_author	
+function	_bloco	_block	
+function	caminho	txt_path	function only; caminho locals elsewhere are plain paths
+function	card_cacheado	cached_card	
+function	card_encerramento	end_card_mp4	matches layout's episode_txt/transcript_txt suffix convention
+function	carrega	load	joins the existing load() on episode, texts, curation
+function	cauda_vaza	clips_mid_word	names the fault, not the tail metaphor
+function	_chama	_call	
+function	_cliente	_client	
+function	cmd_agenda	cmd_schedule	
+function	cmd_curar	cmd_curate	
+function	codigo	code	
+function	compoe_card	render_card	writes a PNG; compose_card is end_card's frame
+function	composicao	composition	
+function	concatena_encerramento	append_end_card	in-place append; concat is the ffmpeg mechanism
+function	_confere_pastas	_check_dirs	
+function	corrige_nomes	fix_proper_nouns	nomes here are proper nouns from episode.json
+function	cortes_legiveis	readable_clips	
+function	_credenciais	_credentials	
+function	curadoria_legivel	readable_curation	
+function	data_do	date_of	
+function	_duracao_silencio	_silence_duration	
+function	_e_do_youtube	_is_youtube_output	tests the output directory, not the file
+function	_e_palavra_comum	_is_common_word	
+function	episodio_txt	episode_txt	
+function	_escreve	_write	
+function	escreve	write	
+function	escreve_caption_episodio	write_episode_caption	
+function	escreve_captions	write_captions	
+function	_espera_processar	_wait_for_processing	
+function	esta_queimado	is_burned	
+function	executar	execute	
+function	_expande_contracoes	_expand_contractions	
+function	faixas_queimadas	burned_spans	faixa is a (start, end) time span
+function	fala_do_corte	clip_speech	
+function	fechado	is_closed	
+function	_fecha_frase	_ends_sentence	
+function	fins_de_frase	sentence_ends	
+function	_fonte	_truetype	_font taken by thumbnail; takes an explicit path
+function	_fonte_citacao	_quote_font	
+function	_fonte_versionada	_bundled_font	versioned means shipped in the repo, not fc-match
+function	fracao_convidado	guest_speech_fraction	matches GUEST_SPEECH_MIN, the threshold it feeds
+function	_fronteira_valida	_valid_boundary	
+function	garante	ensure_dir	creates the parent directory, returns the path unchanged
+function	gerar	generate	
+function	hoje	today	
+function	host_do_token	host_for_token	
+function	ja_publicado	is_published	
+function	_le	_read	
+function	_ler_prompt	_read_prompt	
+function	_limpa	_clean_value	strips whitespace and one surrounding quote pair
+function	limpa_citacao	clean_quote	
+function	linha_episodio	episode_line	
+function	_marca_dagua_graph	_watermark_graph	
+function	metadados_legiveis	readable_metadata	
+function	migrar	migrate	
+function	momentos	moments	
+function	_momentos_por_slug	_moments_by_slug	
+function	monta	compose	compose: build is taken by hashtags.build
+function	monta_card	compose_card	compose: build is taken by hashtags.build
+function	monta_episodio	compose_episode	compose: build is taken by hashtags.build
+function	montar	build	accepted cross-module twin of hashtags.build
+function	montar_posts	build_posts	
+function	motivos	reasons	
+function	_nomes_proprios	_proper_nouns	
+function	novo_estado	new_state	
+function	_padrao_fonetico	_phonetic_pattern	
+function	para_momentos	to_moments	
+function	pasta_fonte	source_dir	
+function	pendente	pending	
+function	plataforma	platform	
+function	plataformas_do	platforms_of	
+function	_pngs_do_post	_post_pngs	
+function	pre_checa	precheck	
+function	preencher	fill_template	fills the prompt template's placeholders
+function	_prepara	_prepare	
+function	privacidade	privacy	
+function	_projeto	_project	
+function	_projeto_falso	_fake_project	
+function	_publica_container	_publish_container	
+function	_publica_par	_publish_pair	
+function	publica_post	publish_post	
+function	publica_reel	publish_reel	
+function	quebra	wrap	wraps the quote to the post width
+function	registra	record	
+function	rejeitar	reject	
+function	_resposta	_response	
+function	salvar_momentos	save_moments	
+function	_segmentos	_segments	
+function	segmentos_no_corte	segments_in_clip	clip, not cut: render._segments_in_cut differs
+function	slug_de_arquivo	file_slug	
+function	sobe	put	upload taken by publish_youtube; pairs with remove
+function	sobrepoe	overlaps	
+function	sugere_frames	suggest_frames	
+function	_tem_ffmpeg	_has_ffmpeg	
+function	tem_ffmpeg	has_ffmpeg	
+function	tem_hesitacao_numerica	has_hedged_number	the fault is a hedged number, not hesitation
+function	tipos_ausentes	missing_kinds	kind, not type: type shadows the builtin
+function	transcricao	transcript	
+function	transcricao_legivel	readable_transcript	
+function	transcricao_txt	transcript_txt	
+function	_txt_do_post	_post_txt	
+function	url_youtube	youtube_url	
+function	vagas	slots_left	approvals still needed before the goal is met
+function	vale_antes	valley_before	
+function	valida	validate	
+function	valida_card	validate_card	
+function	valida_client_secret	validate_client_secret	
+function	valida_corte	validate_clip	
+function	_valida_empresa_ou_tema	_validate_company_or_topic	
+json_key	aprovados	approved	
+json_key	cabe	fits	
+json_key	cargo	role	cargo is the guest's job title
+json_key	chamada_l1	headline_l1	chamada is the thumbnail headline
+json_key	chamada_l2	headline_l2	chamada is the thumbnail headline
+json_key	cidade	city	
+json_key	conselho	advice	
+json_key	convidado	guest	
+json_key	convidados	guests	
+json_key	corte	clip	
+json_key	creditos	credits	
+json_key	data	date	Portuguese date; the save(data) params are English
+json_key	descricao	description	
+json_key	empresa	company	
+json_key	erro	error	
+json_key	historia	story	historia here is a story, not history
+json_key	legenda	caption	post_instagram local must not shadow the caption module
+json_key	legenda_post	post_caption	
+json_key	linhas	lines	
+json_key	meta	target	goal count; the _COMMON_WORDS entry meta is unrelated
+json_key	motivo	reason	
+json_key	nome	name	
+json_key	pessoal	personal	
+json_key	publicado_em	published_at	
+json_key	quem	who	
+json_key	registro_falhou	record_failed	
+json_key	rejeitados	rejected	
+json_key	resumo	summary	
+json_key	rodadas	rounds	
+json_key	selo	badge	selo is the thumbnail's top-left label strip
+json_key	subtitulo	subtitle	
+json_key	temas	topics	conversation subjects; themes misreads in English
+json_key	temporada	season	
+json_key	tese	thesis	
+json_key	texto_tela	screen_text	
+json_key	tipo	kind	type would shadow the builtin; acquire already uses kind
+json_key	titulo	title	
+module	ambiente	environment	
+module	calendario	schedule	avoids shadowing the stdlib calendar module
+module	curadoria	curation	
+module	encerramento	end_card	names the artifact: the closing card
+module	episodio	episode	
+module	publicado	published	
+module	test_ambiente	test_environment	
+module	test_calendario	test_schedule	
+module	test_curadoria	test_curation	
+module	test_encerramento	test_end_card	
+module	test_episodio	test_episode	
+module	test_fontes	test_fonts	
+module	test_integracao	test_integration	
+module	test_publicado	test_published	
+module	test_textos	test_texts	
+module	textos	texts	texts, not copy: copy is a stdlib module
