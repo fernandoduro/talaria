@@ -1,0 +1,95 @@
+file	line	test	class	proves	derivation
+tests/test_brief.py	36	test_metadados_formatados	A	Fixture city value reaches the readable metadata block; the value is episode.json input, renamed symmetrically.	
+tests/test_brief.py	49	test_substitui_placeholder_de_metadados	A	Prompt placeholder token is consumed by fill_template; renamed with prompts/*.md in Task 7.	
+tests/test_brief.py	64	test_estado_legivel_primeira_rodada	B	The readable-curation block opens with the first-round banner when nothing has been judged yet, so the clips prompt asks for 10 proposals instead of a round summary; the pinned phrase is generated prose and is currently unique in brief.py (1 occurrence).	
+tests/test_brief.py	104	test_traz_a_fala_dentro_do_corte	A	Fixture clip slug appears in the generated posts brief; slug is test input.	
+tests/test_brief.py	106	test_traz_a_fala_dentro_do_corte	A	A transcript segment fully inside the clip window reaches the posts brief verbatim; the text is fixture input.	
+tests/test_brief.py	123	test_traz_a_fala_do_segmento_que_atravessa_a_fronteira	B	A segment straddling the clip boundary is trimmed proportionally, so the tail beyond the boundary does NOT reach the brief; the absent substring must be a genuine tail of the new fixture sentence at the same character fraction, or the negative assertion passes vacuously.	
+tests/test_calendario.py	50	test_slug_de_corte_inexistente_aborta	A	Fixture clip slug is echoed in the abort message; slug is test input.	
+tests/test_caption.py	14	test_junta_descricao_e_hashtags	A	Description and hashtags are joined by one blank line; the load-bearing part is the separator, not the words.	
+tests/test_caption.py	43	test_troca_extensao_da_peca	A	Filename derived from the fixture piece name with the extension swapped to .txt.	
+tests/test_caption.py	50	test_conteudo_gravado_em_utf8	B	Caption content is written and read back byte-identical in UTF-8; the accented characters ARE the property, so an ASCII English fixture would leave the test passing while proving nothing about encoding.	
+tests/test_caption.py	60	test_sobrescreve_sem_duplicar	A	Rewriting leaves exactly one .txt, named from the fixture piece.	
+tests/test_caption.py	88	test_numero_e_rejeitado_citando_o_campo_e_a_peca	A	The rejection names the piece; the value is the argument the test passed.	
+tests/test_caption.py	89	test_numero_e_rejeitado_citando_o_campo_e_a_peca	B	The type-rejection message names the offending FIELD, so the operator knows which JSON key to fix; the English message must be checked to contain the new field name, and note that the message's own prose already ends 'it is the caption that accompanies the publication' - after the rename legenda->caption that word appears in the fixed prose regardless of the field, so assertIn('caption', msg) would stop discriminating.	
+tests/test_caption.py	113	test_avisa_quando_tem_travessao	B	A caption containing an em-dash produces a warning naming the em-dash, since the channel treats it as machine-written style; the word is unique to that message in caption.py (1 message string of 3 occurrences, the others prose).	
+tests/test_caption.py	114	test_avisa_quando_tem_travessao	A	The em-dash warning names the piece; the value is the argument the test passed.	
+tests/test_caption.py	117	test_nao_avisa_sem_travessao	A	Text with no em-dash prints nothing; asserted value is empty stdout, input only needs to stay em-dash-free.	
+tests/test_caption.py	135	test_titulo_descricao_e_hashtags	A	Title, description and hashtags joined by blank lines; separator is the property.	
+tests/test_caption.py	138	test_sem_titulo_nao_deixa_linha_solta	A	Empty title leaves no leading blank line; separator is the property.	
+tests/test_caption.py	142	test_so_titulo	A	Title alone produces no trailing separator.	
+tests/test_curadoria.py	57	test_novo_estado_tem_meta	A	New state carries the target count passed in; JSON key plus test input.	
+tests/test_curadoria.py	58	test_novo_estado_tem_meta	A	New state starts with an empty approved list; JSON key.	
+tests/test_curadoria.py	59	test_novo_estado_tem_meta	A	New state starts with an empty rejected list; JSON key.	
+tests/test_curadoria.py	60	test_novo_estado_tem_meta	A	New state starts at round zero; JSON key.	
+tests/test_curadoria.py	78	test_duracao_curta_demais	B	A clip below CLIP_MIN_S is rejected with a message naming duration; NOT unique - 'duracao' appears in both the below-minimum and above-maximum messages, so this assertion cannot tell which branch fired and is identical to the one in test_duracao_longa_demais.	
+tests/test_curadoria.py	83	test_duracao_longa_demais	B	A clip above CLIP_MAX_S is rejected with a message naming duration; NOT unique - same word as the below-minimum message, so the two duration tests are indistinguishable by their assertions.	
+tests/test_curadoria.py	182	test_recusa_corte_sobreposto	B	Approving a clip that overlaps an already-approved one raises, with the message saying it overlaps; NOT unique in the module - the same verb appears in valida_corte's burned-span message, and this assertion passes only because that one is never raised as an exception (the Phase 0 'Console' shape).	
+tests/test_curadoria.py	186	test_aceita_corte_disjunto	A	A disjoint clip is accepted, giving two approvals; count only.	
+tests/test_curadoria.py	196	test_ajuste_de_tempo_pode_encostar_em_outro	A	Re-approving the same slug at a new time replaces rather than duplicates; count only.	
+tests/test_curadoria.py	197	test_ajuste_de_tempo_pode_encostar_em_outro	A	The replacing clip's new start time is stored; numeric.	
+tests/test_curadoria.py	208	test_mesmo_slug_e_ajuste_de_tempo	A	Same-slug re-approval keeps a single entry; count only.	
+tests/test_curadoria.py	209	test_mesmo_slug_e_ajuste_de_tempo	A	The re-approved clip's adjusted start is stored; numeric.	
+tests/test_curadoria.py	238	test_suprime_alertas_que_leem_speaker	B	When speaker attribution is untrustworthy the guest-share warning is suppressed, so the operator is not told a good clip is bad; negative assertion over a generated warning phrase - if the English phrase does not match the real message the test passes while the warning fires.	
+tests/test_curadoria.py	278	test_detecta_se_nao_me_engano	A	A hedged-number marker followed by a digit is detected; the fixture phrase must be a genuine member of RE_HEDGED_NUMBER and a wrong choice fails loudly.	
+tests/test_curadoria.py	284	test_texto_sem_numero_nao_alerta	B	A hedging marker with NO number does not raise the hedged-number warning; this is the near-miss test and the English fixture must still contain a marker the pattern recognises, otherwise it passes for the trivial reason (no marker at all) - the exact defect shape Phase 0 shipped with 'nossa'.	
+tests/test_curadoria.py	383	test_aprovar_adiciona	A	Approving adds one entry; count only.	
+tests/test_curadoria.py	388	test_rejeitar_registra_motivo	A	The rejection reason is stored verbatim; the string is the test's own argument.	
+tests/test_curadoria.py	409	test_tipos_ausentes	A	A kind with no approvals is reported missing; the value is a KINDS enum member renamed by the map.	
+tests/test_curadoria.py	415	test_motivos_acumulados	A	Repeated rejection reasons are de-duplicated; the string is the test's own argument.	
+tests/test_curadoria.py	435	test_exporta_momentos_com_campos_do_render	A	Export carries the clip slug through to moments.json; fixture slug.	
+tests/test_encerramento.py	94	test_nao_deixa_temporario_para_tras	A	No .tmp file survives a successful cached-card build; the Portuguese text is the assertion's failure message, not the expectation.	
+tests/test_episodio.py	49	test_campo_faltando_da_erro_claro	A	A field that IS present is not listed among the missing ones; the value is a JSON key renamed by the map.	
+tests/test_episodio.py	74	test_save_load_roundtrip_preserva_acento	B	save writes non-ASCII episode values literally (ensure_ascii=False) and load reads them back; the accents ARE the property, so an ASCII English city leaves the test green while it no longer detects ensure_ascii=True - the test's name claims accent preservation and would stop proving it.	
+tests/test_hashtags.py	9	test_remove_acento_e_espaco	B	slug strips accents and spaces and title-cases each word; with an ASCII input the accent-stripping half of the property disappears silently.	
+tests/test_hashtags.py	12	test_ribeirao_acai	B	slug maps a two-word accented city to one CamelCase token; the cedilla and tilde are the discriminating input and an ASCII fixture proves only space removal.	
+tests/test_hashtags.py	15	test_planicie_valley	B	slug handles an accented word next to an unaccented one; same accent dependency as the two above.	
+tests/test_integracao.py	60	test_fluxo_curadoria_ate_momentos	A	The end-to-end flow carries the clip slug into moments.json; fixture slug.	
+tests/test_layout.py	28	test_briefs_por_tipo	A	brief path is built from the brief kind; the path segments are directory and file names renamed by the map.	
+tests/test_layout.py	66	test_move_tudo_para_o_lugar_certo	A	Migration puts the clips brief at its layout path; path names only.	
+tests/test_layout.py	98	test_e_idempotente	A	A second migration moves nothing; asserted value is the empty report list.	
+tests/test_layout.py	144	test_duplicata_nao_e_apagada_em_silencio	A	The displaced duplicate survives as a .bak; asserted value is a path existence check.	
+tests/test_layout.py	210	test_pasta_de_saida_duplicada_e_reportada	A	Orphaned output content appears in the migration report; the Portuguese text is the assertion's failure message, not the expectation.	
+tests/test_post_instagram.py	47	test_citacao_longa_e_rejeitada_com_o_excesso	B	A quote needing more than POST_QUOTE_MAX_LINES is rejected with a reason naming the line count; check the English reason - the width-rejection message will also describe a line, so 'line' may stop discriminating between the two refusal reasons.	
+tests/test_post_instagram.py	62	test_palavra_mais_larga_que_o_card_e_rejeitada	B	A single word wider than the card is rejected by MEASUREMENT rather than by line count, with a reason saying it does not fit the width; the phrase is unique in post_instagram.py (1 occurrence).	
+tests/test_post_instagram.py	128	test_autor_vem_do_episodio_json	A	The quote's role line comes from episode.json; fixture value round-tripped.	
+tests/test_post_instagram.py	174	test_contracoes_sao_expandidas	B	limpa_citacao runs the caption cleanup, so a spoken contraction reaches the card in its written form; clean_caption is rewritten in Task 5 and English keeps real contractions, so the expectation must come from running the new implementation.	
+tests/test_post_instagram.py	175	test_contracoes_sao_expandidas	B	The spoken form is GONE from the cleaned quote, not merely accompanied by the expanded form; negative assertion over rewritten clean_caption output.	
+tests/test_post_instagram.py	273	test_card_unico_tem_txt_com_o_slug	A	The post caption file holds description and hashtags joined by one blank line; separator is the property, words are test input.	
+tests/test_post_instagram.py	290	test_sem_legenda_avisa_e_grava_hashtags	A	The missing-caption warning names the post slug; slug is test input.	
+tests/test_post_instagram.py	291	test_sem_legenda_avisa_e_grava_hashtags	B	A post with no caption still gets its .txt but says so on stdout, so the omission is not silent; unique in post_instagram.py, but it is a text PREFIX of render.py's sibling warning 'sem legenda_post', so keep the two English wordings distinguishable.	
+tests/test_post_instagram.py	306	test_legenda_nao_texto_e_rejeitada	A	A non-text caption is rejected naming the post; slug is test input.	
+tests/test_publicado.py	38	test_grava_na_hora_e_rele	A	The record stores the published slug; JSON key and fixture slug.	
+tests/test_publicado.py	40	test_grava_na_hora_e_rele	A	Every record carries a published-at timestamp; JSON key presence only.	
+tests/test_publicado.py	60	test_encontra_por_plataforma_e_slug	A	A recorded (platform, slug) pair reads back as published; platform keys are external names.	
+tests/test_publicado.py	63	test_encontra_por_plataforma_e_slug	A	The same slug on another platform is NOT published; the pending unit is (slug, platform).	
+tests/test_publicado.py	64	test_encontra_por_plataforma_e_slug	A	Another slug on the same platform is not published.	
+tests/test_publicado.py	65	test_encontra_por_plataforma_e_slug	A	An empty register reports nothing published.	
+tests/test_publish.py	159	test_publica_tudo_e_registra_cada_um	A	The YouTube leg of the pair is recorded; platform key and fixture slug.	
+tests/test_publish.py	160	test_publica_tudo_e_registra_cada_um	A	The Instagram Reels leg is recorded independently.	
+tests/test_publish.py	165	test_publica_tudo_e_registra_cada_um	A	The YouTube description comes from the sibling .txt; the string is written by the test's own fixture.	
+tests/test_publish.py	179	test_falha_numa_plataforma_nao_trava_as_outras	A	A platform that raised is NOT recorded, so tomorrow retries it.	
+tests/test_publish.py	215	test_registro_que_falha_depois_do_ar_nao_vira_retentativa	A	A piece that went live counts as ok even when recording it failed; boolean on a JSON key.	
+tests/test_publish.py	218	test_registro_que_falha_depois_do_ar_nao_vira_retentativa	A	The record-failure error text is carried into the result; the string is the test's own injected OSError message.	
+tests/test_publish_instagram.py	88	test_status_error_vira_falha_com_o_status_na_mensagem	A	A terminal container status ends the poll with that status in the message; ERROR is a Graph API value, not this code's wording.	
+tests/test_publish_instagram.py	177	test_imagem_com_container_em_erro_nao_publica	A	An image container in ERROR fails explicitly; ERROR is a Graph API value.	
+tests/test_publish_instagram.py	178	test_imagem_com_container_em_erro_nao_publica	A	media_publish is never called after a failed container; call count only.	
+tests/test_render.py	138	test_segmento_fora_do_corte_nao_entra	A	A segment outside the clip window does not reach the burned-in text; the phrase is fixture text and the adjacent length assertion independently pins the exclusion.	
+tests/test_render.py	333	test_sem_legenda_post_avisa_e_grava_hashtags	B	A clip with no post caption still gets its .txt but warns on stdout; unique in render.py, and note the JSON key rename legenda_post->post_caption changes the pinned string as well as the wording.	
+tests/test_render.py	425	test_grava_titulo_descricao_e_hashtags	A	The episode .txt holds title, description and hashtags separated by blank lines; separator is the property, words come from the texts.json fixture.	
+tests/test_textos.py	25	test_thumb_args_a_partir_do_episodio	A	The thumbnail subtitle is city/state from episode.json; fixture value composed into the line.	
+tests/test_textos.py	36	test_selo_tem_codigo_do_episodio	A	The badge carries the episode code; the code format is Phase 2 scope and unchanged here.	
+tests/test_txt_parse.py	61	test_remove_marcacao_de_som_e_entidades	B	Claims that parsing strips sound annotations and HTML entities, but tests/fixtures/exemplo.txt contains NEITHER a bracketed tag nor an entity, so BOTH assertions pass vacuously today and prove nothing; the new fixture must actually contain a tag matched by RE_SOUND_TAG and an entity.	
+tests/test_utils.py	9	test_remove_marcacao_minuscula	A	A lowercase sound annotation is removed and surrounding space collapsed; the surviving word is the test's own input, and a tag the new pattern does not match fails loudly.	
+tests/test_utils.py	13	test_remove_marcacao_maiuscula	A	Sound-annotation matching is case-insensitive for an uppercase tag; regression for the old case-sensitive list.	
+tests/test_utils.py	16	test_remove_capitalizada	A	A capitalised tag is removed; same loud-failure property.	
+tests/test_utils.py	19	test_remove_palmas	A	A tag with no English cognate in the list is still removed.	
+tests/test_utils.py	23	test_remove_variantes_singular_plural	A	Singular and plural spellings of the same tag are both removed; the optional-plural property has no automatic English analogue, so Task 7 must choose tag pairs the new pattern really covers.	
+tests/test_utils.py	36	test_colapsa_espaco_deixado_pela_remocao	B	Removal does not leave a double space behind; the assertion cannot distinguish 'tag removed and space collapsed' from 'tag never matched', because an unmatched tag also leaves no double space - it must be re-derived by confirming the tag is actually stripped.	
+tests/test_utils.py	111	test_expande_contracoes	B	A spoken contraction is expanded to its written form in a burned-in caption; clean_caption is rewritten in Task 5 (English expands only gonna/wanna/gotta/kinda and KEEPS real contractions), so the expectation must come from running the new implementation.	
+tests/test_utils.py	113	test_expande_contracoes	B	A second spoken contraction expands the same way, proving the table is not a single special case; same rewritten function.	
+tests/test_utils.py	118	test_nao_expande_pro_em_locucao	B	A Latin phrase whose first word collides with a contraction survives the expansion; the design spec DELETES this guard and its tests because English has no such collision, so this site is removed rather than translated.	
+tests/test_utils.py	133	test_contracao_respeita_fronteira_de_palavra	B	Expansion respects word boundaries, so a contraction spelled inside a longer word is untouched; the English rewrite needs an equivalent collision case, which must be found against the new pattern.	
+tests/test_utils.py	139	test_remove_ne_interrogativo	B	A tag question at end of sentence is removed and its question mark becomes a full stop, since the question was rhetorical; the English filler set has no ne, so the replacement marker and its punctuation handling must be re-derived.	
+tests/test_utils.py	140	test_remove_ne_interrogativo	B	A mid-sentence tag question is removed together with the comma pair that surrounds it; same re-derivation as above.	
+tests/test_utils.py	143	test_preserva_maiuscula_inicial	B	Expansion preserves the sentence's initial capital; must be re-verified against whichever English expansion the rewrite keeps.	
