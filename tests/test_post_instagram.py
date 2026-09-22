@@ -59,7 +59,7 @@ class TestEncaixe(unittest.TestCase):
         """
         r = post_instagram.validate_card("anticonstitucionalissimamente")
         self.assertFalse(r["fits"])
-        self.assertIn("não fits na largura", r["reason"])
+        self.assertIn("não cabe na largura", r["reason"])
 
     def test_frase_com_palavra_normal_longa_ainda_cabe(self):
         """A recusa é por medida, não por tamanho de palavra em caracteres."""
@@ -91,7 +91,7 @@ class TestRender(unittest.TestCase):
                     {"name": "X", "role": "Y", "company": "Z"},
                     out,
                 )
-            self.assertIn("lines", str(ctx.exception))
+            self.assertIn("linhas", str(ctx.exception))
             self.assertFalse(os.path.exists(out))
 
     def test_template_ausente_da_erro_claro(self):

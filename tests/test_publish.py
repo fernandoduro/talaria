@@ -33,7 +33,7 @@ def _project(pd, title="Titulo do Short"):
         layout.ensure_dir(base + ".mp4")
         open(base + ".mp4", "w").close()
         with open(base + ".txt", "w", encoding="utf-8") as f:
-            f.write("Legenda do clip.\n\n#Tag")
+            f.write("Legenda do corte.\n\n#Tag")
     pasta = layout.posts_png(pd)
     os.makedirs(pasta, exist_ok=True)
     for n in ("post_cit_x_1.png", "post_cit_x_2.png"):
@@ -162,7 +162,7 @@ class TestExecutar(unittest.TestCase):
         # título veio do moments.json, descrição do .txt
         args = yt.upload.call_args[0]
         self.assertEqual(args[1], "Titulo do Short")
-        self.assertIn("Legenda do clip.", args[2])
+        self.assertIn("Legenda do corte.", args[2])
 
     def test_falha_numa_plataforma_nao_trava_as_outras(self, yt, ig):
         yt.upload.side_effect = RuntimeError("quota estourada")

@@ -22,7 +22,7 @@ def _bucket() -> str:
     bucket = os.environ.get("S3_PUBLISH_BUCKET", "")
     if not bucket:
         raise RuntimeError(
-            "S3_PUBLISH_BUCKET não definido no environment (.env) — é o bucket "
+            "S3_PUBLISH_BUCKET não definido no ambiente (.env) — é o bucket "
             "temporário de onde o Instagram baixa a mídia."
         )
     return bucket

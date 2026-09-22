@@ -295,7 +295,7 @@ def append_end_card(corte_path: str, project_dir: str) -> None:
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
-            raise RuntimeError(f"ffmpeg falhou ao concatenar o end_card:\n"
+            raise RuntimeError(f"ffmpeg falhou ao concatenar o encerramento:\n"
                                f"{r.stderr[-1500:]}")
         shutil.move(saida, corte_path)
     finally:
@@ -315,7 +315,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
         outputs.append(("instagram_reels", f"{slug}_reel.mp4"))
 
     if not outputs:
-        raise ValueError("Nenhuma platform selecionada (use youtube e/ou instagram).")
+        raise ValueError("Nenhuma plataforma selecionada (use youtube e/ou instagram).")
 
     # Renderiza uma vez; se as duas plataformas foram pedidas, copia (pixel-idêntico).
     first_subdir, first_name = outputs[0]

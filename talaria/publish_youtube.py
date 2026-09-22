@@ -50,9 +50,9 @@ def _credentials() -> Credentials:
                              ("YT_REFRESH_TOKEN", refresh)) if not v]
     if faltam:
         raise RuntimeError(
-            f"{', '.join(faltam)} não definido no environment (.env). Rode "
+            f"{', '.join(faltam)} não definido no ambiente (.env). Rode "
             f"'python scripts/youtube_auth.py <client_secret.json>' uma vez "
-            f"para generate o refresh token."
+            f"para gerar o refresh token."
         )
     with open(caminho, encoding="utf-8") as f:
         cs = json.load(f)["installed"]

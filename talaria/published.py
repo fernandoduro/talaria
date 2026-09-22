@@ -35,7 +35,7 @@ def carrega(pd: str) -> dict:
         except json.JSONDecodeError as e:
             raise RuntimeError(
                 f"{path} está corrompido ({e}). Não vou assumir 'nada "
-                f"published' — isso republicaria tudo. Confira o que já está "
+                f"publicado' — isso republicaria tudo. Confira o que já está "
                 f"no ar nos perfis das plataformas e recrie o arquivo à mão."
             )
 

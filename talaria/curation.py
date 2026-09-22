@@ -227,7 +227,7 @@ def validate_clip(faixa: tuple, segs: list, estado: dict) -> tuple:
 # como "host" está cheio delas, who fala ali é o convidado e a atribuição
 # escorregou.
 RE_FIRST_PERSON = re.compile(
-    r"\b(a gente|nosso|nossa|nossos|nossas|eu vim|meu sócio|minha company)\b",
+    r"\b(a gente|nosso|nossa|nossos|nossas|eu vim|meu sócio|minha empresa)\b",
     re.IGNORECASE,
 )
 
@@ -294,12 +294,12 @@ def clip_warnings(faixa: tuple, segs: list) -> list:
 
     frac = guest_speech_fraction(faixa, segs)
     if frac < config.GUEST_SPEECH_MIN:
-        alertas.append(f"convidado fala só {frac*100:.0f}% do clip")
+        alertas.append(f"convidado fala só {frac*100:.0f}% do corte")
 
     seg_host = host_opening(faixa, segs)
     if seg_host >= HOST_OPENING_MAX_S:
         alertas.append(
-            f"clip abre com {seg_host:.0f}s de fala do host — o espectador frio "
+            f"corte abre com {seg_host:.0f}s de fala do host — o espectador frio "
             "desiste antes do convidado falar"
         )
     return alertas
@@ -330,7 +330,7 @@ def approve(estado: dict, clip: dict) -> dict:
         # queimado — pergunta diferente, tolerância diferente.
         if overlaps(faixa, (float(ja["start"]), float(ja["end"])), limiar=0.0):
             raise ValueError(
-                f"clip {clip.get('slug')} sobrepõe o aprovado "
+                f"corte {clip.get('slug')} sobrepõe o aprovado "
                 f"{ja.get('slug')} ({ja['start']:.0f}-{ja['end']:.0f}s)"
             )
     if len(estado["approved"]) >= estado["meta"]:
@@ -388,7 +388,7 @@ def to_moments(estado: dict) -> list:
     que precisa sobreviver até a publicação.
     """
     if not estado.get("approved"):
-        raise ValueError("nenhum clip aprovado — nada a export")
+        raise ValueError("nenhum corte aprovado — nada a exportar")
     return [dict(c) for c in estado["approved"]]
 
 

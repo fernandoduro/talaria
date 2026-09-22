@@ -73,7 +73,7 @@ def carrega(pd: str) -> list:
         kind = item.get("kind") or ""
         onde = f"item {i} da agenda ('{slug or '?'}')"
         if kind not in PLATFORMS:
-            raise ValueError(f"{onde}: kind {kind!r} — use 'clip' ou 'post'")
+            raise ValueError(f"{onde}: tipo {kind!r} — use 'clip' ou 'post'")
         if not slug:
             raise ValueError(f"{onde}: sem slug")
         # O slug vira name de arquivo dentro de publish/. Barra ou `..` o
@@ -84,7 +84,7 @@ def carrega(pd: str) -> list:
         if "/" in slug or "\\" in slug or slug.strip(". ") != slug:
             raise ValueError(
                 f"{onde}: slug não pode ter barra nem começar/terminar com "
-                f"ponto — ele vira name de arquivo em publish/, e assim "
+                f"ponto — ele vira nome de arquivo em publish/, e assim "
                 f"apontaria para fora da pasta do episódio"
             )
         # A chave é (kind, slug), não o slug: o post de citação herda o slug
@@ -161,7 +161,7 @@ def pending(pd: str, dia: dt.date = None, only: list = None,
         estranhas = sorted(set(plataformas) - conhecidas)
         if estranhas:
             raise ValueError(
-                f"platform desconhecida: {', '.join(estranhas)} — "
+                f"plataforma desconhecida: {', '.join(estranhas)} — "
                 f"use {', '.join(sorted(conhecidas))}"
             )
     agenda = carrega(pd)

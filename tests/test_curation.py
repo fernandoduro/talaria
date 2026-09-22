@@ -217,7 +217,7 @@ class TestAtribuicaoConfiavel(unittest.TestCase):
             {"start": 0.0, "end": 30.0, "speaker": "host",
              "text": "Conta pra gente sobre sua trajetória?"},
             {"start": 30.0, "end": 90.0, "speaker": "convidado",
-             "text": "A gente começou com nossa primeira company."},
+             "text": "A gente começou com nossa primeira empresa."},
         ]
         self.assertTrue(curation.attribution_trustworthy(segs))
 

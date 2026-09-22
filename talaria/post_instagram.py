@@ -49,7 +49,7 @@ def validate_card(texto: str) -> dict:
             return {
                 "fits": False,
                 "lines": len(lines),
-                "reason": (f"'{linha.strip()}' não fits na largura do card "
+                "reason": (f"'{linha.strip()}' não cabe na largura do card "
                            f"({round(largura)}px de {config.POST_TEXT_W}) "
                            f"— palavra longa demais, sem onde quebrar"),
             }
@@ -60,7 +60,7 @@ def validate_card(texto: str) -> dict:
         return {
             "fits": False,
             "lines": n,
-            "reason": (f"{n} lines, {excesso} a mais que o limite de "
+            "reason": (f"{n} linhas, {excesso} a mais que o limite de "
                        f"{config.POST_QUOTE_MAX_LINES} — encurte a frase ou "
                        f"quebre em outro card"),
         }
@@ -135,7 +135,7 @@ def render_card(texto: str, autor: dict, out_path: str, template: str = None):
 
     v = validate_card(texto)
     if not v["fits"]:
-        raise ValueError(f"citação não fits no card: {v['reason']}")
+        raise ValueError(f"citação não cabe no card: {v['reason']}")
 
     img = Image.open(template).convert("RGB")
     d = ImageDraw.Draw(img)
@@ -188,7 +188,7 @@ def carrega(project_dir: str) -> list:
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"{path} não existe. Rode 'python run.py post --project <slug> "
-            f"--cortes <n,n>' e escolha as citações em sessão antes de generate."
+            f"--cortes <n,n>' e escolha as citações em sessão antes de gerar."
         )
     with open(path, encoding="utf-8") as f:
         return (json.load(f) or {}).get("posts") or []

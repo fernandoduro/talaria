@@ -27,7 +27,7 @@ def compose_card() -> Image.Image:
     """
     if not os.path.exists(config.LOGO_PATH):
         raise FileNotFoundError(
-            f"logo do end_card não encontrado em {config.LOGO_PATH} — "
+            f"logo do encerramento não encontrado em {config.LOGO_PATH} — "
             f"o arquivo deveria estar versionado em assets/"
         )
 
@@ -95,7 +95,7 @@ def cached_card(project_dir: str) -> str:
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
-            raise RuntimeError(f"ffmpeg falhou ao generate o card:\n{r.stderr[-1500:]}")
+            raise RuntimeError(f"ffmpeg falhou ao gerar o card:\n{r.stderr[-1500:]}")
         os.replace(tmp_destino, destino)
     finally:
         if os.path.exists(frame_path):

@@ -129,13 +129,13 @@ class TestSegmentsInCut(unittest.TestCase):
             {"start": 10.0, "end": 20.0,
              "text": "Vai conseguir reproduzir. Acho que isso é um primeiro ponto.",
              "turn": False},
-            {"start": 20.0, "end": 30.0, "text": "Depois do clip.", "turn": False},
+            {"start": 20.0, "end": 30.0, "text": "Depois do corte.", "turn": False},
         ]
 
     def test_segmento_fora_do_corte_nao_entra(self):
         itens = render._segments_in_cut(self.segs, 0.0, 20.0)
         self.assertEqual(len(itens), 2)
-        self.assertNotIn("Depois do clip", " ".join(t for _, _, t in itens))
+        self.assertNotIn("Depois do corte", " ".join(t for _, _, t in itens))
 
     def test_tempos_sao_relativos_ao_inicio_do_corte(self):
         itens = render._segments_in_cut(self.segs, 10.0, 30.0)
@@ -280,7 +280,7 @@ class TestSugereFrames(unittest.TestCase):
     def test_sugere_dentro_dos_cortes(self):
         for t in self.thumbnail.suggest_frames(self.moments):
             self.assertTrue(any(m["start"] <= t <= m["end"] for m in self.moments),
-                            f"{t} fora de qualquer clip")
+                            f"{t} fora de qualquer corte")
 
     def test_respeita_o_limite_pedido(self):
         self.assertLessEqual(len(self.thumbnail.suggest_frames(self.moments, n=3)), 3)

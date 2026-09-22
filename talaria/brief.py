@@ -40,7 +40,7 @@ def readable_metadata(project_dir: str) -> str:
         f"- Temporada: {ep['season']}\n"
         f"- Número do episódio: {int(ep['episode']):02d}\n"
         f"- Código: {episode.code(ep)}\n"
-        f"- Convidado(s) e role: {nomes}\n"
+        f"- Convidado(s) e cargo: {nomes}\n"
         f"- Empresa ou instituição: {ep['company']}\n"
         f"- Cidade/UF da gravação: {ep['cidade']}/{ep['uf']}\n"
         f"- LinkedIn do(s) convidado(s): {links}\n"
@@ -64,7 +64,7 @@ def readable_curation(estado: dict) -> str:
     rejected = estado.get("rejected", [])
 
     if not approved and not rejected:
-        return ("PRIMEIRA RODADA — nenhum clip avaliado ainda.\n"
+        return ("PRIMEIRA RODADA — nenhum corte avaliado ainda.\n"
                 "Proponha 10 trechos, ordenados do mais forte para o mais fraco.")
 
     lines = [
@@ -79,7 +79,7 @@ def readable_curation(estado: dict) -> str:
         lines.append(f"  {kind}: {n}")
     ausentes = cur.missing_kinds(estado)
     if ausentes:
-        lines.append(f"  KINDS AUSENTES (priorize): {', '.join(ausentes)}")
+        lines.append(f"  TIPOS AUSENTES (priorize): {', '.join(ausentes)}")
 
     lines.append("")
     lines.append("FAIXAS QUEIMADAS — não proponha nada que se sobreponha a elas:")
@@ -112,7 +112,7 @@ def _read_prompt(name: str) -> str:
 def montar(project_dir: str, kind: str) -> str:
     """kind: 'materiais' ou 'cortes'. Retorna o caminho do arquivo gerado."""
     if kind not in ("materiais", "cortes"):
-        raise ValueError("kind deve ser 'materiais' ou 'cortes'")
+        raise ValueError("tipo deve ser 'materiais' ou 'cortes'")
     template = _read_prompt(f"{kind}.md")
     estado_txt = ""
     if kind == "cortes":
@@ -193,7 +193,7 @@ def build_posts(project_dir: str, cortes: list) -> str:
     """
     from . import config
     limite = (
-        f"Máximo de {config.POST_QUOTE_MAX_LINES} lines por card, cerca de "
+        f"Máximo de {config.POST_QUOTE_MAX_LINES} linhas por card, cerca de "
         f"100 caracteres. A citação de referência tem 96.\n"
     )
     conteudo = preencher(

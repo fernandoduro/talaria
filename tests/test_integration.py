@@ -50,7 +50,7 @@ class TestFluxoCompleto(unittest.TestCase):
         estado = curation.new_state(meta=1)
 
         clip = {"slug": "corte1", "start": segs[0]["start"], "end": segs[-1]["end"],
-                 "kind": "story", "screen_text": "Teste de clip"}
+                 "kind": "story", "screen_text": "Teste de corte"}
         curation.approve(estado, clip)
         self.assertTrue(curation.is_closed(estado))
 

@@ -10,8 +10,8 @@ from talaria import caption
 
 class TestMonta(unittest.TestCase):
     def test_junta_descricao_e_hashtags(self):
-        t = caption.compose("A frase do clip.", "#Um #Dois")
-        self.assertEqual(t, "A frase do clip.\n\n#Um #Dois")
+        t = caption.compose("A frase do corte.", "#Um #Dois")
+        self.assertEqual(t, "A frase do corte.\n\n#Um #Dois")
 
     def test_so_descricao_quando_nao_ha_hashtags(self):
         # Sem texts.json o episódio não tem hashtags; o caption ainda serve.

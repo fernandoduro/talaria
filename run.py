@@ -62,7 +62,7 @@ def project_dir(slug: str) -> str:
     pd = os.path.join(PROJECTS, slug)
     movidos = layout.migrate(pd)
     if movidos:
-        print(f"[layout] project reorganizado ({len(movidos)} itens):")
+        print(f"[layout] projeto reorganizado ({len(movidos)} itens):")
         for origem, destino in movidos:
             print(f"         {origem} -> {destino}")
     return pd
@@ -97,14 +97,14 @@ def cmd_prep(args):
     acquire.acquire(args.src, pd)
     video = layout.video(pd)
     transcribe.transcribe(args.src, video, pd, model=args.whisper_model)
-    print(f"\n>>> Pronto para curation. Leia {layout.transcript_txt(pd)} e crie "
+    print(f"\n>>> Pronto para curadoria. Leia {layout.transcript_txt(pd)} e crie "
           f"{layout.moments(pd)}, depois rode 'render'.")
 
 
 def cmd_render(args):
     pd = project_dir(args.project)
     if not os.path.exists(layout.moments(pd)):
-        sys.exit(f"{layout.moments(pd)} não existe. Faça a curation primeiro.")
+        sys.exit(f"{layout.moments(pd)} não existe. Faça a curadoria primeiro.")
     render.render_all(pd, platforms_from_args(args),
                       only=args.only.split(",") if args.only else None)
 
@@ -121,7 +121,7 @@ def cmd_thumb(args):
             with open(mpath, encoding="utf-8") as f:
                 sug = thumbnail.suggest_frames(json.load(f))
             if sug:
-                print("[thumb] candidatos (dentro dos cortes approved): "
+                print("[thumb] candidatos (dentro dos cortes aprovados): "
                       + ", ".join(f"{t:.0f}s" for t in sug))
                 print("[thumb] extraia e escolha: "
                       f"python run.py thumb --project {args.project} --frame-at <s>")
@@ -249,17 +249,17 @@ def cmd_curate(args):
 
     comp = curation.composition(estado)
     print(f"[curate] rodada {estado['rounds']} | "
-          f"{len(estado['approved'])}/{estado['meta']} approved | "
-          f"{len(estado['rejected'])} rejected")
+          f"{len(estado['approved'])}/{estado['meta']} aprovados | "
+          f"{len(estado['rejected'])} rejeitados")
     print("[curate] composição: " + ", ".join(f"{t}={n}" for t, n in comp.items()))
     ausentes = curation.missing_kinds(estado)
     if ausentes:
         print(f"[curate] tipos ausentes: {', '.join(ausentes)}")
     ms = curation.reasons(estado)
     if ms:
-        print(f"[curate] reasons de rejeição acumulados: {'; '.join(ms)}")
+        print(f"[curate] motivos de rejeição acumulados: {'; '.join(ms)}")
     if curation.is_closed(estado):
-        print("[curate] meta atingida — rode com --export para generate moments.json")
+        print("[curate] meta atingida — rode com --export para gerar moments.json")
     else:
         print(f"[curate] faltam {curation.slots_left(estado)} cortes")
     curation.save(pd, estado)
@@ -291,7 +291,7 @@ def cmd_post(args):
                      f"(ex.: 1,3) — recebido {args.cortes!r}")
         escolhidos = [m for i, m in enumerate(moments, start=1) if i in querido]
         if not escolhidos:
-            sys.exit(f"nenhum clip com os números {sorted(querido)} "
+            sys.exit(f"nenhum corte com os números {sorted(querido)} "
                      f"(o episódio tem {len(moments)})")
     else:
         escolhidos = moments
@@ -367,14 +367,14 @@ def cmd_schedule(args):
                   if published.is_published(reg, pl, item["slug"])]
         d = schedule.date_of(item)
         if len(feitos) == len(pls):
-            status = "✓ published"
+            status = "✓ publicado"
         elif feitos:
             faltam = [p for p in pls if p not in feitos]
             status = f"parcial — falta {', '.join(faltam)}"
         elif d < hoje:
             status = "ATRASADO"
         elif d == hoje:
-            status = "pending hoje"
+            status = "pendente hoje"
         else:
             status = "futuro"
         print(f"  {item['data']}  {item['kind']:<5}  "
@@ -386,7 +386,7 @@ def main():
     sub = p.add_subparsers(dest="cmd", required=True)
 
     def add_common(sp):
-        sp.add_argument("--project", required=True, help="slug do project (pasta em projects/)")
+        sp.add_argument("--project", required=True, help="slug do projeto (pasta em projects/)")
 
     sp = sub.add_parser("acquire", help="baixa/copia o vídeo")
     add_common(sp); sp.add_argument("--src", required=True); sp.set_defaults(func=cmd_acquire)
@@ -395,7 +395,7 @@ def main():
     add_common(sp); sp.add_argument("--src", required=True)
     sp.add_argument("--whisper-model", default=None); sp.set_defaults(func=cmd_transcribe)
 
-    sp = sub.add_parser("prep", help="acquire + transcribe (para antes da curation)")
+    sp = sub.add_parser("prep", help="acquire + transcribe (para antes da curadoria)")
     add_common(sp); sp.add_argument("--src", required=True)
     sp.add_argument("--whisper-model", default=None); sp.set_defaults(func=cmd_prep)
 
@@ -423,7 +423,7 @@ def main():
     sp.add_argument("--transcript", default=None, help="path do .txt com timestamps")
     sp.set_defaults(func=cmd_ingest)
 
-    sp = sub.add_parser("brief", help="compose o pacote de leitura para o modelo")
+    sp = sub.add_parser("brief", help="monta o pacote de leitura para o modelo")
     add_common(sp)
     g = sp.add_mutually_exclusive_group()
     g.add_argument("--materiais", action="store_true",
@@ -431,9 +431,9 @@ def main():
     g.add_argument("--cortes", action="store_true", help="prompt de seleção de cortes")
     sp.set_defaults(func=cmd_brief)
 
-    sp = sub.add_parser("curate", help="estado da curation iterativa")
+    sp = sub.add_parser("curate", help="estado da curadoria iterativa")
     add_common(sp)
-    sp.add_argument("--meta", type=int, default=5, help="quantos cortes approve")
+    sp.add_argument("--meta", type=int, default=5, help="quantos cortes aprovar")
     sp.add_argument("--export", action="store_true", help="gera moments.json")
     sp.set_defaults(func=cmd_curate)
 
@@ -453,7 +453,7 @@ def main():
                          "(ex.: corte1,cit_x) — não republica o que já foi")
     sp.add_argument("--platform", default="",
                     help="publica só nestas plataformas (ex.: youtube_shorts) "
-                         "— o resto do clip segue pending para depois")
+                         "— o resto do corte segue pendente para depois")
     sp.set_defaults(func=cmd_publish)
 
     sp = sub.add_parser("agenda", help="mostra a agenda e o status de cada item")

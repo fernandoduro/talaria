@@ -41,7 +41,7 @@ def validate_client_secret(caminho: str) -> dict:
             parte = "não é um objeto JSON"
         raise SystemExit(
             f"{caminho} não é um client Desktop ({parte}). No Google "
-            f"Cloud Console, crie a credencial OAuth com kind de aplicativo "
+            f"Cloud Console, crie a credencial OAuth com tipo de aplicativo "
             f"'Desktop app' e baixe o JSON dela."
         )
     installed = dados["installed"]

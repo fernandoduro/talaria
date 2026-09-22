@@ -52,7 +52,7 @@ def validate(campo: str, valor, peca: str) -> None:
         # Abortar aqui travaria um render por questão de estilo.
         print(f"[caption] !! {peca}: '{campo}' tem travessão — o canal não "
               f"usa em legenda (sai com cara de texto de IA). Reescreva a "
-              f"frase antes de publish.")
+              f"frase antes de publicar.")
 
 
 # Chamada para o episódio completo, na descrição do Short. A API do YouTube

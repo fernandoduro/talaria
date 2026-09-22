@@ -50,7 +50,7 @@ def _credentials() -> tuple:
                              ("IG_BUSINESS_ACCOUNT_ID", conta)) if not v]
     if faltam:
         raise RuntimeError(
-            f"{', '.join(faltam)} não definido no environment (.env). Token "
+            f"{', '.join(faltam)} não definido no ambiente (.env). Token "
             f"expirado? Gere outro no painel do app (Instagram → Configuração "
             f"da API) e atualize IG_PAGE_TOKEN — serve tanto o token de "
             f"página (EAAG...) quanto o do login do Instagram (IGAA...)."

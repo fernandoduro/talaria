@@ -101,7 +101,7 @@ def precheck(pd: str, pares: list) -> list:
             txt = caption.caminho(video)
             if not os.path.exists(txt):
                 erros.append(f"{slug} ({pl}): {txt} não existe — "
-                             f"regere o clip com 'render'")
+                             f"regere o corte com 'render'")
                 continue
             texto = _read(txt)
             if pl == "youtube_shorts":
@@ -112,7 +112,7 @@ def precheck(pd: str, pares: list) -> list:
                         f"exige título; preencha o campo no curation.json e "
                         f"rode 'curate --export'")
                 elif len(title) > YT_TITLE_MAX:
-                    erros.append(f"{slug}: title com {len(title)} chars — "
+                    erros.append(f"{slug}: titulo com {len(title)} chars — "
                                  f"o YouTube aceita {YT_TITLE_MAX}")
                 if len(texto) > YT_DESCRIPTION_MAX:
                     erros.append(f"{slug}: descrição com {len(texto)} chars — "
@@ -140,7 +140,7 @@ def precheck(pd: str, pares: list) -> list:
         envs.update(_CREDENTIALS[pl])
     for name in sorted(envs):
         if not os.environ.get(name):
-            erros.append(f"variável {name} não definida no environment (.env)")
+            erros.append(f"variável {name} não definida no ambiente (.env)")
 
     # Privacidade errada só apareceria depois do upload, com o vídeo já no ar
     # sob a privacy que não se pediu.
@@ -197,7 +197,7 @@ def execute(pd: str, only: list = None, dia=None,
 
     erros = precheck(pd, pares)
     if erros:
-        raise ValueError("pré-checagem reprovou — nada foi published:\n- "
+        raise ValueError("pré-checagem reprovou — nada foi publicado:\n- "
                          + "\n- ".join(erros))
 
     tem_corte = any(item["kind"] == "clip" for item, _ in pares)
