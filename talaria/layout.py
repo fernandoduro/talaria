@@ -1,126 +1,126 @@
-"""Onde cada arquivo do projeto mora. Autoridade única sobre os caminhos.
+"""Onde cada arquivo do project mora. Autoridade única sobre os caminhos.
 
 Antes disto cada módulo montava o seu com string literal
-(`os.path.join(project_dir, "momentos.json")` aparecia em 5 arquivos), e o
+(`os.path.join(project_dir, "moments.json")` aparecia em 5 arquivos), e o
 resultado era uma dúzia de arquivos soltos na raiz do episódio, de naturezas
 diferentes misturadas.
 
 A pasta é organizada por NATUREZA:
 
-    <slug>/episodio.json     o gestor preenche à mão — fica na raiz de
+    <slug>/episode.json     o gestor preenche à mão — fica na raiz de
                              propósito, para não esconder a única tarefa manual
     <slug>/fonte/            entrada: vídeo e transcrição
-    <slug>/decisoes/         o que o gestor e o modelo decidiram
+    <slug>/decisions/         o que o gestor e o modelo decidiram
     <slug>/briefs/           pacotes de leitura, regeneráveis
-    <slug>/publicar/         o que vai ao ar
+    <slug>/publish/         o que vai ao ar
 """
 from __future__ import annotations
 
 import os
 
-FONTE = "fonte"
-DECISOES = "decisoes"
+SOURCE = "fonte"
+DECISIONS = "decisions"
 BRIEFS = "briefs"
-PUBLICAR = "publicar"
+PUBLISH = "publish"
 
 
-def garante(caminho: str) -> str:
+def ensure_dir(caminho: str) -> str:
     """Cria a pasta do arquivo, se preciso. Devolve o próprio caminho."""
     os.makedirs(os.path.dirname(os.path.abspath(caminho)), exist_ok=True)
     return caminho
 
 
-def episodio(pd: str) -> str:
-    return os.path.join(pd, "episodio.json")
+def episode(pd: str) -> str:
+    return os.path.join(pd, "episode.json")
 
 
 def video(pd: str) -> str:
-    return os.path.join(pd, FONTE, "video.mp4")
+    return os.path.join(pd, SOURCE, "video.mp4")
 
 
-def transcricao(pd: str) -> str:
-    return os.path.join(pd, FONTE, "transcricao.json")
+def transcript(pd: str) -> str:
+    return os.path.join(pd, SOURCE, "transcript.json")
 
 
-def transcricao_txt(pd: str) -> str:
-    return os.path.join(pd, FONTE, "transcricao.txt")
+def transcript_txt(pd: str) -> str:
+    return os.path.join(pd, SOURCE, "transcript.txt")
 
 
-def pasta_fonte(pd: str) -> str:
-    return os.path.join(pd, FONTE)
+def source_dir(pd: str) -> str:
+    return os.path.join(pd, SOURCE)
 
 
-def curadoria(pd: str) -> str:
-    return os.path.join(pd, DECISOES, "curadoria.json")
+def curation(pd: str) -> str:
+    return os.path.join(pd, DECISIONS, "curation.json")
 
 
-def momentos(pd: str) -> str:
-    return os.path.join(pd, DECISOES, "momentos.json")
+def moments(pd: str) -> str:
+    return os.path.join(pd, DECISIONS, "moments.json")
 
 
-def textos(pd: str) -> str:
-    return os.path.join(pd, DECISOES, "textos.json")
+def texts(pd: str) -> str:
+    return os.path.join(pd, DECISIONS, "texts.json")
 
 
 def posts(pd: str) -> str:
-    return os.path.join(pd, DECISOES, "posts.json")
+    return os.path.join(pd, DECISIONS, "posts.json")
 
 
-def calendario(pd: str) -> str:
+def schedule(pd: str) -> str:
     """Agenda de publicação: que peça sai em que dia. Decisão editorial."""
-    return os.path.join(pd, DECISOES, "calendario.json")
+    return os.path.join(pd, DECISIONS, "schedule.json")
 
 
-def publicado(pd: str) -> str:
+def published(pd: str) -> str:
     """Registro do que já foi ao ar — a trava contra post duplicado."""
-    return os.path.join(pd, DECISOES, "publicado.json")
+    return os.path.join(pd, DECISIONS, "published.json")
 
 
-def brief(pd: str, tipo: str) -> str:
-    """tipo: 'materiais' | 'cortes' | 'posts'."""
-    return os.path.join(pd, BRIEFS, f"{tipo}.md")
+def brief(pd: str, kind: str) -> str:
+    """kind: 'materiais' | 'cortes' | 'posts'."""
+    return os.path.join(pd, BRIEFS, f"{kind}.md")
 
 
 def thumbnail(pd: str) -> str:
-    return os.path.join(pd, PUBLICAR, "thumbnail.jpg")
+    return os.path.join(pd, PUBLISH, "thumbnail.jpg")
 
 
-def card_encerramento(pd: str) -> str:
-    """Card de encerramento cacheado — igual em todo corte do episódio.
+def end_card_mp4(pd: str) -> str:
+    """Card de end_card cacheado — igual em todo clip do episódio.
 
-    Fica na raiz de `publicar/`, como a thumbnail: artefato do episódio, não
-    de uma peça, e nunca é commitado (`projetos/` inteiro é git-ignored).
+    Fica na raiz de `publish/`, como a thumbnail: artefato do episódio, não
+    de uma peça, e nunca é commitado (`projects/` inteiro é git-ignored).
     """
-    return os.path.join(pd, PUBLICAR, "_card_encerramento.mp4")
+    return os.path.join(pd, PUBLISH, "_card_encerramento.mp4")
 
 
-def episodio_txt(pd: str) -> str:
+def episode_txt(pd: str) -> str:
     """Título e descrição do episódio, prontos para colar no YouTube.
 
-    Fica na raiz de `publicar/`, ao lado da thumbnail: os dois são do episódio
-    inteiro, não de uma peça — por isso não entram nas pastas de plataforma.
+    Fica na raiz de `publish/`, ao lado da thumbnail: os dois são do episódio
+    inteiro, não de uma peça — por isso não entram nas pastas de platform.
     """
-    return os.path.join(pd, PUBLICAR, "episodio.txt")
+    return os.path.join(pd, PUBLISH, "episode.txt")
 
 
-def plataforma(pd: str, nome: str) -> str:
-    """Pasta de saída de uma plataforma de vídeo (youtube_shorts, ...)."""
-    return os.path.join(pd, PUBLICAR, nome)
+def platform(pd: str, name: str) -> str:
+    """Pasta de saída de uma platform de vídeo (youtube_shorts, ...)."""
+    return os.path.join(pd, PUBLISH, name)
 
 
 def posts_png(pd: str) -> str:
-    return os.path.join(pd, PUBLICAR, "instagram_posts")
+    return os.path.join(pd, PUBLISH, "instagram_posts")
 
 
-# Posição antiga -> nova. O prefixo do nome antigo era necessário quando tudo
+# Posição antiga -> nova. O prefixo do name antigo era necessário quando tudo
 # ficava na mesma pasta; dentro da subpasta ele vira redundância.
-_MIGRACAO = [
+_MIGRATION = [
     ("fonte.mp4", video),
-    ("transcricao.json", transcricao),
-    ("transcricao.txt", transcricao_txt),
-    ("curadoria.json", curadoria),
-    ("momentos.json", momentos),
-    ("textos.json", textos),
+    ("transcript.json", transcript),
+    ("transcript.txt", transcript_txt),
+    ("curation.json", curation),
+    ("moments.json", moments),
+    ("texts.json", texts),
     ("posts.json", posts),
     ("brief_materiais.md", lambda pd: brief(pd, "materiais")),
     ("brief_cortes.md", lambda pd: brief(pd, "cortes")),
@@ -129,39 +129,39 @@ _MIGRACAO = [
 ]
 
 # Pastas de saída que só mudam de lugar, sem renomear o conteúdo.
-# Nome da pasta de cada plataforma. Nomeadas porque não são só diretório: o
+# Nome da pasta de cada platform. Nomeadas porque não são só diretório: o
 # `render` distingue por elas qual caption recebe a chamada do episódio (a
 # do YouTube), já que o mp4 das duas é idêntico e só o diretório difere.
 YOUTUBE_SHORTS = "youtube_shorts"
 INSTAGRAM_REELS = "instagram_reels"
 INSTAGRAM_POSTS = "instagram_posts"
 
-_PASTAS_PUBLICAR = (YOUTUBE_SHORTS, INSTAGRAM_REELS, INSTAGRAM_POSTS)
+_PUBLISH_DIRS = (YOUTUBE_SHORTS, INSTAGRAM_REELS, INSTAGRAM_POSTS)
 
 # Temporários que vazaram para a raiz em versões anteriores.
-_LIXO = ("_thumb_frame.jpg",)
+_JUNK = ("_thumb_frame.jpg",)
 
 
-def _confere_pastas(pd: str) -> None:
-    """Recusa migrar se um nome de pasta estiver ocupado por um arquivo.
+def _check_dirs(pd: str) -> None:
+    """Recusa migrate se um name de pasta estiver ocupado por um arquivo.
 
     Sem isto o `shutil.move` explode no meio com um FileExistsError cru, que
-    não diz ao gestor o que ele precisa resolver — e deixa o projeto meio
+    não diz ao gestor o que ele precisa resolver — e deixa o project meio
     migrado.
     """
-    for nome in (FONTE, DECISOES, BRIEFS, PUBLICAR):
-        caminho = os.path.join(pd, nome)
+    for name in (SOURCE, DECISIONS, BRIEFS, PUBLISH):
+        caminho = os.path.join(pd, name)
         if os.path.exists(caminho) and not os.path.isdir(caminho):
             raise RuntimeError(
-                f"'{nome}' precisa ser uma pasta, mas é um arquivo em {pd}. "
+                f"'{name}' precisa ser uma pasta, mas é um arquivo em {pd}. "
                 f"Renomeie ou remova esse arquivo e rode de novo."
             )
 
 
-def migrar(pd: str) -> list:
-    """Move um projeto da estrutura antiga (tudo solto) para a nova.
+def migrate(pd: str) -> list:
+    """Move um project da estrutura antiga (tudo solto) para a nova.
 
-    Idempotente: roda no início de todo comando e não faz nada quando o projeto
+    Idempotente: roda no início de todo comando e não faz nada quando o project
     já está organizado. Devolve a lista de (origem, destino) do que moveu.
 
     Quando o arquivo existe nas DUAS posições, a nova vence — é o que os
@@ -171,17 +171,17 @@ def migrar(pd: str) -> list:
     deixar um arquivo sobrando.
 
     Move item a item, sem estado intermediário: interrupção no meio deixa o
-    projeto parcialmente migrado, e rodar de novo termina o serviço.
+    project parcialmente migrado, e rodar de novo termina o serviço.
     """
     import shutil
 
     if not os.path.isdir(pd):
         return []
 
-    _confere_pastas(pd)
+    _check_dirs(pd)
     movidos = []
 
-    for antigo, destino_de in _MIGRACAO:
+    for antigo, destino_de in _MIGRATION:
         origem = os.path.join(pd, antigo)
         if not os.path.exists(origem):
             continue
@@ -203,24 +203,24 @@ def migrar(pd: str) -> list:
                 pass
             movidos.append((antigo, os.path.basename(bak) + " " + nota))
             continue
-        garante(destino)
+        ensure_dir(destino)
         shutil.move(origem, destino)
         movidos.append((antigo, os.path.relpath(destino, pd)))
 
-    for nome in _PASTAS_PUBLICAR:
-        origem = os.path.join(pd, nome)
+    for name in _PUBLISH_DIRS:
+        origem = os.path.join(pd, name)
         if not os.path.isdir(origem):
             continue
-        destino = os.path.join(pd, PUBLICAR, nome)
+        destino = os.path.join(pd, PUBLISH, name)
 
         if not os.path.isdir(destino):
-            os.makedirs(os.path.join(pd, PUBLICAR), exist_ok=True)
+            os.makedirs(os.path.join(pd, PUBLISH), exist_ok=True)
             shutil.move(origem, destino)
-            movidos.append((nome + "/", os.path.relpath(destino, pd) + "/"))
+            movidos.append((name + "/", os.path.relpath(destino, pd) + "/"))
             continue
 
         # As duas existem: traz o que só está na antiga e some com ela. Pular
-        # deixaria corte já renderizado fora da estrutura documentada, sem
+        # deixaria clip já renderizado fora da estrutura documentada, sem
         # aviso — e ele sumiria na próxima limpeza da pasta do episódio.
         for arquivo in sorted(os.listdir(origem)):
             alvo = os.path.join(destino, arquivo)
@@ -232,18 +232,18 @@ def migrar(pd: str) -> list:
                 if os.path.exists(bak):
                     os.remove(bak)
                 shutil.move(atual, bak)
-                movidos.append((f"{nome}/{arquivo}",
+                movidos.append((f"{name}/{arquivo}",
                                 os.path.relpath(bak, pd) + " (duplicata)"))
                 continue
             shutil.move(atual, alvo)
-            movidos.append((f"{nome}/{arquivo}", os.path.relpath(alvo, pd)))
+            movidos.append((f"{name}/{arquivo}", os.path.relpath(alvo, pd)))
         if not os.listdir(origem):
             os.rmdir(origem)
 
-    for nome in _LIXO:
-        caminho = os.path.join(pd, nome)
+    for name in _JUNK:
+        caminho = os.path.join(pd, name)
         if os.path.exists(caminho):
             os.remove(caminho)
-            movidos.append((nome, "(removido)"))
+            movidos.append((name, "(removido)"))
 
     return movidos

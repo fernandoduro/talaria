@@ -10,25 +10,25 @@ import shutil
 # Fontes — versionadas em assets/fonts/.
 #
 # O texto é queimado no vídeo e rasterizado nos PNG, então a fonte decide o
-# resultado publicado. O fc-match substitui em silêncio: pede-se Poppins e vem
-# Noto Sans, e o layout sai errado sem nenhum erro. Arquivo no repositório =
+# resultado published. O fc-match substitui em silêncio: pede-se Poppins e vem
+# Noto Sans, e o layout sai errado sem nenhum error. Arquivo no repositório =
 # mesmo render em qualquer máquina, e falta de arquivo aborta na importação.
 # ---------------------------------------------------------------------------
-_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-_DIR_FONTES = os.path.join(_RAIZ, "assets", "fonts")
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_FONTS_DIR = os.path.join(_ROOT, "assets", "fonts")
 
 
-def _fonte_versionada(nome: str) -> str:
-    caminho = os.path.join(_DIR_FONTES, nome)
+def _bundled_font(name: str) -> str:
+    caminho = os.path.join(_FONTS_DIR, name)
     if not os.path.exists(caminho):
         raise FileNotFoundError(
-            f"fonte {nome} não encontrada em assets/fonts — o arquivo é "
-            f"versionado; restaure com 'git checkout assets/fonts/{nome}'."
+            f"fonte {name} não encontrada em assets/fonts — o arquivo é "
+            f"versionado; restaure com 'git checkout assets/fonts/{name}'."
         )
     return caminho
 
 
-FONT = _fonte_versionada("DejaVuSans-Bold.ttf")
+FONT = _bundled_font("DejaVuSans-Bold.ttf")
 
 # ---------------------------------------------------------------------------
 # Backend de legenda — detectado em runtime.
@@ -40,7 +40,7 @@ FONT = _fonte_versionada("DejaVuSans-Bold.ttf")
 # externas do ffmpeg.
 # ---------------------------------------------------------------------------
 def has_drawtext() -> bool:
-    """True se o ffmpeg deste ambiente tem o filtro drawtext."""
+    """True se o ffmpeg deste environment tem o filtro drawtext."""
     ff = shutil.which("ffmpeg")
     if not ff:
         return False
@@ -65,14 +65,14 @@ CAPTION_BACKEND = os.environ.get(
 FRAME_W = 1080
 FRAME_H = 1920
 
-# Legenda (drawtext) — libass não desenha de forma confiável neste ambiente.
+# Legenda (drawtext) — libass não desenha de forma confiável neste environment.
 FONTSIZE = 40
 SAFE_W = 980            # largura máx. da linha em px (deixa ~50px de margem/lado)
-LINE_H = 58             # espaçamento vertical entre linhas
-# y da base da ÚLTIMA linha. As linhas empilham para cima, então este valor
+LINE_H = 58             # espaçamento vertical entre lines
+# y da base da ÚLTIMA linha. As lines empilham para cima, então este valor
 # precisa deixar espaço abaixo da faixa de vídeo para a legenda mais alta:
 # com fonte 1280x720 escalada para FG_SCALE_W, a faixa termina em y=1340 e
-# sobram 580px de blur. Em 1360 uma legenda de 5 linhas subia até y=1128 e
+# sobram 580px de blur. Em 1360 uma legenda de 5 lines subia até y=1128 e
 # invadia o vídeo; em 1560 ela começa em 1328 e fica inteira no blur.
 BASE_Y = 1560
 CAP_BORDER = 4          # contorno do texto
@@ -106,9 +106,9 @@ SEG_END_PAD = 0.4         # padding no fim de cada segmento (s)
 # ---------------------------------------------------------------------------
 # Curadoria
 # ---------------------------------------------------------------------------
-CORTE_MIN_S = 60         # duração mínima de um corte
-CORTE_MAX_S = 90         # duração máxima
-FALA_CONVIDADO_MIN = 0.5 # fração mínima de fala do convidado no corte
+CLIP_MIN_S = 60         # duração mínima de um clip
+CLIP_MAX_S = 90         # duração máxima
+GUEST_SPEECH_MIN = 0.5 # fração mínima de fala do convidado no clip
 
 # ---------------------------------------------------------------------------
 # Thumbnail (YouTube)
@@ -125,63 +125,63 @@ THUMB_CONTRAST = 1.08
 #
 # As medidas saem do próprio template (assets/template_instagram.png), medido
 # pixel a pixel. O placeholder traz gradiente, filete e barra; logo e aspas
-# são do canal. O código escreve citação, nome e cargo por cima.
+# são do canal. O código write citação, name e role por cima.
 # ---------------------------------------------------------------------------
-POST_TEMPLATE = os.path.join(_RAIZ, "assets", "template_instagram.png")
+POST_TEMPLATE = os.path.join(_ROOT, "assets", "template_instagram.png")
 
 # ---------------------------------------------------------------------------
-# Marca d'água e card de encerramento
+# Marca d'água e card de end_card
 # ---------------------------------------------------------------------------
-LOGO_PATH = os.path.join(_RAIZ, "assets", "logo.png")
-MARCA_DAGUA_LARGURA = 170
-MARCA_DAGUA_MARGEM = 40
-CARD_DURACAO_S = 3.5
+LOGO_PATH = os.path.join(_ROOT, "assets", "logo.png")
+WATERMARK_W = 170
+WATERMARK_MARGIN = 40
+CARD_DURATION_S = 3.5
 CARD_FADE_S = 0.35
-CARD_LOGO_LARGURA = 620
-CARD_ARROBA = "@seuperfil"
-CARD_COR_ARROBA = (255, 140, 66)   # laranja
-CARD_FUNDO = (10, 10, 10)
+CARD_LOGO_W = 620
+CARD_HANDLE = "@seuperfil"
+CARD_HANDLE_COLOR = (255, 140, 66)   # laranja
+CARD_BG = (10, 10, 10)
 
 POST_W = 2160
 POST_H = 2700
 
-POST_MARGEM_X = 195       # margem esquerda de todo o texto
-POST_LARGURA_UTIL = 1800  # largura máx. da linha da citação
+POST_MARGIN_X = 195       # margem esquerda de todo o texto
+POST_TEXT_W = 1800  # largura máx. da linha da citação
 
-# Citação. As linhas empilham para BAIXO a partir de POST_CIT_Y, herdado do
+# Citação. As lines empilham para BAIXO a partir de POST_QUOTE_Y, herdado do
 # layout original: o placeholder não desenha nada nessa altura para conferir.
-POST_CIT_Y = 1144
-POST_CIT_PASSO = 190      # distância entre inícios de linha consecutivos
-POST_CIT_ALTURA = 160     # altura de uma linha de texto
-POST_CIT_MAX_LINHAS = 5   # a 6ª invadiria o filete em y=2242
-POST_FILETE_Y = 2242
+POST_QUOTE_Y = 1144
+POST_QUOTE_STEP = 190      # distância entre inícios de linha consecutivos
+POST_QUOTE_LINE_H = 160     # altura de uma linha de texto
+POST_QUOTE_MAX_LINES = 5   # a 6ª invadiria o filete em y=2242
+POST_RULE_Y = 2242
 
 # Rodapé (o filete já vem desenhado no template)
-# Nome do programa, usado no selo da thumbnail. Trocar aqui vale para todos
+# Nome do programa, usado no badge da thumbnail. Trocar aqui vale para todos
 # os episódios — é identidade do canal, não dado de um episódio.
-NOME_PROGRAMA = "MEU PODCAST"
+SHOW_NAME = "MEU PODCAST"
 
-POST_NOME_Y = 2338
-POST_CARGO_Y = 2459
+POST_NAME_Y = 2338
+POST_ROLE_Y = 2459
 
 # 150 e não 160: a Poppins é mais larga que a Avenir Next Demi Bold em que o
-# layout foi medido, e a 160 a citação de referência vira 6 linhas — a 6ª
+# layout foi medido, e a 160 a citação de referência vira 6 lines — a 6ª
 # cruzaria o filete em y=2242. A 150 sobram 83px na linha mais cheia.
-POST_CIT_SIZE = 150
-POST_NOME_SIZE = 62
-POST_CARGO_SIZE = 38
+POST_QUOTE_SIZE = 150
+POST_NAME_SIZE = 62
+POST_ROLE_SIZE = 38
 
-POST_COR_CITACAO = (245, 242, 234)
-POST_COR_NOME = (255, 255, 255)
-POST_COR_CARGO = (154, 149, 144)
+POST_QUOTE_COLOR = (245, 242, 234)
+POST_NAME_COLOR = (255, 255, 255)
+POST_ROLE_COLOR = (154, 149, 144)
 
 # Fonte da citação e do rodapé do post.
-POST_FONT = _fonte_versionada("Poppins-SemiBold.ttf")
-POST_MONO = _fonte_versionada("DejaVuSansMono-Bold.ttf")
+POST_FONT = _bundled_font("Poppins-SemiBold.ttf")
+POST_MONO = _bundled_font("DejaVuSansMono-Bold.ttf")
 
 # ---------------------------------------------------------------------------
 # Publicação agendada
 # ---------------------------------------------------------------------------
 # Fuso da publicação — explícito porque máquina em UTC perto da meia-noite
 # mudaria o dia da publicação em silêncio — data sempre com zona.
-FUSO_PUBLICACAO = "America/Sao_Paulo"
+PUBLISH_TZ = "America/Sao_Paulo"

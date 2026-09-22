@@ -4,14 +4,14 @@ import os
 import tempfile
 import unittest
 
-_RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _SPEC = importlib.util.spec_from_file_location(
-    "youtube_auth", os.path.join(_RAIZ, "scripts", "youtube_auth.py"))
+    "youtube_auth", os.path.join(_ROOT, "scripts", "youtube_auth.py"))
 youtube_auth = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(youtube_auth)
 
 
-def _escreve(d, conteudo):
+def _write(d, conteudo):
     caminho = os.path.join(d, "cs.json")
     with open(caminho, "w", encoding="utf-8") as f:
         f.write(conteudo)
@@ -26,34 +26,34 @@ class TestValidaClientSecret(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             dados = {"installed": {"client_id": "x", "client_secret": "y",
                                    "token_uri": "https://oauth2.example/token"}}
-            caminho = _escreve(d, json.dumps(dados))
-            self.assertEqual(youtube_auth.valida_client_secret(caminho),
+            caminho = _write(d, json.dumps(dados))
+            self.assertEqual(youtube_auth.validate_client_secret(caminho),
                              dados["installed"])
 
     def test_recusa_client_web_dizendo_o_que_fazer(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _escreve(d, json.dumps({"web": {"client_id": "x"}}))
+            caminho = _write(d, json.dumps({"web": {"client_id": "x"}}))
             with self.assertRaises(SystemExit) as ctx:
-                youtube_auth.valida_client_secret(caminho)
+                youtube_auth.validate_client_secret(caminho)
             self.assertIn("Desktop", str(ctx.exception))
 
     def test_recusa_json_invalido(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _escreve(d, "nao e json {")
+            caminho = _write(d, "nao e json {")
             with self.assertRaises(SystemExit) as ctx:
-                youtube_auth.valida_client_secret(caminho)
+                youtube_auth.validate_client_secret(caminho)
             self.assertIn("Baixe", str(ctx.exception))
 
     def test_recusa_arquivo_ausente(self):
         with self.assertRaises(SystemExit) as ctx:
-            youtube_auth.valida_client_secret("/nao/existe.json")
+            youtube_auth.validate_client_secret("/nao/existe.json")
         self.assertIn("comando", str(ctx.exception))
 
     def test_recusa_installed_truncado(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _escreve(d, json.dumps({"installed": {"client_id": "x"}}))
+            caminho = _write(d, json.dumps({"installed": {"client_id": "x"}}))
             with self.assertRaises(SystemExit) as ctx:
-                youtube_auth.valida_client_secret(caminho)
+                youtube_auth.validate_client_secret(caminho)
             msg = str(ctx.exception)
             self.assertIn("incompleto", msg)
             self.assertIn("client_secret", msg)
@@ -61,13 +61,13 @@ class TestValidaClientSecret(unittest.TestCase):
 
     def test_recusa_json_nao_objeto(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _escreve(d, "42")
+            caminho = _write(d, "42")
             with self.assertRaises(SystemExit):
-                youtube_auth.valida_client_secret(caminho)
+                youtube_auth.validate_client_secret(caminho)
 
     def test_escopo_e_exatamente_o_do_publish(self):
         from talaria import publish_youtube
-        self.assertEqual(youtube_auth.ESCOPO, publish_youtube.ESCOPO)
+        self.assertEqual(youtube_auth.SCOPES, publish_youtube.SCOPES)
 
 
 class TestMain(unittest.TestCase):

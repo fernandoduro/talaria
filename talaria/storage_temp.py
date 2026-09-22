@@ -14,21 +14,21 @@ from urllib.parse import unquote, urlparse
 import boto3
 from botocore.config import Config
 
-VALIDADE_S = 3600
-PREFIXO = "tmp-publish/"
+EXPIRY_S = 3600
+PREFIX = "tmp-publish/"
 
 
 def _bucket() -> str:
     bucket = os.environ.get("S3_PUBLISH_BUCKET", "")
     if not bucket:
         raise RuntimeError(
-            "S3_PUBLISH_BUCKET não definido no ambiente (.env) — é o bucket "
+            "S3_PUBLISH_BUCKET não definido no environment (.env) — é o bucket "
             "temporário de onde o Instagram baixa a mídia."
         )
     return bucket
 
 
-def _cliente():
+def _client():
     """Cliente S3, apontando para outro provedor quando configurado.
 
     Cloudflare R2, MinIO e afins falam a mesma API do S3 — só mudam de
@@ -47,16 +47,16 @@ def _cliente():
 def sobe(caminho: str) -> str:
     """Sobe o arquivo e devolve a URL assinada que o Instagram vai buscar.
 
-    O uuid no nome evita colisão entre publicações simultâneas do mesmo slug
+    O uuid no name evita colisão entre publicações simultâneas do mesmo slug
     (retry manual em outra janela, por exemplo).
     """
-    s3 = _cliente()
-    key = f"{PREFIXO}{uuid.uuid4().hex}_{os.path.basename(caminho)}"
+    s3 = _client()
+    key = f"{PREFIX}{uuid.uuid4().hex}_{os.path.basename(caminho)}"
     s3.upload_file(caminho, _bucket(), key)
     return s3.generate_presigned_url(
         "get_object",
         Params={"Bucket": _bucket(), "Key": key},
-        ExpiresIn=VALIDADE_S,
+        ExpiresIn=EXPIRY_S,
     )
 
 
@@ -74,14 +74,14 @@ def remove(url: str) -> None:
         # Onde o bucket aparece depende do estilo da URL: a AWS usa
         # virtual-hosted (`bucket.host/key`) e o R2/MinIO usam path-style
         # (`host/bucket/key`). Quem decide é o HOST, não o texto do caminho —
-        # olhar só o caminho erra quando o bucket se chama como o PREFIXO
+        # olhar só o caminho erra quando o bucket se chama como o PREFIX
         # ("tmp-publish"), cortando o prefixo real da key. Nos dois casos o
         # delete miraria objeto inexistente e falharia calado, deixando a
         # mídia acessível pela URL até expirar.
         if not partes.hostname.startswith(bucket + "."):
             if key.startswith(bucket + "/"):
                 key = key[len(bucket) + 1:]
-        _cliente().delete_object(Bucket=bucket, Key=key)
+        _client().delete_object(Bucket=bucket, Key=key)
     except Exception as e:  # noqa: BLE001
         print(f"[storage] !! não removi o temporário ({e}) — "
-              f"resíduo em {PREFIXO}, expira sozinho da URL em 1h")
+              f"resíduo em {PREFIX}, expira sozinho da URL em 1h")

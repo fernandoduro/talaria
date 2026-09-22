@@ -17,7 +17,7 @@ def srt_ts(seconds: float) -> str:
 
 
 def mmss(seconds: float) -> str:
-    """Segundos -> 'mm:ss' (rótulo curto p/ curadoria)."""
+    """Segundos -> 'mm:ss' (rótulo curto p/ curation)."""
     m, s = divmod(int(seconds), 60)
     return f"{m:02d}:{s:02d}"
 
@@ -40,7 +40,7 @@ def vtt_ts_to_sec(ts: str) -> float:
 # ---------------------------------------------------------------------------
 # Marcações de som do YouTube. A lista original era case-sensitive e deixava
 # passar [Risadas], [MÚSICA] e [Palmas] — que iam queimadas na legenda do vídeo.
-RE_SOM = re.compile(
+RE_SOUND_TAG = re.compile(
     r"\[\s*(m[úu]sica|risos?|risadas?|aplausos?|palmas|"
     r"ru[íi]do|sil[êe]ncio|inaud[íi]vel|music|laughter|applause)\s*\]",
     re.IGNORECASE,
@@ -50,16 +50,16 @@ RE_SOM = re.compile(
 def strip_markup(txt: str) -> str:
     """Remove entidades HTML e marcações de som ([música], [risadas], ...)."""
     t = (txt.replace("&gt;", "").replace("&lt;", "").replace("&amp;", "&"))
-    t = RE_SOM.sub("", t)
+    t = RE_SOUND_TAG.sub("", t)
     t = re.sub(r"\s{2,}", " ", t)
     return t.strip()
 
 
 # Contrações da fala -> forma plena na legenda. A legenda queimada é lida como
-# texto, não ouvida: "tá" na tela parece erro de digitação, ainda que seja
+# texto, não ouvida: "tá" na tela parece error de digitação, ainda que seja
 # transcrição fiel do que foi dito. Só formas em que a expansão é inequívoca —
 # gíria e escolha de palavra ficam como estão, para não reescrever a fala.
-_CONTRACOES = [
+_CONTRACTIONS = [
     (r"t[áa]", "está"),
     (r"t[ôo]", "estou"),
     (r"t[ãa]o", None),      # sentinela: 'tão' NÃO é contração (ver _expande)
@@ -82,7 +82,7 @@ RE_NE_MEIO = re.compile(r",\s*n[ée]\s*,", re.IGNORECASE)
 RE_PRO_LATIM = re.compile(r"\bpro\s+(labore|rata|forma|bono|indiviso)\b", re.IGNORECASE)
 
 
-def _expande_contracoes(t: str) -> str:
+def _expand_contractions(t: str) -> str:
     """Troca contrações por forma plena, respeitando fronteira de palavra.
 
     Preserva a maiúscula inicial: "Tá bom" -> "Está bom".
@@ -96,7 +96,7 @@ def _expande_contracoes(t: str) -> str:
 
     t = RE_PRO_LATIM.sub(_guarda, t)
 
-    for pat, alvo in _CONTRACOES:
+    for pat, alvo in _CONTRACTIONS:
         if alvo is None:      # na lista só para documentar a exclusão
             continue
 
@@ -111,10 +111,10 @@ def _expande_contracoes(t: str) -> str:
     return t
 
 
-# Trocas fonéticas que a transcrição automática faz em nome próprio. A mesma
-# empresa sai como Zarvik, Zarvic, Zarvyk e Zlarvik — varia no y/i, no c/k, e
+# Trocas fonéticas que a transcrição automática faz em name próprio. A mesma
+# company sai como Zarvik, Zarvic, Zarvyk e Zlarvik — varia no y/i, no c/k, e
 # no `l` que a transcrição insere.
-_EQUIV_FONETICA = [
+_PHONETIC_EQUIVALENTS = [
     ("y", "[yieu]"),
     ("i", "[yieu]"),
     ("e", "[yiea]"),
@@ -127,69 +127,69 @@ _EQUIV_FONETICA = [
 ]
 
 
-def _padrao_fonetico(nome: str) -> str:
-    """Regex que casa o nome e suas variantes de transcrição.
+def _phonetic_pattern(name: str) -> str:
+    """Regex que casa o name e suas variantes de transcrição.
 
     Só as letras internas viram classe de caractere; consoante fora da tabela
     entra literal, para o padrão não ficar frouxo a ponto de casar palavra
     comum ("zarpa" não pode virar "Zarvik").
     """
     partes = []
-    for ch in nome.lower():
-        for letra, classe in _EQUIV_FONETICA:
+    for ch in name.lower():
+        for letra, classe in _PHONETIC_EQUIVALENTS:
             if ch == letra:
                 partes.append(classe)
                 break
         else:
             partes.append(re.escape(ch))
-    # 'l' extra no meio ("Zlarvik" para "Zarvik") é erro comum de transcrição.
+    # 'l' extra no meio ("Zlarvik" para "Zarvik") é error comum de transcrição.
     return partes[0] + "l?" + "".join(partes[1:])
 
 
-# Nomes de empresa que também são palavra do português. Reescrever a caixa
+# Nomes de company que também são palavra do português. Reescrever a caixa
 # deles estraga a frase, então ficam de fora da correção. Lista curta e
 # explícita: adivinhar "é palavra comum?" sem dicionário erra mais do que
-# acerta, e um nome faltando aqui só perde a capitalização automática.
-_PALAVRAS_COMUNS = {
+# acerta, e um name faltando aqui só perde a capitalização automática.
+_COMMON_WORDS = {
     "matriz", "acho", "praia", "ponte", "campo", "norte", "sul", "vida",
     "casa", "porto", "rede", "ideia", "meta", "alma", "onda", "raiz",
 }
 
 
-def _e_palavra_comum(nome: str) -> bool:
-    return nome.strip().lower() in _PALAVRAS_COMUNS
+def _is_common_word(name: str) -> bool:
+    return name.strip().lower() in _COMMON_WORDS
 
 
-def corrige_nomes(txt: str, nomes: list) -> str:
-    """Reescreve nome próprio na grafia oficial vinda do episodio.json.
+def fix_proper_nouns(txt: str, nomes: list) -> str:
+    """Reescreve name próprio na grafia oficial vinda do episode.json.
 
-    A transcrição erra nome próprio e a legenda é queimada no vídeo — sem isto
-    o erro vai ao ar (Zarvic/Zlarvik no lugar de Zarvik).
+    A transcrição erra name próprio e a legenda é queimada no vídeo — sem isto
+    o error vai ao ar (Zarvic/Zlarvik no lugar de Zarvik).
 
-    Só entra nome INVENTADO: quando a empresa se chama "Matriz" ou "Acho", a
+    Só entra name INVENTADO: quando a company se chama "Matriz" ou "Acho", a
     transcrição acerta sozinha e reescrever estragaria a frase ("a matriz de
     risco" viraria "a Matriz de risco"). O teste é a própria grafia oficial
     aparecer no texto — aí o padrão fonético não tem o que consertar e só faria
     estrago.
     """
-    for nome in nomes or []:
-        nome = str(nome).strip()
-        if len(nome) < 4:
+    for name in nomes or []:
+        name = str(name).strip()
+        if len(name) < 4:
             continue
-        pat = re.compile(rf"\b{_padrao_fonetico(nome)}\b", re.IGNORECASE)
+        pat = re.compile(rf"\b{_phonetic_pattern(name)}\b", re.IGNORECASE)
 
-        def _sub(m, nome=nome):
+        def _sub(m, name=name):
             # Grafia já correta (ou só diferindo por caixa): não mexe.
-            return nome if m.group(0).lower() != nome.lower() else m.group(0)
+            return name if m.group(0).lower() != name.lower() else m.group(0)
 
         achados = pat.findall(txt)
-        # Nenhuma variante errada: só o próprio nome, talvez em caixa baixa.
+        # Nenhuma variante errada: só o próprio name, talvez em caixa baixa.
         # Aí a única coisa a fazer é acertar a caixa — e mesmo isso fica de
-        # fora quando o nome é palavra do idioma ("a matriz de risco"), que a
+        # fora quando o name é palavra do idioma ("a matriz de risco"), que a
         # transcrição escreveu certo e virar "a Matriz" estragaria.
-        if achados and all(a.lower() == nome.lower() for a in achados):
-            if not _e_palavra_comum(nome):
-                txt = re.sub(rf"\b{re.escape(nome)}\b", nome, txt,
+        if achados and all(a.lower() == name.lower() for a in achados):
+            if not _is_common_word(name):
+                txt = re.sub(rf"\b{re.escape(name)}\b", name, txt,
                              flags=re.IGNORECASE)
             continue
         txt = pat.sub(_sub, txt)
@@ -210,7 +210,7 @@ def clean_caption(txt: str) -> str:
     # 'né' antes das contrações: RE_NE_* casa a forma falada, não a expandida.
     t = RE_NE_FIM.sub(".", t)
     t = RE_NE_MEIO.sub(", ", t)
-    t = _expande_contracoes(t)
+    t = _expand_contractions(t)
     t = re.sub(r"\s{2,}", " ", t)
     t = re.sub(r"\s+([,.?!])", r"\1", t)
     return t.strip()

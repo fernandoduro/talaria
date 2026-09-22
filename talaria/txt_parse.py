@@ -1,6 +1,6 @@
 """Parser de transcrição .txt com timestamps (formato YouTube "copiar transcrição").
 
-Formato esperado — timestamp sozinho numa linha, texto nas linhas seguintes:
+Formato esperado — timestamp sozinho numa linha, texto nas lines seguintes:
 
     0:10
     E aí, pessoal, hoje a gravação é aqui em Ribeirão Açaí...
@@ -8,14 +8,14 @@ Formato esperado — timestamp sozinho numa linha, texto nas linhas seguintes:
     Vamos conversar um pouco sobre a Zarvik e a trajetória dela, né...
 
 O marcador ">>" indica troca de interlocutor e é preservado como flag no
-segmento (turn=True), útil na curadoria: corte que começa em troca de turno
+segmento (turn=True), útil na curation: clip que começa em troca de turno
 tende a ter fronteira natural.
 
 Atenção: ">>" diz QUE trocou de interlocutor, não QUEM passou a falar. Por
 isso a identidade é resolvida uma única vez, sobre o episódio inteiro
 (resolve_speakers), e gravada em cada segmento como speaker="host" ou
-"convidado". Deduzir o falante dentro da fatia de um corte não funciona: o
-corte que começa no meio de uma resposta não tem nenhum ">>" para se orientar.
+"convidado". Deduzir o falante dentro da fatia de um clip não funciona: o
+clip que começa no meio de uma resposta não tem nenhum ">>" para se orientar.
 
 Saída: [{start, end, text, turn, speaker}]. Os três primeiros campos são
 idênticos aos do vtt_parse/whisper, para o resto do pipeline não distinguir a
@@ -49,7 +49,7 @@ def parse_txt(path: str, total_duration: float | None = None) -> list:
     with open(path, encoding="utf-8") as f:
         lines = f.read().splitlines()
 
-    blocks = []   # (start, [linhas de texto])
+    blocks = []   # (start, [lines de texto])
     cur_start, buf = None, []
     for raw in lines:
         line = raw.strip()
@@ -89,7 +89,7 @@ def regroup_into_sentences(blocks: list) -> list:
     A transcrição do YouTube quebra a cada ~5s, no meio da frase ("...o meu
     co-host aqui, o" / "Fulano, fazendo..."). Isso quebra duas coisas:
     a legenda queimada (texto cortado na tela) e a validação de fronteira de
-    corte (que exige início/fim em frase completa).
+    clip (que exige início/fim em frase completa).
 
     Junta blocos até encontrar pontuação final, troca de interlocutor (>>),
     ou os limites de duração/tamanho de config.
@@ -117,7 +117,7 @@ def regroup_into_sentences(blocks: list) -> list:
 
 # Rótulos de falante gravados em cada segmento.
 HOST = "host"
-CONVIDADO = "convidado"
+GUEST = "convidado"
 
 
 def resolve_speakers(segs: list) -> list:
@@ -126,8 +126,8 @@ def resolve_speakers(segs: list) -> list:
     O episódio abre com os apresentadores introduzindo o tema e o convidado —
     logo, o primeiro segmento é sempre host. Cada turn=True (marcador ">>") alterna o falante a partir dali.
 
-    A resolução é GLOBAL de propósito. Feita dentro da fatia de um corte, ela
-    erra: um corte que começa no meio de uma resposta não contém nenhum ">>" e
+    A resolução é GLOBAL de propósito. Feita dentro da fatia de um clip, ela
+    erra: um clip que começa no meio de uma resposta não contém nenhum ">>" e
     seria atribuído todo ao host, zerando a fração de fala do convidado — o
     oposto da realidade. Resolvendo aqui, cada segmento carrega a atribuição
     absoluta e qualquer fatia posterior a herda correta.
@@ -139,6 +139,6 @@ def resolve_speakers(segs: list) -> list:
         # O primeiro segmento é host mesmo que venha marcado com ">>" — o
         # marcador ali só indica que a transcrição abriu num bloco de fala.
         if i > 0 and s.get("turn"):
-            atual = CONVIDADO if atual == HOST else HOST
+            atual = GUEST if atual == HOST else HOST
         s["speaker"] = atual
     return segs

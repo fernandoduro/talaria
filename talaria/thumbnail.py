@@ -1,7 +1,7 @@
 """Gera a thumbnail do YouTube (1280x720) a partir de um frame do vídeo.
 
 Todo o texto vem de parâmetros (nada hardcoded de episódio). Composição:
-frame escurecido + gradiente na base + selo, chamada em destaque e créditos.
+frame escurecido + gradiente na base + badge, chamada em destaque e créditos.
 """
 import os
 import subprocess
@@ -11,17 +11,17 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFont
 from . import config
 
 
-def sugere_frames(momentos: list, n: int = 5) -> list:
-    """Instantes candidatos a frame de thumbnail, tirados dos cortes aprovados.
+def suggest_frames(moments: list, n: int = 5) -> list:
+    """Instantes candidatos a frame de thumbnail, tirados dos cortes approved.
 
     A escolha final é visual — expressão, mãos, enquadramento — e fica com o
-    gestor. O que dá para automatizar é ONDE procurar: dentro de um corte
+    gestor. O que dá para automatizar é ONDE procurar: dentro de um clip
     aprovado o convidado está falando com energia, ao contrário de um instante
     sorteado no episódio, que costuma pegar pausa ou o host.
 
-    Devolve o meio de cada corte, que evita as bordas (entrada e saída de fala).
+    Devolve o meio de cada clip, que evita as bordas (entrada e saída de fala).
     """
-    meios = sorted((m["start"] + m["end"]) / 2 for m in momentos or [])
+    meios = sorted((m["start"] + m["end"]) / 2 for m in moments or [])
     if len(meios) <= n:
         return [round(t, 1) for t in meios]
     passo = len(meios) / n
@@ -50,15 +50,15 @@ def _outlined(draw, xy, text, fnt, fill, ow=4, anchor="la"):
     draw.text((x, y), text, font=fnt, fill=fill, anchor=anchor)
 
 
-def build_thumbnail(frame_path, out_path, *, selo, chamada_l1, chamada_l2,
-                    creditos="", subtitulo=""):
+def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
+                    credits="", subtitle=""):
     """Monta a thumbnail. Textos totalmente parametrizados.
 
-    selo:        faixa laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
-    chamada_l1:  1ª linha grande (branca)
-    chamada_l2:  2ª linha grande (laranja)
-    creditos:    canto superior direito (ex.: nomes dos convidados)
-    subtitulo:   abaixo dos créditos
+    badge:        faixa laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
+    headline_l1:  1ª linha grande (branca)
+    headline_l2:  2ª linha grande (laranja)
+    credits:    canto superior direito (ex.: nomes dos guests)
+    subtitle:   abaixo dos créditos
     """
     W, H = config.THUMB_W, config.THUMB_H
     img = Image.open(frame_path).convert("RGB").resize((W, H))
@@ -75,26 +75,26 @@ def build_thumbnail(frame_path, out_path, *, selo, chamada_l1, chamada_l2,
 
     d = ImageDraw.Draw(img)
 
-    # selo (faixa laranja)
-    if selo:
+    # badge (faixa laranja)
+    if badge:
         ftag = _font(30)
-        tb = d.textbbox((0, 0), selo, font=ftag)
+        tb = d.textbbox((0, 0), badge, font=ftag)
         pad = 16
         d.rectangle([28, 30, 28 + (tb[2] - tb[0]) + pad * 2, 30 + (tb[3] - tb[1]) + pad * 2],
                     fill=config.THUMB_ORANGE)
-        d.text((28 + pad, 30 + pad - tb[1]), selo, font=ftag, fill=config.THUMB_WHITE)
+        d.text((28 + pad, 30 + pad - tb[1]), badge, font=ftag, fill=config.THUMB_WHITE)
 
-    # chamada principal (2 linhas na base)
-    if chamada_l1:
-        _outlined(d, (40, H - 210), chamada_l1, _font(72), config.THUMB_WHITE, ow=5)
-    if chamada_l2:
-        _outlined(d, (40, H - 120), chamada_l2, _font(56), config.THUMB_ORANGE, ow=5)
+    # chamada principal (2 lines na base)
+    if headline_l1:
+        _outlined(d, (40, H - 210), headline_l1, _font(72), config.THUMB_WHITE, ow=5)
+    if headline_l2:
+        _outlined(d, (40, H - 120), headline_l2, _font(56), config.THUMB_ORANGE, ow=5)
 
     # créditos (canto superior direito)
-    if creditos:
-        _outlined(d, (W - 40, 40), creditos, _font(28), config.THUMB_WHITE, ow=3, anchor="ra")
-    if subtitulo:
-        _outlined(d, (W - 40, 78), subtitulo, _font(24), (210, 210, 210), ow=3, anchor="ra")
+    if credits:
+        _outlined(d, (W - 40, 40), credits, _font(28), config.THUMB_WHITE, ow=3, anchor="ra")
+    if subtitle:
+        _outlined(d, (W - 40, 78), subtitle, _font(24), (210, 210, 210), ow=3, anchor="ra")
 
     img.save(out_path, quality=92)
     print(f"[thumb] salva -> {out_path}")

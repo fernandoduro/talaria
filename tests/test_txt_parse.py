@@ -7,7 +7,7 @@ from talaria import txt_parse
 FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "exemplo.txt")
 
 
-def _bloco(start, end, text, turn=False):
+def _block(start, end, text, turn=False):
     return {"start": start, "end": end, "text": text, "turn": turn}
 
 
@@ -65,9 +65,9 @@ class TestParseTxt(unittest.TestCase):
 class TestRegroupIntoSentences(unittest.TestCase):
     def test_junta_blocos_ate_pontuacao(self):
         blocks = [
-            _bloco(0.0, 5.0, "primeira parte da frase"),
-            _bloco(5.0, 10.0, "que termina aqui."),
-            _bloco(10.0, 15.0, "Outra frase."),
+            _block(0.0, 5.0, "primeira parte da frase"),
+            _block(5.0, 10.0, "que termina aqui."),
+            _block(10.0, 15.0, "Outra frase."),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertEqual(len(segs), 2)
@@ -77,15 +77,15 @@ class TestRegroupIntoSentences(unittest.TestCase):
 
     def test_troca_de_turno_quebra_segmento(self):
         blocks = [
-            _bloco(0.0, 5.0, "fala sem pontuacao final"),
-            _bloco(5.0, 10.0, "resposta do outro", turn=True),
+            _block(0.0, 5.0, "fala sem pontuacao final"),
+            _block(5.0, 10.0, "resposta do outro", turn=True),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertEqual(len(segs), 2)
 
     def test_quebra_por_tamanho_maximo(self):
         # sem pontuação final: só o limite de caracteres pode quebrar
-        blocks = [_bloco(float(i * 2), float(i * 2 + 2), "palavra " * 12)
+        blocks = [_block(float(i * 2), float(i * 2 + 2), "palavra " * 12)
                   for i in range(4)]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertGreater(len(segs), 1, msg="SEG_MAX_CHARS não quebrou o segmento")
@@ -129,10 +129,10 @@ class TestResolucaoDeFalante(unittest.TestCase):
 
     def test_alternancia_explicita(self):
         blocks = [
-            _bloco(0.0, 5.0, "Abertura do host."),
-            _bloco(5.0, 10.0, "Resposta do convidado.", turn=True),
-            _bloco(10.0, 15.0, "Continua a resposta."),
-            _bloco(15.0, 20.0, "Pergunta do host?", turn=True),
+            _block(0.0, 5.0, "Abertura do host."),
+            _block(5.0, 10.0, "Resposta do convidado.", turn=True),
+            _block(10.0, 15.0, "Continua a resposta."),
+            _block(15.0, 20.0, "Pergunta do host?", turn=True),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         segs = txt_parse.resolve_speakers(segs)
@@ -145,8 +145,8 @@ class TestResolucaoDeFalante(unittest.TestCase):
     def test_primeiro_segmento_com_turn_ainda_e_host(self):
         """Transcrição que já abre com '>>' não deve inverter o episódio."""
         blocks = [
-            _bloco(0.0, 5.0, "Abertura do host.", turn=True),
-            _bloco(5.0, 10.0, "Resposta do convidado.", turn=True),
+            _block(0.0, 5.0, "Abertura do host.", turn=True),
+            _block(5.0, 10.0, "Resposta do convidado.", turn=True),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
         self.assertEqual([s["speaker"] for s in segs], ["host", "convidado"])
@@ -163,16 +163,16 @@ class TestResolucaoDeFalante(unittest.TestCase):
         falante em volta" o identificam.
         """
         blocks = [
-            _bloco(0.0, 5.0, "Pergunta do host?"),
-            _bloco(5.0, 10.0, "Comeco da resposta.", turn=True),
-            _bloco(10.0, 12.0, "Sei.", turn=True),          # backchannel do host
-            _bloco(12.0, 20.0, "Continuo respondendo."),    # ainda o convidado
-            _bloco(20.0, 30.0, "E foi assim que crescemos."),
+            _block(0.0, 5.0, "Pergunta do host?"),
+            _block(5.0, 10.0, "Comeco da resposta.", turn=True),
+            _block(10.0, 12.0, "Sei.", turn=True),          # backchannel do host
+            _block(12.0, 20.0, "Continuo respondendo."),    # ainda o convidado
+            _block(20.0, 30.0, "E foi assim que crescemos."),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
         # O ideal seria [host, convidado, host, convidado, convidado]. Com um
         # número ímpar de trocas espúrias, a resposta do convidado sai rotulada
-        # como host daí em diante e subestima a fração no corte.
+        # como host daí em diante e subestima a fração no clip.
         self.assertEqual([s["speaker"] for s in segs],
                          ["host", "convidado", "host", "host", "host"])
 

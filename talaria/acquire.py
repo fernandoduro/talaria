@@ -1,6 +1,6 @@
 """Obtém o vídeo-fonte a partir de arquivo local, link do YouTube ou do Drive.
 
-Salva sempre em <projeto>/fonte/video.mp4 (ver layout.video) e retorna o caminho.
+Salva sempre em <project>/fonte/video.mp4 (ver layout.video) e retorna o caminho.
 """
 from __future__ import annotations
 
@@ -39,7 +39,7 @@ def _ytdlp(args, capture=False):
 
 def acquire(src: str, project_dir: str) -> str:
     """Baixa/copia o vídeo para layout.video(project_dir) e retorna o caminho."""
-    dest = layout.garante(layout.video(project_dir))
+    dest = layout.ensure_dir(layout.video(project_dir))
     kind = detect_source(src)
 
     if kind == "local":
@@ -69,7 +69,7 @@ def fetch_youtube_captions(url: str, project_dir: str, lang="pt") -> str | None:
     vid = youtube_id(url)
     if not vid:
         return None
-    pasta = layout.pasta_fonte(project_dir)
+    pasta = layout.source_dir(project_dir)
     os.makedirs(pasta, exist_ok=True)
     out_tpl = os.path.join(pasta, "yt_%(id)s.%(ext)s")
     print(f"[acquire] tentando legenda automática ({lang}) do YouTube...")

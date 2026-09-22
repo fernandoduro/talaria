@@ -45,57 +45,57 @@ class TestMmss(unittest.TestCase):
 
 
 class TestCorrigeNomes(unittest.TestCase):
-    """A legenda tem que grafar nome próprio como o episodio.json manda.
+    """A legenda tem que grafar name próprio como o episode.json manda.
 
-    A transcrição automática erra nome próprio: a mesma empresa aparece como
+    A transcrição automática erra name próprio: a mesma company aparece como
     Zarvik, Zarvic, Zarvyk e Zarvyc no mesmo documento. Sem correção, a
-    legenda queimada leva o erro para o vídeo publicado.
+    legenda queimada leva o error para o vídeo published.
     """
 
     def test_corrige_variantes_foneticas(self):
         for errado in ("Zarvic", "Zarvyk", "Zarvyc"):
             self.assertEqual(
-                utils.corrige_nomes(f"a gente montou a {errado}, né", ["Zarvik"]),
+                utils.fix_proper_nouns(f"a gente montou a {errado}, né", ["Zarvik"]),
                 "a gente montou a Zarvik, né")
 
     def test_preserva_grafia_correta(self):
-        self.assertEqual(utils.corrige_nomes("a Zarvik hoje", ["Zarvik"]),
+        self.assertEqual(utils.fix_proper_nouns("a Zarvik hoje", ["Zarvik"]),
                          "a Zarvik hoje")
 
     def test_nao_altera_palavra_comum_parecida(self):
         """Correção não pode atropelar palavra do idioma."""
         txt = "zarpa origem foi essa"
-        self.assertEqual(utils.corrige_nomes(txt, ["Zarvik"]), txt)
+        self.assertEqual(utils.fix_proper_nouns(txt, ["Zarvik"]), txt)
 
     def test_sem_nomes_nao_faz_nada(self):
-        self.assertEqual(utils.corrige_nomes("texto qualquer", []), "texto qualquer")
+        self.assertEqual(utils.fix_proper_nouns("texto qualquer", []), "texto qualquer")
 
     def test_respeita_fronteira_de_palavra(self):
-        self.assertEqual(utils.corrige_nomes("Zarvikzinho", ["Zarvik"]), "Zarvikzinho")
+        self.assertEqual(utils.fix_proper_nouns("Zarvikzinho", ["Zarvik"]), "Zarvikzinho")
 
     def test_nao_altera_nome_que_e_palavra_do_idioma(self):
         """Cliente chamado 'Matriz' ou 'Acho' não pode reescrever a frase.
 
-        A correção existe para nome que a transcrição ERRA. Quando o nome é
+        A correção existe para name que a transcrição ERRA. Quando o name é
         palavra comum, a transcrição acerta e mexer só estraga.
         """
-        self.assertEqual(utils.corrige_nomes("a matriz de risco", ["Matriz"]),
+        self.assertEqual(utils.fix_proper_nouns("a matriz de risco", ["Matriz"]),
                          "a matriz de risco")
-        self.assertEqual(utils.corrige_nomes("eu acho que sim", ["Acho"]),
+        self.assertEqual(utils.fix_proper_nouns("eu acho que sim", ["Acho"]),
                          "eu acho que sim")
-        self.assertEqual(utils.corrige_nomes("na praia hoje", ["Praia"]),
+        self.assertEqual(utils.fix_proper_nouns("na praia hoje", ["Praia"]),
                          "na praia hoje")
 
     def test_capitaliza_nome_em_caixa_baixa(self):
-        """Transcrição escreve marca em minúscula; a legenda deve capitalizar."""
-        self.assertEqual(utils.corrige_nomes("o quibralux e o quadro", ["Quibralux"]),
+        """Transcrição write marca em minúscula; a legenda deve capitalizar."""
+        self.assertEqual(utils.fix_proper_nouns("o quibralux e o quadro", ["Quibralux"]),
                          "o Quibralux e o quadro")
-        self.assertEqual(utils.corrige_nomes("a zarvik hoje", ["Zarvik"]),
+        self.assertEqual(utils.fix_proper_nouns("a zarvik hoje", ["Zarvik"]),
                          "a Zarvik hoje")
 
     def test_ainda_corrige_nome_inventado(self):
         """O caso que motivou a função continua funcionando."""
-        self.assertEqual(utils.corrige_nomes("montar a Zarvic", ["Zarvik"]),
+        self.assertEqual(utils.fix_proper_nouns("montar a Zarvic", ["Zarvik"]),
                          "montar a Zarvik")
 
 

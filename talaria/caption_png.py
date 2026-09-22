@@ -36,9 +36,9 @@ def _draw_outlined(d, xy, text, fill, ow):
 
 
 def render_caption_png(lines: list[str], out_path: str) -> str:
-    """Desenha as linhas de uma legenda num PNG transparente 1080x1920.
+    """Desenha as lines de uma legenda num PNG transparente 1080x1920.
 
-    Espelha o layout do drawtext: linhas centralizadas, empilhadas de baixo
+    Espelha o layout do drawtext: lines centralizadas, empilhadas de baixo
     para cima a partir de BASE_Y, cada uma sobre uma caixa preta translúcida.
     """
     img = Image.new("RGBA", (config.FRAME_W, config.FRAME_H), (0, 0, 0, 0))

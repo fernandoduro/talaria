@@ -14,18 +14,18 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 
-ESCOPO = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 
 # Categoria "People & Blogs" — o YouTube exige uma; é a de videocast.
-CATEGORIA = "22"
+CATEGORY_ID = "22"
 
 # Privacidade aceita pelo YouTube. `unlisted` serve para conferir o Short no
 # canal antes de abrir ao público — útil na estreia e em teste de agenda.
-PRIVACIDADES = ("public", "unlisted", "private")
-PRIVACIDADE_PADRAO = "public"
+PRIVACY_VALUES = ("public", "unlisted", "private")
+DEFAULT_PRIVACY = "public"
 
 
-def privacidade() -> str:
+def privacy() -> str:
     """Privacidade do Short, do `.env`. Sem a variável, publica público.
 
     Valor inválido ABORTA em vez de cair no padrão: um typo em
@@ -34,40 +34,40 @@ def privacidade() -> str:
     """
     valor = (os.environ.get("YT_PRIVACY") or "").strip().lower()
     if not valor:
-        return PRIVACIDADE_PADRAO
-    if valor not in PRIVACIDADES:
+        return DEFAULT_PRIVACY
+    if valor not in PRIVACY_VALUES:
         raise ValueError(
             f"YT_PRIVACY={valor!r} não é válido — use "
-            f"{', '.join(PRIVACIDADES)}."
+            f"{', '.join(PRIVACY_VALUES)}."
         )
     return valor
 
 
-def _credenciais() -> Credentials:
+def _credentials() -> Credentials:
     caminho = os.environ.get("YT_CLIENT_SECRET_PATH", "")
     refresh = os.environ.get("YT_REFRESH_TOKEN", "")
     faltam = [n for n, v in (("YT_CLIENT_SECRET_PATH", caminho),
                              ("YT_REFRESH_TOKEN", refresh)) if not v]
     if faltam:
         raise RuntimeError(
-            f"{', '.join(faltam)} não definido no ambiente (.env). Rode "
+            f"{', '.join(faltam)} não definido no environment (.env). Rode "
             f"'python scripts/youtube_auth.py <client_secret.json>' uma vez "
-            f"para gerar o refresh token."
+            f"para generate o refresh token."
         )
     with open(caminho, encoding="utf-8") as f:
         cs = json.load(f)["installed"]
     return Credentials(None, refresh_token=refresh,
                        token_uri=cs["token_uri"], client_id=cs["client_id"],
-                       client_secret=cs["client_secret"], scopes=ESCOPO)
+                       client_secret=cs["client_secret"], scopes=SCOPES)
 
 
-def upload(video_path: str, titulo: str, descricao: str) -> dict:
+def upload(video_path: str, title: str, description: str) -> dict:
     """Sobe o vídeo (resumable) e devolve id e URL do Short."""
-    service = build("youtube", "v3", credentials=_credenciais())
+    service = build("youtube", "v3", credentials=_credentials())
     corpo = {
-        "snippet": {"title": titulo, "description": descricao,
-                    "categoryId": CATEGORIA},
-        "status": {"privacyStatus": privacidade(),
+        "snippet": {"title": title, "description": description,
+                    "categoryId": CATEGORY_ID},
+        "status": {"privacyStatus": privacy(),
                    "selfDeclaredMadeForKids": False},
     }
     media = MediaFileUpload(video_path, mimetype="video/mp4", resumable=True)

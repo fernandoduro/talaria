@@ -1,6 +1,6 @@
 """Talaria — pipeline de cortes verticais (Shorts/Reels) a partir de podcast.
 
-Fluxo: acquire -> transcribe -> [curadoria manual: momentos.json] -> render -> thumbnail.
+Fluxo: acquire -> transcribe -> [curation manual: moments.json] -> render -> thumbnail.
 Ver run.py para o orquestrador CLI.
 """
 

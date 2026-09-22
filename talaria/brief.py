@@ -8,201 +8,201 @@ from __future__ import annotations
 import json
 import os
 
-from . import curadoria as cur
-from . import episodio, layout, utils
+from . import curation as cur
+from . import episode, layout, utils
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROMPTS_DIR = os.path.join(ROOT, "prompts")
 
 
-def transcricao_legivel(project_dir: str) -> str:
+def readable_transcript(project_dir: str) -> str:
     """Transcrição com [mm:ss] por segmento, para localizar cortes."""
-    path = layout.transcricao(project_dir)
+    path = layout.transcript(project_dir)
     with open(path, encoding="utf-8") as f:
         segs = json.load(f)["segments"]
-    linhas = []
+    lines = []
     for s in segs:
         marca = ">> " if s.get("turn") else ""
-        linhas.append(f"[{utils.mmss(s['start'])}] {marca}{s['text']}")
-    return "\n".join(linhas)
+        lines.append(f"[{utils.mmss(s['start'])}] {marca}{s['text']}")
+    return "\n".join(lines)
 
 
-def metadados_legiveis(project_dir: str) -> str:
-    """Bloco de metadados do prompt, preenchido a partir do episodio.json."""
-    ep = episodio.load(project_dir)
-    convidados = ep.get("convidados") or []
+def readable_metadata(project_dir: str) -> str:
+    """Bloco de metadados do prompt, preenchido a partir do episode.json."""
+    ep = episode.load(project_dir)
+    guests = ep.get("guests") or []
     nomes = "; ".join(
-        f"{c.get('nome','')} ({c.get('cargo','')})" for c in convidados if c.get("nome")
+        f"{c.get('name','')} ({c.get('role','')})" for c in guests if c.get("name")
     )
-    links = "; ".join(c.get("linkedin", "") for c in convidados if c.get("linkedin"))
-    temas = ", ".join(ep.get("temas") or [])
+    links = "; ".join(c.get("linkedin", "") for c in guests if c.get("linkedin"))
+    topics = ", ".join(ep.get("topics") or [])
     return (
-        f"- Temporada: {ep['temporada']}\n"
-        f"- Número do episódio: {int(ep['episodio']):02d}\n"
-        f"- Código: {episodio.codigo(ep)}\n"
-        f"- Convidado(s) e cargo: {nomes}\n"
-        f"- Empresa ou instituição: {ep['empresa']}\n"
+        f"- Temporada: {ep['season']}\n"
+        f"- Número do episódio: {int(ep['episode']):02d}\n"
+        f"- Código: {episode.code(ep)}\n"
+        f"- Convidado(s) e role: {nomes}\n"
+        f"- Empresa ou instituição: {ep['company']}\n"
         f"- Cidade/UF da gravação: {ep['cidade']}/{ep['uf']}\n"
         f"- LinkedIn do(s) convidado(s): {links}\n"
-        f"- Temas da conversa: {temas}\n"
+        f"- Temas da conversa: {topics}\n"
     )
 
 
-def preencher(template: str, transcricao: str, metadados: str,
-              curadoria: str = "", cortes: str = "") -> str:
+def preencher(template: str, transcript: str, metadados: str,
+              curation: str = "", cortes: str = "") -> str:
     """Substitui os placeholders do prompt pelo conteúdo do episódio."""
     return (template
-            .replace("{{TRANSCRICAO}}", transcricao)
+            .replace("{{TRANSCRICAO}}", transcript)
             .replace("{{METADADOS}}", metadados)
-            .replace("{{CURADORIA}}", curadoria)
+            .replace("{{CURADORIA}}", curation)
             .replace("{{CORTES}}", cortes))
 
 
-def curadoria_legivel(estado: dict) -> str:
-    """Estado da curadoria em texto, injetado no prompt de cortes."""
-    aprovados = estado.get("aprovados", [])
-    rejeitados = estado.get("rejeitados", [])
+def readable_curation(estado: dict) -> str:
+    """Estado da curation em texto, injetado no prompt de cortes."""
+    approved = estado.get("approved", [])
+    rejected = estado.get("rejected", [])
 
-    if not aprovados and not rejeitados:
-        return ("PRIMEIRA RODADA — nenhum corte avaliado ainda.\n"
+    if not approved and not rejected:
+        return ("PRIMEIRA RODADA — nenhum clip avaliado ainda.\n"
                 "Proponha 10 trechos, ordenados do mais forte para o mais fraco.")
 
-    linhas = [
-        f"Rodada: {estado.get('rodadas', 0)}",
+    lines = [
+        f"Rodada: {estado.get('rounds', 0)}",
         f"Meta: {estado['meta']} cortes",
-        f"Aprovados: {len(aprovados)}",
-        f"VAGAS RESTANTES: {cur.vagas(estado)} — proponha exatamente este número.",
+        f"Aprovados: {len(approved)}",
+        f"VAGAS RESTANTES: {cur.slots_left(estado)} — proponha exatamente este número.",
         "",
         "COMPOSIÇÃO POR TIPO:",
     ]
-    for tipo, n in cur.composicao(estado).items():
-        linhas.append(f"  {tipo}: {n}")
-    ausentes = cur.tipos_ausentes(estado)
+    for kind, n in cur.composition(estado).items():
+        lines.append(f"  {kind}: {n}")
+    ausentes = cur.missing_kinds(estado)
     if ausentes:
-        linhas.append(f"  TIPOS AUSENTES (priorize): {', '.join(ausentes)}")
+        lines.append(f"  KINDS AUSENTES (priorize): {', '.join(ausentes)}")
 
-    linhas.append("")
-    linhas.append("FAIXAS QUEIMADAS — não proponha nada que se sobreponha a elas:")
-    for c in aprovados:
-        linhas.append(f"  [{utils.mmss(c['start'])}-{utils.mmss(c['end'])}] "
-                      f"APROVADO: {c.get('texto_tela', c.get('slug', ''))}")
-    for r in rejeitados:
-        linhas.append(f"  [{utils.mmss(r['start'])}-{utils.mmss(r['end'])}] "
-                      f"REJEITADO ({r.get('motivo', '')}): {r.get('resumo', '')}")
+    lines.append("")
+    lines.append("FAIXAS QUEIMADAS — não proponha nada que se sobreponha a elas:")
+    for c in approved:
+        lines.append(f"  [{utils.mmss(c['start'])}-{utils.mmss(c['end'])}] "
+                      f"APROVADO: {c.get('screen_text', c.get('slug', ''))}")
+    for r in rejected:
+        lines.append(f"  [{utils.mmss(r['start'])}-{utils.mmss(r['end'])}] "
+                      f"REJEITADO ({r.get('reason', '')}): {r.get('summary', '')}")
 
-    ms = cur.motivos(estado)
+    ms = cur.reasons(estado)
     if ms:
-        linhas.append("")
-        linhas.append("MOTIVOS DE REJEIÇÃO ACUMULADOS — aplique como filtro:")
+        lines.append("")
+        lines.append("MOTIVOS DE REJEIÇÃO ACUMULADOS — aplique como filtro:")
         for m in ms:
-            linhas.append(f"  - {m}")
+            lines.append(f"  - {m}")
 
-    return "\n".join(linhas)
+    return "\n".join(lines)
 
 
-def _ler_prompt(nome: str) -> str:
+def _read_prompt(name: str) -> str:
     """Lê um prompt versionado do diretório prompts/."""
-    path = os.path.join(PROMPTS_DIR, nome)
+    path = os.path.join(PROMPTS_DIR, name)
     if not os.path.exists(path):
         raise FileNotFoundError(f"prompt não encontrado: {path}")
     with open(path, encoding="utf-8") as f:
         return f.read()
 
 
-def montar(project_dir: str, tipo: str) -> str:
-    """tipo: 'materiais' ou 'cortes'. Retorna o caminho do arquivo gerado."""
-    if tipo not in ("materiais", "cortes"):
-        raise ValueError("tipo deve ser 'materiais' ou 'cortes'")
-    template = _ler_prompt(f"{tipo}.md")
+def montar(project_dir: str, kind: str) -> str:
+    """kind: 'materiais' ou 'cortes'. Retorna o caminho do arquivo gerado."""
+    if kind not in ("materiais", "cortes"):
+        raise ValueError("kind deve ser 'materiais' ou 'cortes'")
+    template = _read_prompt(f"{kind}.md")
     estado_txt = ""
-    if tipo == "cortes":
-        estado_txt = curadoria_legivel(cur.load(project_dir))
+    if kind == "cortes":
+        estado_txt = readable_curation(cur.load(project_dir))
     conteudo = preencher(
         template,
-        transcricao=transcricao_legivel(project_dir),
-        metadados=metadados_legiveis(project_dir),
-        curadoria=estado_txt,
+        transcript=readable_transcript(project_dir),
+        metadados=readable_metadata(project_dir),
+        curation=estado_txt,
     )
-    out = layout.garante(layout.brief(project_dir, tipo))
+    out = layout.ensure_dir(layout.brief(project_dir, kind))
     with open(out, "w", encoding="utf-8") as f:
         f.write(conteudo)
     return out
 
 
-def fala_do_corte(project_dir: str, corte: dict) -> str:
-    """A fala literal do corte, para escolher a citação.
+def clip_speech(project_dir: str, clip: dict) -> str:
+    """A fala literal do clip, para escolher a citação.
 
     Inclui todo segmento que SOBREPÕE a janela, aparando o texto na fronteira —
     a mesma regra do `render._segments_in_cut`, para que o pacote mostre a fala
     que virou vídeo.
 
-    Exigir contenção total escondia a última frase de todo corte, porque
+    Exigir contenção total escondia a última frase de todo clip, porque
     a transcrição tem blocos de ~8s e a fronteira quase nunca coincide com eles.
-    Era justamente onde costuma estar a frase de impacto: num corte o pacote
+    Era justamente onde costuma estar a frase de impacto: num clip o pacote
     terminava em "chegou lá na fábrica, você não" enquanto o vídeo seguia.
 
     O texto vem CRU (sem `clean_caption`): a escolha do recorte é feita sobre o
-    que a pessoa falou. A limpeza entra depois, no `post --gerar`.
+    que a pessoa falou. A limpeza entra depois, no `post --generate`.
     """
-    from .render import _apara_texto
+    from .render import _trim_text
 
-    path = layout.transcricao(project_dir)
+    path = layout.transcript(project_dir)
     with open(path, encoding="utf-8") as f:
         segs = json.load(f)["segments"]
 
     partes = []
     for s in segs:
         ini, fim = s["start"], s["end"]
-        if fim <= corte["start"] or ini >= corte["end"]:
+        if fim <= clip["start"] or ini >= clip["end"]:
             continue
         txt = (s.get("text") or "").strip()
         if not txt:
             continue
-        if ini < corte["start"] or fim > corte["end"]:
+        if ini < clip["start"] or fim > clip["end"]:
             dur = fim - ini
             if dur > 0:
-                txt = _apara_texto(
+                txt = _trim_text(
                     txt,
-                    (max(ini, corte["start"]) - ini) / dur,
-                    (min(fim, corte["end"]) - ini) / dur,
+                    (max(ini, clip["start"]) - ini) / dur,
+                    (min(fim, clip["end"]) - ini) / dur,
                 )
         if txt:
             partes.append(txt)
     return " ".join(partes).strip()
 
 
-def cortes_legiveis(project_dir: str, cortes: list) -> str:
-    """Bloco com a fala de cada corte selecionado, para a sessão de curadoria."""
+def readable_clips(project_dir: str, cortes: list) -> str:
+    """Bloco com a fala de cada clip selecionado, para a sessão de curation."""
     partes = []
     for c in cortes:
         partes.append(
             f"### {c['slug']}  [{utils.mmss(c['start'])}–{utils.mmss(c['end'])}]\n\n"
-            f"- Tipo: {c.get('tipo', '')}\n"
-            f"- Texto de tela do vídeo: {c.get('texto_tela', '')}\n\n"
-            f"Fala literal:\n\n{fala_do_corte(project_dir, c)}\n"
+            f"- Tipo: {c.get('kind', '')}\n"
+            f"- Texto de tela do vídeo: {c.get('screen_text', '')}\n\n"
+            f"Fala literal:\n\n{clip_speech(project_dir, c)}\n"
         )
     return "\n".join(partes)
 
 
-def montar_posts(project_dir: str, cortes: list) -> str:
+def build_posts(project_dir: str, cortes: list) -> str:
     """Escreve brief_posts.md com o prompt e a fala dos cortes escolhidos.
 
     Função separada de `montar()` porque o pacote de posts não recebe a
-    transcrição inteira: a citação sai de cortes já aprovados, e mandar o
+    transcrição inteira: a citação sai de cortes já approved, e mandar o
     episódio todo convidaria a escolher fala que nunca virou vídeo.
     """
     from . import config
     limite = (
-        f"Máximo de {config.POST_CIT_MAX_LINHAS} linhas por card, cerca de "
+        f"Máximo de {config.POST_QUOTE_MAX_LINES} lines por card, cerca de "
         f"100 caracteres. A citação de referência tem 96.\n"
     )
     conteudo = preencher(
-        _ler_prompt("posts.md"),
-        transcricao="",
-        metadados=metadados_legiveis(project_dir) + "\n" + limite,
-        cortes=cortes_legiveis(project_dir, cortes),
+        _read_prompt("posts.md"),
+        transcript="",
+        metadados=readable_metadata(project_dir) + "\n" + limite,
+        cortes=readable_clips(project_dir, cortes),
     )
-    out = layout.garante(layout.brief(project_dir, "posts"))
+    out = layout.ensure_dir(layout.brief(project_dir, "posts"))
     with open(out, "w", encoding="utf-8") as f:
         f.write(conteudo)
     return out

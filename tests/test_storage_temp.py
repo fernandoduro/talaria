@@ -41,7 +41,7 @@ class TestSobe(unittest.TestCase):
     @mock.patch("talaria.storage_temp.boto3")
     def test_assina_com_sigv4(self, boto3_mock):
         # O boto3 pode cair em SigV2, que o R2 recusa com 401 na URL assinada
-        # — e aí o Instagram não baixa a mídia. O erro só apareceria na
+        # — e aí o Instagram não baixa a mídia. O error só apareceria na
         # publicação, como "container falhou", sem dizer que era a assinatura.
         storage_temp.sobe("/tmp/video.mp4")
         cfg = boto3_mock.client.call_args.kwargs.get("config")
@@ -80,7 +80,7 @@ class TestRemove(unittest.TestCase):
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "tmp-publish"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_bucket_com_nome_do_prefixo_nao_corta_demais(self, boto3_mock):
-        # Bucket chamado igual ao PREFIXO: na URL da AWS o bucket está no
+        # Bucket chamado igual ao PREFIX: na URL da AWS o bucket está no
         # HOST, e a key já começa em 'tmp-publish/'. Decidir pelo texto do
         # caminho cortaria o prefixo real e apagaria nada — o mesmo silêncio
         # que a correção do path-style veio resolver.

@@ -3,11 +3,11 @@
 O backend de legenda (drawtext ou overlay de PNGs) é escolhido em runtime por
 config.CAPTION_BACKEND — ver talaria/caption_png.py.
 
-Lê transcricao.json (segmentos) + momentos.json (cortes curados) e, por corte,
+Lê transcript.json (segmentos) + moments.json (cortes curados) e, por clip,
 gera o MP4 vertical com legenda para as plataformas escolhidas.
 
-momentos.json: lista de {slug, start, end, ...}. Campos extras (quem, titulo,
-frase_efeito) são ignorados aqui — servem para os textos.
+moments.json: lista de {slug, start, end, ...}. Campos extras (who, title,
+frase_efeito) são ignorados aqui — servem para os texts.
 """
 from __future__ import annotations
 
@@ -19,8 +19,8 @@ import tempfile
 
 from PIL import ImageFont
 
-from . import (audio, caption, caption_png, config, encerramento, episodio,
-               layout, textos, utils)
+from . import (audio, caption, caption_png, config, end_card, episode,
+               layout, texts, utils)
 
 _PILFONT = ImageFont.truetype(config.FONT, config.FONTSIZE)
 
@@ -32,8 +32,8 @@ def _text_width_px(s: str, fnt=None) -> float:
 def wrap_by_pixels(txt: str, fnt=None, largura: float | None = None) -> list[str]:
     """Quebra o texto por LARGURA REAL EM PIXELS (não por nº de caracteres).
 
-    Garante que nenhuma linha ultrapasse a largura. Usa quantas linhas precisar
-    — melhor 3 linhas curtas que texto cortado nas laterais.
+    Garante que nenhuma linha ultrapasse a largura. Usa quantas lines precisar
+    — melhor 3 lines curtas que texto cortado nas laterais.
 
     Sem argumentos, quebra a legenda queimada do vídeo (fonte e SAFE_W do
     config). Com `fnt`/`largura`, serve também o post de citação, que tem fonte
@@ -64,10 +64,10 @@ def _esc_drawtext(s: str) -> str:
 
 
 def _drawtext_chain(segments, start, end, nomes=None) -> str:
-    """Constrói a cadeia de filtros drawtext para as legendas de um corte."""
+    """Constrói a cadeia de filtros drawtext para as legendas de um clip."""
     parts = []
     # Mesma fonte de verdade do backend overlay: sem isto o drawtext perdia o
-    # aparo de texto e mostrava fala que o corte não reproduz.
+    # aparo de texto e mostrava fala que o clip não reproduz.
     for rs, re_, txt in _segments_in_cut(segments, start, end, nomes):
         lines = wrap_by_pixels(txt)
         n = len(lines)
@@ -99,7 +99,7 @@ def _filtergraph(segments, start, end, nomes=None) -> str:
     )
 
 
-def _marca_dagua_graph(in_label: str, logo_label: str) -> str:
+def _watermark_graph(in_label: str, logo_label: str) -> str:
     """Overlay do logo no canto superior direito, encadeado após a legenda.
 
     Os dois backends de legenda (`drawtext` e `overlay`) já convergem no label
@@ -107,9 +107,9 @@ def _marca_dagua_graph(in_label: str, logo_label: str) -> str:
     tocar em `_filtergraph` nem em `caption_png.build_overlay_graph`.
     """
     return (
-        f"[{logo_label}]scale={config.MARCA_DAGUA_LARGURA}:-1[wm];"
-        f"[{in_label}][wm]overlay=W-w-{config.MARCA_DAGUA_MARGEM}:"
-        f"{config.MARCA_DAGUA_MARGEM}[outv2]"
+        f"[{logo_label}]scale={config.WATERMARK_W}:-1[wm];"
+        f"[{in_label}][wm]overlay=W-w-{config.WATERMARK_MARGIN}:"
+        f"{config.WATERMARK_MARGIN}[outv2]"
     )
 
 
@@ -128,11 +128,11 @@ def _base_graph() -> str:
 
 
 def _segments_in_cut(segments, start, end, nomes=None):
-    """Segmentos que aparecem no corte, com tempos relativos ao início dele.
+    """Segmentos que aparecem no clip, com tempos relativos ao início dele.
 
-    Quando o corte apara um segmento (começa ou termina no meio dele), o TEXTO
+    Quando o clip apara um segmento (começa ou termina no meio dele), o TEXTO
     é aparado na mesma proporção. Sem isso a legenda mostra fala que o áudio do
-    corte não alcança: o último segmento ficava 1.4s na tela exibindo os
+    clip não alcança: o último segmento ficava 1.4s na tela exibindo os
     150 caracteres do bloco inteiro, enquanto o áudio só dizia as 4 primeiras
     palavras.
     """
@@ -141,69 +141,69 @@ def _segments_in_cut(segments, start, end, nomes=None):
         s, e = seg["start"], seg["end"]
         if e <= start or s >= end:
             continue
-        txt = utils.corrige_nomes(utils.clean_caption(seg["text"]), nomes)
+        txt = utils.fix_proper_nouns(utils.clean_caption(seg["text"]), nomes)
         if not txt:
             continue
         vis_s, vis_e = max(s, start), min(e, end)
-        if (vis_e - vis_s) < LEGENDA_MIN_S:
+        if (vis_e - vis_s) < CAPTION_MIN_S:
             continue          # rápido demais para ler: só pisca na tela
-        txt = _apara_texto(txt, (vis_s - s) / (e - s), (vis_e - s) / (e - s))
+        txt = _trim_text(txt, (vis_s - s) / (e - s), (vis_e - s) / (e - s))
         if not txt:
             continue
         out.append((vis_s - start, vis_e - start, txt))
     return out
 
 
-# Tempo mínimo de tela para uma legenda valer a pena. O fim do corte vem do
+# Tempo mínimo de tela para uma legenda valer a pena. O fim do clip vem do
 # vale de áudio, não da grade da transcrição, então sobram milissegundos do
 # bloco seguinte — sem este piso viravam PNG de 1 frame ("Poucas" piscando no
-# fim do corte, a palavra que o ajuste de áudio tinha tirado).
-LEGENDA_MIN_S = 0.30
+# fim do clip, a palavra que o ajuste de áudio tinha tirado).
+CAPTION_MIN_S = 0.30
 
 
-# Folga mínima tirada do fim do corte, para absorver arredondamento quando o
+# Folga mínima tirada do fim do clip, para absorver arredondamento quando o
 # ajuste por áudio não roda (sem ffmpeg, ou fim já no vale).
-MARGEM_FIM_S = 0.02
+END_MARGIN_S = 0.02
 
-# Quanto o ajuste por áudio pode recuar. Além disso o corte perderia conteúdo
+# Quanto o ajuste por áudio pode recuar. Além disso o clip perderia conteúdo
 # em vez de ganhar limpeza, e o problema passa a ser o fim escolhido.
-AJUSTE_AUDIO_MAX_S = 0.5
+AUDIO_ADJUST_MAX_S = 0.5
 
 
-def aplica_margem_fim(end: float, start: float) -> float:
-    """Recua o fim do corte pela margem, respeitando a duração mínima.
+def apply_end_margin(end: float, start: float) -> float:
+    """Recua o fim do clip pela margem, respeitando a duração mínima.
 
-    Um corte já no limite dos 60s não pode encolher: a margem existe para
+    Um clip já no limite dos 60s não pode encolher: a margem existe para
     absorver arredondamento, não para violar a regra de duração.
     """
-    piso = start + min(config.CORTE_MIN_S, end - start)
-    return max(piso, end - MARGEM_FIM_S)
+    piso = start + min(config.CLIP_MIN_S, end - start)
+    return max(piso, end - END_MARGIN_S)
 
 
-def ajusta_fim_por_audio(video_path, start, end):
-    """Move o fim do corte para a pausa de fala mais próxima.
+def adjust_end_by_audio(video_path, start, end):
+    """Move o fim do clip para a pausa de fala mais próxima.
 
     Os tempos vêm da transcrição, que tem resolução de 1 segundo — o fim cai em
     cima da fronteira entre duas palavras e vaza o ataque da seguinte
     ("Poucas"). Esta é a correção que antes se fazia medindo o envelope à mão.
 
-    Recua no máximo AJUSTE_AUDIO_MAX_S e nunca abaixo da duração mínima; sem
+    Recua no máximo AUDIO_ADJUST_MAX_S e nunca abaixo da duração mínima; sem
     ffmpeg, cai na margem fixa.
     """
-    vale = audio.vale_antes(video_path, end, busca=AJUSTE_AUDIO_MAX_S)
-    if vale >= end or (end - vale) > AJUSTE_AUDIO_MAX_S:
-        return aplica_margem_fim(end, start)
-    if (vale - start) < config.CORTE_MIN_S:
-        return aplica_margem_fim(end, start)
+    vale = audio.valley_before(video_path, end, busca=AUDIO_ADJUST_MAX_S)
+    if vale >= end or (end - vale) > AUDIO_ADJUST_MAX_S:
+        return apply_end_margin(end, start)
+    if (vale - start) < config.CLIP_MIN_S:
+        return apply_end_margin(end, start)
     return vale
 
 
-def _apara_texto(txt: str, ini: float, fim: float) -> str:
+def _trim_text(txt: str, ini: float, fim: float) -> str:
     """Recorta `txt` na fatia proporcional [ini, fim] (0..1), por palavra.
 
     A transcrição não traz tempo por palavra, então a posição é estimada
     proporcionalmente ao texto — aproximação suficiente para não exibir frase
-    que o corte não reproduz. O recorte é feito em fronteira de palavra: cortar
+    que o clip não reproduz. O recorte é feito em fronteira de palavra: cortar
     por caractere deixaria "reprodu" na tela.
     """
     if ini <= 0 and fim >= 1:
@@ -217,20 +217,20 @@ def _apara_texto(txt: str, ini: float, fim: float) -> str:
     if b - a < 1:                     # fatia curta demais: mantém 1 palavra
         b = min(n, a + 1)
     # A estimativa proporcional erra por uma ou duas palavras. Nas duas direções
-    # o alvo é o mesmo: fechar a legenda na pontuação mais próxima do corte, em
+    # o alvo é o mesmo: fechar a legenda na pontuação mais próxima do clip, em
     # vez de deixá-la pendurada no meio da frase.
     if b < n:
-        b = _ajusta_ate_pontuacao(palavras, b)
+        b = _snap_to_punctuation(palavras, b)
     return " ".join(palavras[a:b])
 
 
 # Quantas palavras o ajuste pode andar para achar a pontuação. Dois em cada
-# direção cobre o erro típico da estimativa proporcional sem deixar a legenda
+# direção cobre o error típico da estimativa proporcional sem deixar a legenda
 # invadir a frase seguinte.
-JANELA_PONTUACAO = 2
+PUNCTUATION_WINDOW = 2
 
 
-def _ajusta_ate_pontuacao(palavras: list, b: int) -> int:
+def _snap_to_punctuation(palavras: list, b: int) -> int:
     """Move o fim da fatia para a pontuação mais próxima, dentro da janela.
 
     Recuar evita arrastar o começo da frase seguinte ("...reproduzir. Acho
@@ -238,7 +238,7 @@ def _ajusta_ate_pontuacao(palavras: list, b: int) -> int:
     ("muito mais do" quando a fala diz "muito mais do mesmo.").
     """
     fim_de_frase = (".", "!", "?", "…")
-    for d in range(0, JANELA_PONTUACAO + 1):
+    for d in range(0, PUNCTUATION_WINDOW + 1):
         atras = b - 1 - d
         if atras >= 0 and palavras[atras].endswith(fim_de_frase):
             return atras + 1
@@ -258,19 +258,19 @@ def _build_overlay_inputs(segments, start, end, tmpdir, nomes=None):
     return items
 
 
-def concatena_encerramento(corte_path: str, project_dir: str) -> None:
-    """Acrescenta o card de encerramento ao fim de `corte_path`, no lugar.
+def append_end_card(corte_path: str, project_dir: str) -> None:
+    """Acrescenta o card de end_card ao fim de `corte_path`, no lugar.
 
     Usa o CONCAT FILTER, não o concat demuxer com `-c copy`. Testado na
-    prática: `-c copy` produzia um arquivo quase do tamanho do corte sozinho,
-    porque os dois clipes vêm de encodes independentes (o corte do
+    prática: `-c copy` produzia um arquivo quase do tamanho do clip sozinho,
+    porque os dois clipes vêm de encodes independentes (o clip do
     filtergraph principal, o card do Pillow) com timestamps que não se
     encadeiam — o ffmpeg avisa "Non-monotonic DTS" e o card acaba descartado
-    ou truncado, SEM erro de retorno. O concat filter reencoda esta etapa
-    (curta — só a junção, não o corte inteiro) e recalcula os timestamps do
+    ou truncado, SEM error de retorno. O concat filter reencoda esta etapa
+    (curta — só a junção, não o clip inteiro) e recalcula os timestamps do
     zero com `setpts`/`asetpts`, o que corrige o problema.
     """
-    card_path = encerramento.card_cacheado(project_dir)
+    card_path = end_card.cached_card(project_dir)
 
     tmpdir = tempfile.mkdtemp(prefix="talaria_concat_")
     try:
@@ -280,7 +280,7 @@ def concatena_encerramento(corte_path: str, project_dir: str) -> None:
             "-i", corte_path, "-i", card_path,
             "-filter_complex",
             # setsar=1 normaliza o aspect ratio de pixel: o card (gerado do
-            # PNG estático) e o corte (do filtergraph principal) podem sair
+            # PNG estático) e o clip (do filtergraph principal) podem sair
             # com SAR diferente mesmo tendo a mesma resolução em pixels, e o
             # concat filter — ao contrário do demuxer — rejeita entradas com
             # parâmetros de vídeo que não batem exatamente.
@@ -295,7 +295,7 @@ def concatena_encerramento(corte_path: str, project_dir: str) -> None:
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
-            raise RuntimeError(f"ffmpeg falhou ao concatenar o encerramento:\n"
+            raise RuntimeError(f"ffmpeg falhou ao concatenar o end_card:\n"
                                f"{r.stderr[-1500:]}")
         shutil.move(saida, corte_path)
     finally:
@@ -303,10 +303,10 @@ def concatena_encerramento(corte_path: str, project_dir: str) -> None:
 
 
 def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None):
-    """Renderiza um corte para as plataformas escolhidas (youtube/instagram)."""
+    """Renderiza um clip para as plataformas escolhidas (youtube/instagram)."""
     slug = moment["slug"]
     start, end = float(moment["start"]), float(moment["end"])
-    end = ajusta_fim_por_audio(video_path, start, end)
+    end = adjust_end_by_audio(video_path, start, end)
 
     outputs = []
     if "youtube" in platforms:
@@ -315,11 +315,11 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
         outputs.append(("instagram_reels", f"{slug}_reel.mp4"))
 
     if not outputs:
-        raise ValueError("Nenhuma plataforma selecionada (use youtube e/ou instagram).")
+        raise ValueError("Nenhuma platform selecionada (use youtube e/ou instagram).")
 
     # Renderiza uma vez; se as duas plataformas foram pedidas, copia (pixel-idêntico).
     first_subdir, first_name = outputs[0]
-    first_dir = layout.plataforma(project_dir, first_subdir)
+    first_dir = layout.platform(project_dir, first_subdir)
     os.makedirs(first_dir, exist_ok=True)
     first_out = os.path.join(first_dir, first_name)
 
@@ -346,7 +346,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
         # ffmpeg recorta ANTES desse frame e não sobra nada). Com `-loop 1` o
         # stream é contínuo e o -ss/-to do bloco anterior não o afeta.
         logo_idx = len(seek_inputs) // 2   # cada item de seek_inputs é "-i, caminho"
-        fg += ";" + _marca_dagua_graph("outv", str(logo_idx))
+        fg += ";" + _watermark_graph("outv", str(logo_idx))
 
         cmd = [
             "ffmpeg", "-y",
@@ -375,29 +375,29 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
     # — a leitura veria sempre uma queda de energia ali (fala -> silêncio do
     # card) e reportaria "cauda limpa" mesmo quando a fala foi cortada no
     # meio de uma palavra. A ordem importa: medir no arquivo sem o card.
-    if audio.cauda_vaza(first_out, end - start):
+    if audio.clips_mid_word(first_out, end - start):
         print(f"[render] !! {slug}: a fala não termina limpa — o fim pode estar "
               f"cortando palavra. Ajuste o `end` e renderize de novo.")
 
     # O card entra DEPOIS da checagem acima e ANTES de copiar para as outras
     # plataformas — as duas plataformas precisam do mesmo arquivo final.
-    concatena_encerramento(first_out, project_dir)
+    append_end_card(first_out, project_dir)
 
     for subdir, name in outputs[1:]:
-        d = layout.plataforma(project_dir, subdir)
+        d = layout.platform(project_dir, subdir)
         os.makedirs(d, exist_ok=True)
         shutil.copy2(first_out, os.path.join(d, name))
 
     # Caption de publicação ao lado de cada peça: o gestor abre e cola no campo
     # de legenda. Escrito depois das cópias para cobrir todas as plataformas.
-    escreve_captions(project_dir, moment,
-                     [os.path.join(layout.plataforma(project_dir, sub), nome)
-                      for sub, nome in outputs])
+    write_captions(project_dir, moment,
+                     [os.path.join(layout.platform(project_dir, sub), name)
+                      for sub, name in outputs])
 
     print(f"[render] {slug} OK")
 
 
-def _e_do_youtube(peca: str) -> bool:
+def _is_youtube_output(peca: str) -> bool:
     """True quando a peça está na pasta de saída do YouTube.
 
     A pasta é o que distingue as duas cópias: o mp4 é pixel-idêntico e o slug
@@ -407,96 +407,96 @@ def _e_do_youtube(peca: str) -> bool:
     return pasta == layout.YOUTUBE_SHORTS
 
 
-def escreve_captions(project_dir, moment, pecas):
+def write_captions(project_dir, moment, pecas):
     """Grava o caption de publicação ao lado de cada peça renderizada.
 
-    A descrição é o `legenda_post` que a curadoria escreveu para o corte; as
-    hashtags valem para o episódio inteiro e vêm do `textos.json`.
+    A descrição é o `post_caption` que a curation escreveu para o clip; as
+    hashtags valem para o episódio inteiro e vêm do `texts.json`.
 
     A chamada para o episódio completo entra SÓ no `.txt` do YouTube: no
     Instagram a URL não é clicável e manda o leitor para fora do app. As duas
     peças deixam de ter caption idêntico por essa razão, e só por ela.
 
-    Corte sem `legenda_post` ainda ganha o arquivo (as hashtags já poupam
-    trabalho), mas AVISA: caption mudo publicado é pior que caption ausente,
+    Corte sem `post_caption` ainda ganha o arquivo (as hashtags já poupam
+    trabalho), mas AVISA: caption mudo published é pior que caption ausente,
     porque passa despercebido até estar no ar.
     """
-    caption.valida("legenda_post", moment.get("legenda_post"), moment["slug"])
-    descricao = (moment.get("legenda_post") or "").strip()
-    if not descricao:
-        print(f"[caption] !! {moment['slug']}: sem legenda_post — o .txt sai "
-              f"só com as hashtags. Preencha em decisoes/curadoria.json.")
+    caption.validate("post_caption", moment.get("post_caption"), moment["slug"])
+    description = (moment.get("post_caption") or "").strip()
+    if not description:
+        print(f"[caption] !! {moment['slug']}: sem post_caption — o .txt sai "
+              f"só com as hashtags. Preencha em decisions/curation.json.")
 
-    hashtags = (textos.load(project_dir) or {}).get("hashtags", "")
-    url = episodio.url_youtube(project_dir)
+    hashtags = (texts.load(project_dir) or {}).get("hashtags", "")
+    url = episode.youtube_url(project_dir)
     if not url:
-        print(f"[caption] !! {moment['slug']}: sem url_youtube no "
-              f"episodio.json — o Short sai sem chamada para o episódio "
+        print(f"[caption] !! {moment['slug']}: sem youtube_url no "
+              f"episode.json — o Short sai sem chamada para o episódio "
               f"completo. Preencha quando o vídeo longo estiver no ar.")
 
     escritos = []
     for peca in pecas:
-        texto = caption.monta(descricao, hashtags,
-                              url if _e_do_youtube(peca) else None)
-        escritos.append(caption.escreve(peca, texto))
+        texto = caption.compose(description, hashtags,
+                              url if _is_youtube_output(peca) else None)
+        escritos.append(caption.write(peca, texto))
     return escritos
 
 
-def escreve_caption_episodio(project_dir):
-    """Grava título + descrição do episódio em `publicar/episodio.txt`.
+def write_episode_caption(project_dir):
+    """Grava título + descrição do episódio em `publish/episode.txt`.
 
-    O `textos.json` é JSON, então copiar a descrição de lá para o YouTube
+    O `texts.json` é JSON, então copiar a descrição de lá para o YouTube
     obriga a lidar com `\\n` escapado. Este arquivo é o mesmo conteúdo já
     formatado, para abrir e colar.
 
-    Devolve `None` sem criar arquivo quando ainda não há textos: episódio antes
+    Devolve `None` sem criar arquivo quando ainda não há texts: episódio antes
     da etapa de materiais não tem o que colar, e um `.txt` vazio na pasta de
     publicação só confundiria.
     """
-    dados = textos.load(project_dir) or {}
-    texto = caption.monta_episodio(dados.get("titulo"), dados.get("descricao"),
+    dados = texts.load(project_dir) or {}
+    texto = caption.compose_episode(dados.get("title"), dados.get("description"),
                                    dados.get("hashtags"))
     if not texto:
         return None
-    destino = layout.garante(layout.episodio_txt(project_dir))
+    destino = layout.ensure_dir(layout.episode_txt(project_dir))
     with open(destino, "w", encoding="utf-8") as f:
         f.write(texto)
     return destino
 
 
 def render_all(project_dir, platforms, only=None):
-    """Renderiza todos os cortes de momentos.json (ou só os slugs em `only`)."""
+    """Renderiza todos os cortes de moments.json (ou só os slugs em `only`)."""
     video_path = layout.video(project_dir)
-    with open(layout.transcricao(project_dir), encoding="utf-8") as f:
+    with open(layout.transcript(project_dir), encoding="utf-8") as f:
         segments = json.load(f)["segments"]
-    with open(layout.momentos(project_dir), encoding="utf-8") as f:
-        momentos = json.load(f)
+    with open(layout.moments(project_dir), encoding="utf-8") as f:
+        moments = json.load(f)
 
-    nomes = _nomes_proprios(project_dir)
+    nomes = _proper_nouns(project_dir)
 
-    for m in momentos:
+    for m in moments:
         if only and m["slug"] not in only:
             continue
         render_cut(video_path, segments, m, project_dir, platforms, nomes=nomes)
 
-    # Título e descrição do episódio saem junto: quem renderiza está publicando,
-    # e é nessa hora que os dois textos são colados no YouTube.
-    ep_txt = escreve_caption_episodio(project_dir)
+    # Título e descrição do episódio saem junto: who renderiza está publicando,
+    # e é nessa hora que os dois texts são colados no YouTube.
+    ep_txt = write_episode_caption(project_dir)
     if ep_txt:
         print(f"[caption] episódio -> {os.path.basename(ep_txt)}")
 
 
-def _nomes_proprios(project_dir):
-    """Nomes que a legenda deve grafar como o episodio.json manda.
+def _proper_nouns(project_dir):
+    """Nomes que a legenda deve grafar como o episode.json manda.
 
-    A transcrição erra nome próprio (Zarvik/Zarvic/Zlarvik) e a
+    A transcrição erra name próprio (Zarvik/Zarvic/Zlarvik) e a
     legenda vai queimada no vídeo. Episódio sem metadados não quebra o render —
     segue sem correção.
     """
     try:
-        ep = episodio.load(project_dir)
+        ep = episode.load(project_dir)
     except (FileNotFoundError, ValueError):
         return []
-    nomes = [ep.get("empresa", "")]
-    nomes += [c.get("nome", "") for c in ep.get("convidados") or []]
+    nomes = [ep.get("company", "")]
+    nomes += [c.get("name", "") for c in ep.get("guests") or []]
     return [n for n in nomes if n and len(n) >= 4]

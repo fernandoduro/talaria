@@ -1,7 +1,7 @@
 """Transcrição automática: legenda do YouTube (rápido) ou Whisper local (fallback).
 
-Saída: <projeto>/transcricao.json  {"segments": [{start, end, text}]}
-       <projeto>/transcricao.txt   (legível, com [mm:ss] por bloco, p/ curadoria)
+Saída: <project>/transcript.json  {"segments": [{start, end, text}]}
+       <project>/transcript.txt   (legível, com [mm:ss] por bloco, p/ curation)
 """
 import json
 
@@ -9,10 +9,10 @@ from . import acquire, config, layout, utils, vtt_parse
 
 
 def _write_outputs(segments, project_dir):
-    with open(layout.garante(layout.transcricao(project_dir)), "w", encoding="utf-8") as f:
+    with open(layout.ensure_dir(layout.transcript(project_dir)), "w", encoding="utf-8") as f:
         json.dump({"segments": segments}, f, ensure_ascii=False, indent=2)
 
-    # versão legível em blocos de ~25s (1 parágrafo por bloco) p/ curadoria
+    # versão legível em blocos de ~25s (1 parágrafo por bloco) p/ curation
     blocks, cur, start = [], [], None
     for s in segments:
         if start is None:
@@ -23,7 +23,7 @@ def _write_outputs(segments, project_dir):
             cur, start = [], None
     if cur:
         blocks.append((start, segments[-1]["end"], " ".join(cur)))
-    with open(layout.garante(layout.transcricao_txt(project_dir)), "w", encoding="utf-8") as f:
+    with open(layout.ensure_dir(layout.transcript_txt(project_dir)), "w", encoding="utf-8") as f:
         for a, b, txt in blocks:
             f.write(f"[{utils.mmss(a)}-{utils.mmss(b)}] {txt}\n\n")
 

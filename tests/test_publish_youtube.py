@@ -63,7 +63,7 @@ class TestPrivacidade(unittest.TestCase):
                 return insert.call_args.kwargs["body"]["status"]
 
     def test_sem_a_variavel_continua_publico(self):
-        # O default não muda: quem não configurou nada publica como sempre.
+        # O default não muda: who não configurou nada publica como sempre.
         self.assertEqual(self._sobe({})["privacyStatus"], "public")
 
     def test_unlisted_permite_conferir_antes_de_abrir(self):
