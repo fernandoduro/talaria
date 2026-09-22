@@ -267,7 +267,7 @@ module	textos	texts	global	texts, not copy: copy is a stdlib module
 filename	_card_encerramento.mp4	_end_card.mp4	global	single on-disk literal in layout.py; found by Finding 3 fix-round grep, not enumerated in the original brief (top-level defs/constants only)
 filename	concatenado.mp4	concatenated.mp4	global	temp filename inside render.py end-card concat step; ephemeral (mkdtemp, moved over corte_path immediately) but still a Portuguese on-disk literal
 function	nomes	names	global	plural of nome (already global); parameter/local in utils.fix_proper_nouns, post_instagram.clean_quote and five render.py functions that thread the proper-nouns list through the call chain - never a false positive, no other sense
-function	texto	text	manual	fix-round-1 gap: parameters on hashtags.slug, curation.has_hedged_number, post_instagram.wrap/validate_card/clean_quote/render_card's local, caption.write and render.py's second write_captions' local - the other ~98 occurrences are the pervasive generic local/prose "texto", never enumerated and out of scope here
+function	texto	text	manual	fix-round-1/2: parameters on hashtags.slug, curation.has_hedged_number, post_instagram.wrap/validate_card/clean_quote/render_card's local (incl. its generate() local), render.py's write_episode_caption and second write_captions' local, test_environment.py's _write param, publish.py's precheck local, and test_brief.py's/test_publish.py's locals - the remaining occurrences are the pervasive generic local/prose "texto" (comments, docstrings, and the "não cabe na largura"/"cortando palavra" runtime strings, which must stay Portuguese) - out of scope
 function	caminho_peca	piece_path	global	parameter on caption.txt_path (formerly caminho) and caption.write; confined, no other sense
 function	tem_convidado	has_guest	global	local in episode._validate_company_or_topic; confined, no other sense
 function	tem_empresa	has_company	global	local in episode._validate_company_or_topic; confined, no other sense
@@ -277,11 +277,214 @@ function	fcargo	role_font	global	local in post_instagram.render_card; confined, 
 function	legendas	captions	manual	fix-round-1 gap: parameter on post_instagram.write_captions only; "legendas" also appears as ordinary prose (render.py docstrings/comments, config.py) meaning captions/subtitles generically - leave those, Task 8's job
 function	metadados	metadata	manual	fix-round-1 gap: parameter on brief.fill_template and its two internal callers' kwarg; also appears in brief.py's module docstring, a function docstring, and test method names - leave those, Task 8's job
 function	largura	width	manual	fix-round-1 gap: parameter on render.wrap_by_pixels and its three kwarg call sites (post_instagram.py, test_render.py x2); also appears as ordinary prose ("a largura", docstrings) elsewhere in render.py/post_instagram.py - leave those, Task 8's job
-function	valor	value	manual	fix-round-1 gap: parameters on caption.validate (2nd) and environment._clean_value; also a pervasive generic local ("chave, valor = linha.split(...)" in environment.load, and prose "um valor de outro kind") - leave those, out of scope here
+function	valor	value	manual	fix-round-1/2: parameters on caption.validate (2nd) and environment._clean_value; environment.load's own local (renamed alongside chave/linha/postas); hashtags.build's loop var; publish_youtube.privacy's local; episode.youtube_url's local; run.py's cmd_thumb local; test_caption.py's _validate param - the remaining occurrences are prose ("um valor de outro kind") - out of scope
 function	campo	field	manual	fix-round-1 gap: parameter on caption.validate (1st); also pervasive prose ("qual campo", "anterior ao campo") elsewhere - leave those, out of scope here
-function	peca	piece	manual	fix-round-1 gap: parameter/local on render._is_youtube_output and render.write_captions' loop variable (the render.py version, distinct from post_instagram.write_captions); also pervasive prose ("a peça", "cada peça") elsewhere and a test-local variable at test_render.py:328 - leave those, out of scope here
-function	pecas	pieces	manual	fix-round-1 gap: parameter on render.write_captions (project_dir, moment, pecas) only; a test-local variable at test_render.py:315 with the same name is out of scope
-function	pasta	folder	manual	fix-round-1 gap: local in render._is_youtube_output only; "pasta" is also one of the most common Portuguese words for "folder" and appears throughout as prose/other locals - leave those, out of scope here
+function	peca	piece	manual	fix-round-1/2: parameter/local on render._is_youtube_output and render.write_captions' loop variable (the render.py version, distinct from post_instagram.write_captions), plus every test-local variable of the same name in test_render.py/test_caption.py; the remaining occurrences are pervasive prose ("a peça", "cada peça") - out of scope
+function	pecas	pieces	manual	fix-round-1/2: parameter on render.write_captions (project_dir, moment, pecas), plus test_render.py's/test_caption.py's test-local variables of the same name - out of scope elsewhere
+function	pasta	folder	manual	fix-round-1/2: local in render._is_youtube_output, acquire.acquire, publish.py's _post_pngs, test_published.py, test_end_card.py and test_publish.py (whole-file sweep, verified no docstring in that file) - "pasta" is also one of the most common Portuguese words for "folder" and appears throughout as prose/other locals elsewhere - out of scope there
 function	tamanho	size	manual	fix-round-1 gap: parameter on post_instagram._truetype (2nd) only; also pervasive prose ("tamanho da fonte", "tamanho do clip") elsewhere - leave those, out of scope here
 filename	brief_materiais.md	brief_materials.md	global	legacy _MIGRATION source key in layout.py, left half-renamed after the cortes/materiais manual pass; fix-round-1 Finding 5 - rename for internal consistency, table is untested against real data
 filename	brief_cortes.md	brief_clips.md	global	legacy _MIGRATION source key in layout.py, left half-renamed after the cortes/materiais manual pass; fix-round-1 Finding 5 - rename for internal consistency, table is untested against real data
+constant	ANTIGOS	OLD_NAMES	global	fix-round-2 gap (789-identifier inventory): uppercase constant, test_layout.py
+constant	CITACAO_DO_DESIGN	DESIGN_QUOTE	global	fix-round-2 gap (789-identifier inventory): uppercase constant, test_render.py
+class	TestAberturaDoHost	TestHostOpening	global	fix-round-2 gap (789-identifier inventory): class name, matches host_opening()
+class	TestAjusteRespeitaMinimo	TestAdjustRespectsMinimum	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestAtribuicaoConfiavel	TestAttributionTrustworthy	global	fix-round-2 gap (789-identifier inventory): class name, matches attribution_trustworthy()
+class	TestAutorETexto	TestAuthorAndText	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCaminhos	TestPaths	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCaminhosPublicacao	TestPublishPaths	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCaptionDoCorte	TestClipCaption	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCaptionDoEpisodio	TestEpisodeCaption	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCaptionDoPost	TestPostCaption	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCardCacheado	TestCachedCard	global	fix-round-2 gap (789-identifier inventory): class name, matches cached_card()
+class	TestCarrega	TestLoad	global	fix-round-2 gap (789-identifier inventory): class name, matches carrega->load
+class	TestCaudaVaza	TestClipsMidWord	global	fix-round-2 gap (789-identifier inventory): class name, matches clips_mid_word function it tests
+class	TestConcatenaEncerramento	TestConcatenateEndCard	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestCorrigeNomes	TestFixProperNouns	global	fix-round-2 gap (789-identifier inventory): class name, matches fix_proper_nouns()
+class	TestCredenciais	TestCredentials	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestEncaixe	TestFit	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestEpisodio	TestEpisode	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestEscreve	TestWrite	global	fix-round-2 gap (789-identifier inventory): class name, matches _escreve->_write
+class	TestEstadoInicial	TestInitialState	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestExecutar	TestExecute	global	fix-round-2 gap (789-identifier inventory): class name, matches execute()
+class	TestExportacao	TestExport	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestFimEmFraseCompleta	TestEndAtCompleteSentence	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestFinsDeFrase	TestSentenceEnds	global	fix-round-2 gap (789-identifier inventory): class name, matches sentence_ends()
+class	TestFluxoCompleto	TestFullFlow	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestFontesVersionadas	TestVersionedFonts	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestGerar	TestGenerate	global	fix-round-2 gap (789-identifier inventory): class name, matches generate()
+class	TestHesitacaoNumerica	TestHedgedNumber	global	fix-round-2 gap (789-identifier inventory): class name, matches has_hedged_number()
+class	TestHostDoToken	TestHostForToken	global	fix-round-2 gap (789-identifier inventory): class name, matches host_for_token()
+class	TestJaPublicado	TestAlreadyPublished	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestLegendaValidaAntesDeEscrever	TestCaptionValidatedBeforeWriting	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestMarcaDaguaECardIntegracao	TestWatermarkAndCardIntegration	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestMarcaDaguaGraph	TestWatermarkGraph	global	fix-round-2 gap (789-identifier inventory): class name, matches _watermark_graph
+class	TestMargemDeFim	TestEndMargin	global	fix-round-2 gap (789-identifier inventory): class name, matches apply_end_margin
+class	TestMigracao	TestMigration	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestMigracaoAutomatica	TestAutomaticMigration	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestMigracaoDefensiva	TestDefensiveMigration	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestMonta	TestBuild	global	fix-round-2 gap (789-identifier inventory): class name, matches montar->build
+class	TestMontaCard	TestComposeCard	global	fix-round-2 gap (789-identifier inventory): class name, matches compose_card()
+class	TestMontaEpisodio	TestComposeEpisode	global	fix-round-2 gap (789-identifier inventory): class name, matches compose_episode
+class	TestOperacoes	TestOperations	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestOrdemCaudaVazaAntesDoCard	TestClipsMidWordOrderBeforeCard	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestPendente	TestPending	global	fix-round-2 gap (789-identifier inventory): class name, matches pendente->pending
+class	TestPreChecagem	TestPrecheck	global	fix-round-2 gap (789-identifier inventory): class name, matches precheck()
+class	TestPrivacidade	TestPrivacy	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestProtagonismo	TestProminence	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestPublicaPost	TestPublishPost	global	fix-round-2 gap (789-identifier inventory): class name, matches publish_post()
+class	TestPublicaReel	TestPublishReel	global	fix-round-2 gap (789-identifier inventory): class name, matches publish_reel()
+class	TestQueimados	TestBurned	global	fix-round-2 gap (789-identifier inventory): class name, matches is_burned/burned_spans
+class	TestRegistra	TestRecord	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestResolucaoDeFalante	TestSpeakerResolution	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestSobe	TestPut	global	fix-round-2 gap (789-identifier inventory): class name, matches sobe->put
+class	TestSobreposicao	TestOverlap	global	fix-round-2 gap (789-identifier inventory): class name, matches overlaps()
+class	TestSobreposicaoEntreAprovados	TestOverlapBetweenApproved	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestSugereFrames	TestSuggestFrames	global	fix-round-2 gap (789-identifier inventory): class name, matches suggest_frames
+class	TestTextos	TestTexts	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestTravessao	TestEmDash	global	fix-round-2 gap (789-identifier inventory): class name, matches TRAVESSAO->EM_DASH
+class	TestValeAntes	TestValleBefore	global	fix-round-2 gap (789-identifier inventory): class name, matches valley_before
+class	TestValidaClientSecret	TestValidateClientSecret	global	fix-round-2 gap (789-identifier inventory): class name, matches validate_client_secret()
+class	TestValidaTexto	TestValidateText	global	fix-round-2 gap (789-identifier inventory): class name
+class	TestValidacoes	TestValidations	global	fix-round-2 gap (789-identifier inventory): class name
+function	_episodio	_episode	global	fix-round-2 gap (789-identifier inventory): private local named after episode module
+function	_projeto_antigo	_old_project	global	fix-round-2 gap (789-identifier inventory): compound, test helper method name
+function	_textos	_texts	global	fix-round-2 gap (789-identifier inventory): private local named after texts module
+function	_valida	_validate	global	fix-round-2 gap (789-identifier inventory): test helper method name, test_caption.py
+function	achado	matches	global	fix-round-2 gap (789-identifier inventory): post_instagram.py filtered-guest-matches list (named singular in the original despite being a list)
+function	achados	matches	global	fix-round-2 gap (789-identifier inventory): utils.py regex findall results
+function	alertas	alerts	global	fix-round-2 gap (789-identifier inventory): list of warning strings returned by clip_warnings
+function	alvo	target	global	fix-round-2 gap (789-identifier inventory): destination/comparison-target local; different files/scopes than curation's target, no collision
+function	anterior	previous	manual	fix-round-2 gap (789-identifier inventory): test_txt_parse.py's previous-speaker local (6 sites); common Portuguese word ("previous/earlier") elsewhere as prose - stays Portuguese there
+function	antes	before	manual	fix-round-2 gap (789-identifier inventory): test-local var name in one file only; also ordinary prose ("antes de") everywhere else - kept manual
+function	antigo	old	global	fix-round-2 gap (789-identifier inventory): old-name loop/local var, layout.py migration
+function	arq	fname	global	fix-round-2 gap (789-identifier inventory): abbreviation of arquivo, sanitized-filename-base local in publish.py/post_instagram.py
+function	arquivo	file	global	fix-round-2 gap (789-identifier inventory): layout.py _check_dirs local
+function	arquivos	files	global	fix-round-2 gap (789-identifier inventory): test_layout.py local, plural of arquivo/file
+function	arroba_h	handle_h	global	fix-round-2 gap (789-identifier inventory): compound, end_card.py local; CARD_ARROBA already renamed uppercase
+function	atras	behind	global	fix-round-2 gap (789-identifier inventory): render.py word-boundary-snap index local
+function	atual	current	manual	fix-round-2 gap (789-identifier inventory): txt_parse.py's current-speaker local (3 sites); common Portuguese word elsewhere as prose - stays Portuguese there
+function	ausentes	missing	global	fix-round-2 gap (789-identifier inventory): run.py local for curation.missing_kinds() result
+function	autor	author	global	fix-round-2 gap (789-identifier inventory): one remaining site beyond render_card's already-renamed param - see application notes
+function	bloco_h	block_h	global	fix-round-2 gap (789-identifier inventory): compound, end_card.py local
+function	bruto	raw	global	fix-round-2 gap (789-identifier inventory): post_instagram.py raw-card-value loop var; different scope than existing "raw", no collision
+function	busca	search	global	fix-round-2 gap (789-identifier inventory): audio.py valley_before param; SEARCH_S constant already renamed uppercase
+function	caminho_2	path_2	global	fix-round-2 gap (789-identifier inventory): compound, test-local (leftover from caminho->path pass, protected by trailing _2)
+function	caminhos	paths	global	fix-round-2 gap (789-identifier inventory): plural of caminho/path, test-local list
+function	campos	fields	manual	fix-round-2 gap (789-identifier inventory): the identifier is only scripts/youtube_auth.py:48's local; every other "campos" is ordinary prose (including inside a couple of raised messages) - those stay
+function	centro	center	global	fix-round-2 gap (789-identifier inventory): test-local
+function	chave	key	manual	fix-round-2 gap (789-identifier inventory): parsed .env key local in environment.py; "a chave" is ordinary prose in caption.py docstrings/comments - those stay; no collision with storage_temp.py's unrelated "key"
+function	classe	char_class	global	fix-round-2 gap (789-identifier inventory): utils.py phonetic-equivalents loop var
+function	cod	code	global	fix-round-2 gap (789-identifier inventory): abbreviation of codigo; texts.py local, calls episode.code() - no collision
+function	conhecidas	known	global	fix-round-2 gap (789-identifier inventory): schedule.py known-platforms set
+function	conta	account	global	fix-round-2 gap (789-identifier inventory): Instagram/Graph API account id local
+function	conteudo	content	global	fix-round-2 gap (789-identifier inventory): brief-text content local in brief.py
+function	corpo	body	global	fix-round-2 gap (789-identifier inventory): API request/response body local
+function	corte_path	clip_path	global	fix-round-2 gap (789-identifier inventory): compound param, render.py
+function	dados	data	global	fix-round-2 gap (789-identifier inventory): generic-dict local/param, several files; no collision with the schedule-item "date" sense already renamed
+function	dentro	inside	global	fix-round-2 gap (789-identifier inventory): segments-within-clip local in curation.py, 4 sites; run.py:124's print statement uses "dentro" as ordinary prose - stays Portuguese
+function	desconhecidos	unknown_slugs	global	fix-round-2 gap (789-identifier inventory): schedule.py; named distinctly from estranhas, see above
+function	destino	destination	global	fix-round-2 gap (789-identifier inventory): target path local, layout.py/end_card.py
+function	destino_de	dest_fn	global	fix-round-2 gap (789-identifier inventory): compound, layout.py migration loop var (a callable)
+function	dia	day	manual	fix-round-2 gap (789-identifier inventory): pending()/execute()'s day parameter, keyword-called extensively (tests, publish.py, run.py) - all call sites updated; the word's prose occurrences are confined to comments/docstrings
+function	do_pl	by_pl	global	fix-round-2 gap (789-identifier inventory): compound (Portuguese "do" + platform abbreviation), run.py local
+function	duracao	duration	global	fix-round-2 gap (789-identifier inventory): test-local; DURACAO_S-style constants already renamed uppercase elsewhere
+function	duracoes_vistas	durations_seen	global	fix-round-2 gap (789-identifier inventory): compound, test-local
+function	errado	wrong	global	fix-round-2 gap (789-identifier inventory): test-local
+function	erros	errors	global	fix-round-2 gap (789-identifier inventory): list of error-message strings
+function	escolhidos	chosen	global	fix-round-2 gap (789-identifier inventory): post_instagram.py chosen-moments local
+function	escritos	written	global	fix-round-2 gap (789-identifier inventory): list of written output paths
+function	espaco	space	global	fix-round-2 gap (789-identifier inventory): end_card.py layout local
+function	especificacao	spec	global	fix-round-2 gap (789-identifier inventory): test-helper param name
+function	esperado	expected	global	fix-round-2 gap (789-identifier inventory): test-local; EXPECTED constant already renamed uppercase, no collision (different case/scope)
+function	espiao	spy	global	fix-round-2 gap (789-identifier inventory): test-local mock name
+function	estado	state	global	fix-round-2 gap (789-identifier inventory): curation-state dict/param; 138 occurrences across 11 files incl. ~15 curation.py signatures; no second sense
+function	estado_txt	state_txt	global	fix-round-2 gap (789-identifier inventory): compound with estado, brief.py local
+function	estranhas	unknown_platforms	global	fix-round-2 gap (789-identifier inventory): schedule.py; named distinctly from desconhecidos (same function, different check) to avoid same-name reuse
+function	excesso	excess	global	fix-round-2 gap (789-identifier inventory): post_instagram.py over-limit count local
+function	faixa	span	manual	fix-round-2 gap (789-identifier inventory): (start,end) tuple parameter in curation.py; also an ordinary Portuguese noun ("band/range") in a few comments - those stay
+function	faixas	spans	manual	fix-round-2 gap (789-identifier inventory): plural of faixa, same caveat
+function	fallback_tema	fallback_topic	global	fix-round-2 gap (789-identifier inventory): hashtags.py param, compound with already-renamed topics
+function	faltam	missing	global	fix-round-2 gap (789-identifier inventory): missing-env-var-names local, publish_youtube.py/publish_instagram.py; different scope than faltando/ausentes, no collision
+function	faltando	missing	global	fix-round-2 gap (789-identifier inventory): list of missing required fields, episode.py
+function	feitos	done	global	fix-round-2 gap (789-identifier inventory): run.py's already-published-platforms list
+function	filho	child	global	fix-round-2 gap (789-identifier inventory): carousel child-container local, publish_instagram.py
+function	filhos	children	global	fix-round-2 gap (789-identifier inventory): carousel child-container list, publish_instagram.py
+function	fim	end	manual	fix-round-2 gap (789-identifier inventory): extremely common Portuguese word ("end"); apply only to the specific local/param sites that hold a time value (audio.py, brief.py's ini/fim, render.py word-boundary snapping), never the pervasive prose "o fim"/"no fim"
+function	fim_5	end_5	global	fix-round-2 gap (789-identifier inventory): compound (protected from bare fim), test_post_instagram.py local
+function	fim_6	end_6	global	fix-round-2 gap (789-identifier inventory): compound (protected from bare fim), test_post_instagram.py local
+function	fim_de_frase	sentence_end	global	fix-round-2 gap (789-identifier inventory): compound tuple-of-punctuation local in render.py; RE_FIM_DE_FRASE constant already renamed uppercase, no collision
+function	fixa	fixed	global	fix-round-2 gap (789-identifier inventory): test-local boolean/value
+function	frente	ahead	global	fix-round-2 gap (789-identifier inventory): render.py word-boundary-snap index local
+function	futuro	future	global	fix-round-2 gap (789-identifier inventory): test-local date value
+function	gerados	generated	global	fix-round-2 gap (789-identifier inventory): list of generated output paths
+function	grupo	group	global	fix-round-2 gap (789-identifier inventory): test-local
+function	identidade	identity	global	fix-round-2 gap (789-identifier inventory): test-local font-identity tuple
+function	ini	start	manual	fix-round-2 gap (789-identifier inventory): brief.py's/render.py's ini/fim pair, short for inicio; renamed after checking no local collision
+function	inicio	start	manual	fix-round-2 gap (789-identifier inventory): collides in sense with existing "start"; renamed per-site (audio.py params, brief.py's ini/fim pair) after checking no local collision; "início"-as-prose in comments stays Portuguese
+function	itens	items	manual	fix-round-2 gap (789-identifier inventory): test-local var in test_render.py only; run.py:65's "N itens" print message is ordinary prose, stays Portuguese
+function	ja_existia	already_existed	global	fix-round-2 gap (789-identifier inventory): compound, run.py local
+function	janela	window	global	fix-round-2 gap (789-identifier inventory): audio.py local; WINDOW_S constant already renamed uppercase
+function	letra	letter	global	fix-round-2 gap (789-identifier inventory): utils.py phonetic-equivalents loop var
+function	limiar	threshold	global	fix-round-2 gap (789-identifier inventory): float threshold local in audio.py; LIMIAR_* constants already renamed uppercase
+function	limiar_db	threshold_db	global	fix-round-2 gap (789-identifier inventory): compound, audio.py local
+function	limite	limit	global	fix-round-2 gap (789-identifier inventory): brief.py line-limit text local
+function	limpo	cleaned	global	fix-round-2 gap (789-identifier inventory): sanitized-slug local in post_instagram.py
+function	linha	line	manual	fix-round-2 gap (789-identifier inventory): loop var meaning "line of text" in post_instagram.py/environment.py; "linha" is also extremely common Portuguese prose ("linha 1", docstrings) elsewhere - those stay
+function	marca	marker	manual	fix-round-2 gap (789-identifier inventory): brief.py's ">> " turn-marker local; "marca" is also the verb "marks" (txt_parse.py) and part of "marca d'água"/watermark prose (render.py) - those stay
+function	mau	bad	global	fix-round-2 gap (789-identifier inventory): test-local values, no other sense
+function	meios	midpoints	global	fix-round-2 gap (789-identifier inventory): thumbnail.py local for clip midpoints
+function	menor	smaller	global	fix-round-2 gap (789-identifier inventory): test-local comparison value
+function	metodo	method	global	fix-round-2 gap (789-identifier inventory): publish_instagram.py HTTP-method param
+function	momentos_path	moments_path	global	fix-round-2 gap (789-identifier inventory): compound (protected from bare momentos), run.py local
+function	move_que_morre	move_that_dies	global	fix-round-2 gap (789-identifier inventory): test mock function name
+function	movidos	moved	global	fix-round-2 gap (789-identifier inventory): list of moved (old,new) path pairs
+function	na_raiz	at_root	global	fix-round-2 gap (789-identifier inventory): compound (protected from bare raiz), test_layout.py local
+function	nota	note	global	fix-round-2 gap (789-identifier inventory): layout.py migration-report note string local
+function	numerados	numbered	global	fix-round-2 gap (789-identifier inventory): publish.py numbered-PNG list
+function	onde	where	manual	fix-round-2 gap (789-identifier inventory): common Portuguese word used to build error-location strings (schedule.py/run.py); the local variable is renamed, the prose sentences around it stay Portuguese
+function	origem	origin	global	fix-round-2 gap (789-identifier inventory): source-detection local in acquire.py
+function	padrao	pattern	global	fix-round-2 gap (789-identifier inventory): compiled regex Pattern local in publish.py; PADRAO constant already renamed uppercase, no collision
+function	pai	parent	global	fix-round-2 gap (789-identifier inventory): carousel parent-container local, publish_instagram.py
+function	pai_params	parent_params	global	fix-round-2 gap (789-identifier inventory): compound, test-local
+function	palavra	word	manual	fix-round-2 gap (789-identifier inventory): singular; mostly ordinary prose ("cortando palavra") - no clean identifier site found beyond prose, kept manual
+function	palavras	words	global	fix-round-2 gap (789-identifier inventory): word-list locals in hashtags.py/render.py; different scopes than existing "words", no collision
+function	pares	pairs	global	fix-round-2 gap (789-identifier inventory): (item, platform) pairs list
+function	parte	part	manual	fix-round-2 gap (789-identifier inventory): scripts/youtube_auth.py's error-detail local (2 sites); "parte" is also ordinary Portuguese prose ("parte a frase", fixture text) elsewhere - stays Portuguese there
+function	partes	parts	global	fix-round-2 gap (789-identifier inventory): list-of-string-parts local, several files
+function	passo	step	global	fix-round-2 gap (789-identifier inventory): thumbnail.py local; unrelated to already-renamed POST_QUOTE_STEP constant
+function	piso	floor	global	fix-round-2 gap (789-identifier inventory): render.py margin-floor local
+function	planejado	planned	global	fix-round-2 gap (789-identifier inventory): post_instagram.py planned-writes list
+function	plataformas	platforms	manual	fix-round-2 gap (789-identifier inventory): execute()/pending()'s platforms parameter, keyword-called (run.py, publish.py); prose occurrences confined to comments/docstrings, and PLATFORMS constant already uppercase with no collision
+function	pontos	points	global	fix-round-2 gap (789-identifier inventory): list of (t, dB) points in audio.py
+function	por_pl	per_pl	global	fix-round-2 gap (789-identifier inventory): compound (Portuguese "por" + platform abbreviation), test_publish.py local
+function	postas	added	global	fix-round-2 gap (789-identifier inventory): environment.py count of env vars set
+function	primeira_pessoa	first_person	global	fix-round-2 gap (789-identifier inventory): compound comment/local matching RE_FIRST_PERSON
+function	primeiro	first	global	fix-round-2 gap (789-identifier inventory): test-local
+function	quem_assina	signer	global	fix-round-2 gap (789-identifier inventory): compound local naming who signs the quote; distinct from the pronoun "quem", which stays Portuguese
+function	querido	wanted	global	fix-round-2 gap (789-identifier inventory): run.py's requested-clip-numbers set
+function	raiz	stem/root	manual	fix-round-2 gap (789-identifier inventory): filename-stem local in end_card.py/caption.py (renamed stem); os.walk/repo-root local in test_layout.py/test_fonts.py (renamed root); ALSO the literal string in utils.py's _COMMON_WORDS allowlist (like "meta") and ordinary prose ("na raiz do episódio") elsewhere - those stay
+function	relogio	clock	global	fix-round-2 gap (789-identifier inventory): test-local mock-clock name
+function	reservas	reserved	global	fix-round-2 gap (789-identifier inventory): utils.py reserved-regex-chars local
+function	resposta	response	global	fix-round-2 gap (789-identifier inventory): API response local in publish_youtube.py; distinct from test helper _response, no collision
+function	resultados	results	global	fix-round-2 gap (789-identifier inventory): list of per-item results
+function	rodape	footer	global	fix-round-2 gap (789-identifier inventory): post_instagram.py footer-line local
+function	ruim	bad	global	fix-round-2 gap (789-identifier inventory): test-local values, no other sense
+function	saida	output/output_dir	global	fix-round-2 gap (789-identifier inventory): output-path local, several files; named output_dir in post_instagram.py/render.py, output in two test helpers
+function	se_existe	exists	global	fix-round-2 gap (789-identifier inventory): end_card.py boolean local
+function	segundo	second	global	fix-round-2 gap (789-identifier inventory): test_post_instagram.py's second-guest-result local; single site
+function	sem_acento	unaccented	global	fix-round-2 gap (789-identifier inventory): compound, hashtags.py local
+function	sem_registro	no_record	global	fix-round-2 gap (789-identifier inventory): compound, run.py local
+function	sobras	leftovers	global	fix-round-2 gap (789-identifier inventory): test-local orphaned-file list
+function	sobreviventes	survivors	global	fix-round-2 gap (789-identifier inventory): test_layout.py local
+function	stat_antes	stat_before	global	fix-round-2 gap (789-identifier inventory): compound, test-local
+function	tmp_destino	tmp_dest	global	fix-round-2 gap (789-identifier inventory): compound, end_card.py temp-path local
+function	todo	combined	global	fix-round-2 gap (789-identifier inventory): test_txt_parse.py joined-text local; not the English acronym TODO
+function	topo	top	global	fix-round-2 gap (789-identifier inventory): end_card.py layout local
+function	transcricao_path	transcript_path	global	fix-round-2 gap (789-identifier inventory): compound (protected from bare transcricao), run.py local
+function	ultimo	last	global	fix-round-2 gap (789-identifier inventory): test-local values
+function	unico	single	global	fix-round-2 gap (789-identifier inventory): publish.py single-PNG-path local
+function	url_episodio	episode_url	global	fix-round-2 gap (789-identifier inventory): compound, caption.py param
+function	vale	valley	manual	fix-round-2 gap (789-identifier inventory): render.py's local holding audio.valley_before()'s result; "vale" is also the extremely common Portuguese verb "is worth/matters" in comments - those stay
+function	vazios	empty	global	fix-round-2 gap (789-identifier inventory): episode.py empty-required-fields list
+function	vistos	seen	global	fix-round-2 gap (789-identifier inventory): curation.py's own seen-slugs set; different file/scope than schedule.py's already-renamed vistos->seen, no collision

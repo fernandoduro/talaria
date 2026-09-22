@@ -1,0 +1,790 @@
+identifier	count	verdict	note
+self	479	english	
+path	48	abbreviation	
+segs	43	abbreviation	
+setUp	35	english	
+project_dir	33	english	
+req	30	abbreviation	
+out	29	abbreviation	
+txt	27	abbreviation	
+estado	26	renamed	-> state (global); curation-state dict/param; 138 occurrences across 11 files incl. ~15 curation.py signatures; no second sense
+args	22	english	
+storage	22	english	
+name	21	english	
+pares	19	renamed	-> pairs (global); (item, platform) pairs list
+text	16	english	
+cur	15	abbreviation	
+slug	15	english	
+names	15	english	
+start	14	english	
+end	14	english	
+video_path	13	english	
+url	13	english	
+moments	13	english	
+dur	11	abbreviation	
+lines	11	english	
+item	11	ambiguous	same spelling/sense in both languages
+video	11	ambiguous	same spelling/sense in both languages (video vs vídeo, unaccented already)
+msgs	11	abbreviation	
+destino	10	renamed	-> destination (global); target path local, layout.py/end_card.py
+reg	10	english	
+blocks	9	english	
+segments	9	english	
+img	9	abbreviation	
+buf	9	abbreviation	
+corpo	9	renamed	-> body (global); API request/response body local
+items	9	english	
+boto3_mock	9	third_party	boto3 is the AWS SDK name we did not choose
+pontos	8	renamed	-> points (global); list of (t, dB) points in audio.py
+posts	8	english	
+clip	8	english	
+erros	8	renamed	-> errors (global); list of error-message strings
+itens	8	renamed	-> items (manual); test-local var in test_render.py only; run.py:65's "N itens" print message is ordinary prose, stays Portuguese
+fim	7	renamed	-> end (manual); extremely common Portuguese word ("end"); apply only to the specific local/param sites that hold a time value (audio.py, brief.py's ini/fim, render.py word-boundary snapping), never the pervasive prose "o fim"/"no fim"
+load	7	english	
+linha	7	renamed	-> line (manual); loop var meaning "line of text" in post_instagram.py/environment.py; "linha" is also extremely common Portuguese prose ("linha 1", docstrings) elsewhere - those stay
+msg	7	abbreviation	
+status	7	english	
+fnt	7	abbreviation	
+dados	7	renamed	-> data (global); generic-dict local/param, several files; no collision with the schedule-item "date" sense already renamed
+saida	7	renamed	-> output/output_dir (global); output-path local, several files; named output_dir in post_instagram.py/render.py, output in two test helpers
+gerados	7	renamed	-> generated (global); list of generated output paths
+base	7	english	
+faixa	7	renamed	-> span (manual); (start,end) tuple parameter in curation.py; also an ordinary Portuguese noun ("band/range") in a few comments - those stay
+inicio	6	renamed	-> start (manual); collides in sense with existing "start"; renamed per-site (audio.py params, brief.py's ini/fim pair) after checking no local collision; "início"-as-prose in comments stays Portuguese
+kind	6	english	
+partes	6	renamed	-> parts (global); list-of-string-parts local, several files
+token	6	english	
+resultados	6	renamed	-> results (global); list of per-item results
+movidos	6	renamed	-> moved (global); list of moved (old,new) path pairs
+frac	6	abbreviation	
+ruim	6	renamed	-> bad (global); test-local values, no other sense
+tags	5	english	
+escritos	5	renamed	-> written (global); list of written output paths
+clips	5	english	
+template	5	english	
+alvo	5	renamed	-> target (global); destination/comparison-target local; different files/scopes than curation's target, no collision
+alertas	5	renamed	-> alerts (global); list of warning strings returned by clip_warnings
+words	4	english	
+line	4	english	
+out_path	4	english	
+raiz	4	renamed	-> stem/root (manual); filename-stem local in end_card.py/caption.py (renamed stem); os.walk/repo-root local in test_layout.py/test_fonts.py (renamed root); ALSO the literal string in utils.py's _COMMON_WORDS allowlist (like "meta") and ordinary prose ("na raiz do episódio") elsewhere - those stay
+cmd	4	abbreviation	
+title	4	english	
+description	4	english	
+key	4	english	
+value	4	english	
+hashtags	4	english	
+platform	4	english	
+conta	4	renamed	-> account (global); Instagram/Graph API account id local
+tmpdir	4	abbreviation	
+only	4	english	
+anterior	4	renamed	-> previous (manual); test_txt_parse.py's previous-speaker local (6 sites); common Portuguese word ("previous/earlier") elsewhere as prose - stays Portuguese there
+insert	4	ambiguous	English word; also happens to be a Portuguese loanword/cognate in this codebase's usage (YouTube API's videos().insert())
+model	3	english	
+re_	3	abbreviation	
+limiar	3	renamed	-> threshold (global); float threshold local in audio.py; LIMIAR_* constants already renamed uppercase
+faltam	3	renamed	-> missing (global); missing-env-var-names local, publish_youtube.py/publish_instagram.py; different scope than faltando/ausentes, no collision
+bucket	3	english	
+piece	3	english	
+atual	3	renamed	-> current (manual); txt_parse.py's current-speaker local (3 sites); common Portuguese word elsewhere as prose - stays Portuguese there
+chave	3	renamed	-> key (manual); parsed .env key local in environment.py; "a chave" is ordinary prose in caption.py docstrings/comments - those stay; no collision with storage_temp.py's unrelated "key"
+palavras	3	renamed	-> words (global); word-list locals in hashtags.py/render.py; different scopes than existing "words", no collision
+FILE_NAME	3	english	
+save	3	english	
+guests	3	english	
+moment	3	english	
+sub	3	abbreviation	
+today	3	english	
+dia	3	renamed	-> day (manual); pending()/execute()'s day parameter, keyword-called extensively (tests, publish.py, run.py) - all call sites updated; the word's prose occurrences are confined to comments/docstrings
+plataformas	3	renamed	-> platforms (manual); execute()/pending()'s platforms parameter, keyword-called (run.py, publish.py); prose occurrences confined to comments/docstrings, and PLATFORMS constant already uppercase with no collision
+arq	3	renamed	-> fname (global); abbreviation of arquivo, sanitized-filename-base local in publish.py/post_instagram.py
+conteudo	3	renamed	-> content (global); brief-text content local in brief.py
+faltando	3	renamed	-> missing (global); list of missing required fields, episode.py
+pngs	3	english	
+origem	3	renamed	-> origin (global); source-detection local in acquire.py
+bak	3	abbreviation	
+dentro	3	renamed	-> inside (global); segments-within-clip local in curation.py, 4 sites; run.py:124's print statement uses "dentro" as ordinary prose - stays Portuguese
+comp	3	abbreviation	
+ultimo	3	renamed	-> last (global); test-local values
+_write	3	english	
+kwargs	3	abbreviation	
+TestCarrega	3	renamed	-> TestLoad (global); class name, matches carrega->load
+tpl	3	abbreviation	
+device	2	english	
+compute	2	english	
+vtt	2	abbreviation	
+pad	2	abbreviation	
+parts	2	english	
+fill	2	english	
+desc	2	abbreviation	
+dbs	2	abbreviation	
+inst	2	abbreviation	
+frame	2	english	
+frame_path	2	english	
+vid	2	abbreviation	
+src	2	abbreviation	
+SCOPES	2	english	
+_credentials	2	english	
+resposta	2	renamed	-> response (global); API response local in publish_youtube.py; distinct from test helper _response, no collision
+_ROOT	2	english	
+piece_path	2	english	
+cur_start	2	english	
+raw	2	english	
+turn	2	english	
+ends	2	english	
+too_long	2	english	
+params	2	abbreviation	
+container_id	2	english	
+caption	2	english	
+build	2	english	
+city	2	english	
+company	2	english	
+fallback_tema	2	renamed	-> fallback_topic (global); hashtags.py param, compound with already-renamed topics
+topics	2	english	
+grad	2	english	
+draw	2	english	
+write_captions	2	english	
+width	2	english	
+subdir	2	english	
+ini	2	renamed	-> start (manual); brief.py's/render.py's ini/fim pair, short for inicio; renamed after checking no local collision
+png	2	abbreviation	
+platforms	2	english	
+seek_inputs	2	english	
+onde	2	renamed	-> where (manual); common Portuguese word used to build error-location strings (schedule.py/run.py); the local variable is renamed, the prose sentences around it stay Portuguese
+cards	2	english	
+pls	2	abbreviation	
+limpo	2	renamed	-> cleaned (global); sanitized-slug local in post_instagram.py
+ROOT	2	english	
+ausentes	2	renamed	-> missing (global); run.py local for curation.missing_kinds() result
+estado_txt	2	renamed	-> state_txt (global); compound with estado, brief.py local
+transcript	2	english	
+curation	2	english	
+pat	2	abbreviation	
+orig	2	abbreviation	
+seconds	2	english	
+_sub	2	english	
+padrao	2	renamed	-> pattern (global); compiled regex Pattern local in publish.py; PADRAO constant already renamed uppercase, no collision
+has_clip	2	english	
+antigo	2	renamed	-> old (global); old-name loop/local var, layout.py migration
+nota	2	renamed	-> note (global); layout.py migration-report note string local
+faixas	2	renamed	-> spans (manual); plural of faixa, same caveat
+total	2	ambiguous	same spelling/sense in both languages
+target	2	english	
+tol	2	abbreviation	
+speaker	2	english	
+TestCredenciais	2	renamed	-> TestCredentials (global); class name
+argv	2	abbreviation	
+config	2	english	
+mtime_1	2	abbreviation	
+futuro	2	renamed	-> future (global); test-local date value
+sobras	2	renamed	-> leftovers (global); test-local orphaned-file list
+mau	2	renamed	-> bad (global); test-local values, no other sense
+TestCaptionDoEpisodio	2	renamed	-> TestEpisodeCaption (global); class name
+_textos	2	renamed	-> _texts (global); private local named after texts module
+_episodio	2	renamed	-> _episode (global); private local named after episode module
+sig	2	abbreviation	
+original	2	ambiguous	same spelling/sense in both languages
+_sh	2	english	
+main	2	english	
+escolhidos	2	renamed	-> chosen (global); post_instagram.py chosen-moments local
+parte	2	renamed	-> part (manual); scripts/youtube_auth.py's error-detail local (2 sites); "parte" is also ordinary Portuguese prose ("parte a frase", fixture text) elsewhere - stays Portuguese there
+__version__	1	english	
+_write_outputs	1	english	
+from_youtube_captions	1	english	
+from_whisper	1	english	
+transcribe	1	english	
+seg_iter	1	english	
+_info	1	english	
+vtt_path	1	english	
+source	1	english	
+_FONT	1	english	
+_draw_outlined	1	english	
+render_caption_png	1	english	
+build_overlay_graph	1	english	
+alpha	1	english	
+_png	1	english	
+asc	1	english	
+caption_items	1	english	
+base_label	1	english	
+out_label	1	english	
+nxt	1	english	
+parse_vtt	1	english	
+cue_start	1	abbreviation	
+newline	1	english	
+head	1	english	
+WINDOW_S	1	english	
+RATE_HZ	1	english	
+SEARCH_S	1	english	
+_pcm	1	english	
+envelope	1	english	
+PAUSE_THRESHOLD_DB	1	english	
+SILENCE_MIN_S	1	english	
+_silence_duration	1	english	
+valley_before	1	english	
+clips_mid_word	1	english	
+win	1	abbreviation	
+rms	1	abbreviation	
+busca	1	renamed	-> search (global); audio.py valley_before param; SEARCH_S constant already renamed uppercase
+limiar_db	1	renamed	-> threshold_db (global); compound, audio.py local
+janela	1	renamed	-> window (global); audio.py local; WINDOW_S constant already renamed uppercase
+_HANDLE_SIZE	1	english	
+compose_card	1	english	
+cached_card	1	english	
+logo	1	ambiguous	same word in both languages (logo/logo); also an English loanword
+logo_w	1	english	
+logo_h	1	english	
+logo_r	1	english	
+bbox	1	english	
+arroba_h	1	renamed	-> handle_h (global); compound, end_card.py local; CARD_ARROBA already renamed uppercase
+espaco	1	renamed	-> space (global); end_card.py layout local
+bloco_h	1	renamed	-> block_h (global); compound, end_card.py local
+topo	1	renamed	-> top (global); end_card.py layout local
+se_existe	1	renamed	-> exists (global); end_card.py boolean local
+tmp_destino	1	renamed	-> tmp_dest (global); compound, end_card.py temp-path local
+YT_RE	1	english	
+DRIVE_RE	1	english	
+detect_source	1	english	
+youtube_id	1	english	
+_ytdlp	1	english	
+acquire	1	english	
+fetch_youtube_captions	1	english	
+ytdlp	1	english	
+dest	1	abbreviation	
+out_tpl	1	english	
+capture	1	english	
+lang	1	abbreviation	
+CATEGORY_ID	1	english	
+PRIVACY_VALUES	1	english	
+DEFAULT_PRIVACY	1	english	
+privacy	1	english	
+upload	1	english	
+refresh	1	english	
+service	1	english	
+media	1	english	
+EXPIRY_S	1	english	
+PREFIX	1	english	
+_bucket	1	english	
+_client	1	english	
+put	1	english	
+remove	1	english	
+_FONTS_DIR	1	english	
+_bundled_font	1	english	
+FONT	1	english	
+has_drawtext	1	english	
+CAPTION_BACKEND	1	english	
+FRAME_W	1	english	
+FRAME_H	1	english	
+FONTSIZE	1	english	
+SAFE_W	1	english	
+LINE_H	1	english	
+BASE_Y	1	english	
+CAP_BORDER	1	english	
+CAP_BOX_ALPHA	1	english	
+CAP_BOX_BORDER	1	english	
+BG_BLUR_SIGMA	1	english	
+FG_SCALE_W	1	english	
+VCODEC	1	english	
+PRESET	1	english	
+CRF	1	english	
+PIX_FMT	1	english	
+ACODEC	1	english	
+ABITRATE	1	english	
+WHISPER_MODEL	1	english	
+WHISPER_LANG	1	english	
+SEG_MAX_GAP	1	english	
+SEG_MAX_DUR	1	english	
+SEG_MAX_CHARS	1	english	
+SEG_END_PAD	1	english	
+CLIP_MIN_S	1	english	
+CLIP_MAX_S	1	english	
+GUEST_SPEECH_MIN	1	english	
+THUMB_W	1	english	
+THUMB_H	1	english	
+THUMB_ORANGE	1	english	
+THUMB_WHITE	1	english	
+THUMB_BRIGHTNESS	1	english	
+THUMB_CONTRAST	1	english	
+POST_TEMPLATE	1	english	
+LOGO_PATH	1	english	
+WATERMARK_W	1	english	
+WATERMARK_MARGIN	1	english	
+CARD_DURATION_S	1	english	
+CARD_FADE_S	1	english	
+CARD_LOGO_W	1	english	
+CARD_HANDLE	1	english	
+CARD_HANDLE_COLOR	1	english	
+CARD_BG	1	english	
+POST_W	1	english	
+POST_H	1	english	
+POST_MARGIN_X	1	english	
+POST_TEXT_W	1	english	
+POST_QUOTE_Y	1	english	
+POST_QUOTE_STEP	1	english	
+POST_QUOTE_LINE_H	1	english	
+POST_QUOTE_MAX_LINES	1	english	
+POST_RULE_Y	1	english	
+SHOW_NAME	1	english	
+POST_NAME_Y	1	english	
+POST_ROLE_Y	1	english	
+POST_QUOTE_SIZE	1	english	
+POST_NAME_SIZE	1	english	
+POST_ROLE_SIZE	1	english	
+POST_QUOTE_COLOR	1	english	
+POST_NAME_COLOR	1	english	
+POST_ROLE_COLOR	1	english	
+POST_FONT	1	english	
+POST_MONO	1	english	
+PUBLISH_TZ	1	english	
+SEPARATOR	1	english	
+EM_DASH	1	english	
+validate	1	english	
+EPISODE_PREFIX	1	english	
+episode_line	1	english	
+compose	1	english	
+compose_episode	1	english	
+txt_path	1	english	
+write	1	english	
+field	1	english	
+url_episodio	1	renamed	-> episode_url (global); compound, caption.py param
+is_published	1	english	
+record	1	english	
+tmp	1	english	
+id_post	1	abbreviation	
+RE_TS_LINE	1	english	
+_ts_to_sec	1	english	
+parse_txt	1	english	
+regroup_into_sentences	1	english	
+HOST	1	english	
+GUEST	1	english	
+resolve_speakers	1	english	
+total_duration	1	english	
+too_big	1	english	
+DEFAULT_PATH	1	english	
+_clean_value	1	english	
+postas	1	renamed	-> added (global); environment.py count of env vars set
+GRAPH_FACEBOOK	1	english	
+GRAPH_INSTAGRAM	1	english	
+host_for_token	1	english	
+POLL_TIMEOUT_S	1	english	
+POLL_INTERVAL_S	1	english	
+TIMEOUT_HTTP_S	1	english	
+_call	1	english	
+_wait_for_processing	1	english	
+_publish_container	1	english	
+publish_reel	1	english	
+publish_post	1	english	
+host	1	english	
+media_id	1	english	
+perma	1	english	
+urls	1	abbreviation	
+metodo	1	renamed	-> method (global); publish_instagram.py HTTP-method param
+png_paths	1	english	
+filhos	1	renamed	-> children (global); carousel child-container list, publish_instagram.py
+pai	1	renamed	-> parent (global); carousel parent-container local, publish_instagram.py
+filho	1	renamed	-> child (global); carousel child-container local, publish_instagram.py
+CHANNEL_TAGS	1	english	
+format_line	1	english	
+sem_acento	1	renamed	-> unaccented (global); compound, hashtags.py local
+thumb_args	1	english	
+build_kwargs	1	english	
+cod	1	renamed	-> code (global); abbreviation of codigo; texts.py local, calls episode.code() - no collision
+suggest_frames	1	english	
+extract_frame	1	english	
+_font	1	english	
+_outlined	1	english	
+build_thumbnail	1	english	
+meios	1	renamed	-> midpoints (global); thumbnail.py local for clip midpoints
+passo	1	renamed	-> step (global); thumbnail.py local; unrelated to already-renamed POST_QUOTE_STEP constant
+at_seconds	1	english	
+anchor	1	english	
+badge	1	english	
+headline_l1	1	english	
+headline_l2	1	english	
+subtitle	1	english	
+ftag	1	abbreviation	
+_PILFONT	1	english	
+_text_width_px	1	english	
+wrap_by_pixels	1	english	
+_esc_drawtext	1	english	
+_drawtext_chain	1	english	
+_filtergraph	1	english	
+_watermark_graph	1	english	
+BASE_GRAPH	1	english	
+_base_graph	1	english	
+_segments_in_cut	1	english	
+CAPTION_MIN_S	1	english	
+END_MARGIN_S	1	english	
+AUDIO_ADJUST_MAX_S	1	english	
+apply_end_margin	1	english	
+adjust_end_by_audio	1	english	
+_trim_text	1	english	
+PUNCTUATION_WINDOW	1	english	
+_snap_to_punctuation	1	english	
+_build_overlay_inputs	1	english	
+append_end_card	1	english	
+render_cut	1	english	
+_is_youtube_output	1	english	
+write_episode_caption	1	english	
+render_all	1	english	
+_proper_nouns	1	english	
+seg	1	abbreviation	
+piso	1	renamed	-> floor (global); render.py margin-floor local
+vale	1	renamed	-> valley (manual); render.py's local holding audio.valley_before()'s result; "vale" is also the extremely common Portuguese verb "is worth/matters" in comments - those stay
+fim_de_frase	1	renamed	-> sentence_end (global); compound tuple-of-punctuation local in render.py; RE_FIM_DE_FRASE constant already renamed uppercase, no collision
+card_path	1	english	
+outputs	1	english	
+first_subdir	1	english	
+first_name	1	english	
+first_dir	1	english	
+first_out	1	english	
+folder	1	english	
+ep_txt	1	english	
+cand	1	english	
+in_label	1	english	
+logo_label	1	english	
+vis_s	1	abbreviation	
+vis_e	1	abbreviation	
+atras	1	renamed	-> behind (global); render.py word-boundary-snap index local
+frente	1	renamed	-> ahead (global); render.py word-boundary-snap index local
+corte_path	1	renamed	-> clip_path (global); compound param, render.py
+logo_idx	1	english	
+pieces	1	english	
+_rs	1	english	
+_re	1	english	
+PLATFORMS	1	english	
+CAROUSEL_MAX	1	english	
+platforms_of	1	english	
+date_of	1	english	
+pending	1	english	
+seen	1	english	
+conhecidas	1	renamed	-> known (global); schedule.py known-platforms set
+estranhas	1	renamed	-> unknown_platforms (global); schedule.py; named distinctly from desconhecidos (same function, different check) to avoid same-name reuse
+desconhecidos	1	renamed	-> unknown_slugs (global); schedule.py; named distinctly from estranhas, see above
+_quote_font	1	english	
+wrap	1	english	
+validate_card	1	english	
+_truetype	1	english	
+episode_author	1	english	
+clean_quote	1	english	
+render_card	1	english	
+file_slug	1	english	
+generate	1	english	
+fcit	1	abbreviation	
+name_font	1	english	
+role_font	1	english	
+rodape	1	renamed	-> footer (global); post_instagram.py footer-line local
+planejado	1	renamed	-> planned (global); post_instagram.py planned-writes list
+quem_assina	1	renamed	-> signer (global); compound local naming who signs the quote; distinct from the pronoun "quem", which stays Portuguese
+excesso	1	renamed	-> excess (global); post_instagram.py over-limit count local
+size	1	english	
+who	1	english	
+achado	1	renamed	-> matches (global); post_instagram.py filtered-guest-matches list (named singular in the original despite being a list)
+author	1	english	
+autor	1	renamed	-> author (global); one remaining site beyond render_card's already-renamed param - see application notes
+bruto	1	renamed	-> raw (global); post_instagram.py raw-card-value loop var; different scope than existing "raw", no collision
+captions	1	english	
+PROMPTS_DIR	1	english	
+readable_transcript	1	english	
+readable_metadata	1	english	
+fill_template	1	english	
+readable_curation	1	english	
+_read_prompt	1	english	
+clip_speech	1	english	
+readable_clips	1	english	
+build_posts	1	english	
+links	1	english	
+approved	1	english	
+rejected	1	english	
+limite	1	renamed	-> limit (global); brief.py line-limit text local
+marca	1	renamed	-> marker (manual); brief.py's ">> " turn-marker local; "marca" is also the verb "marks" (txt_parse.py) and part of "marca d'água"/watermark prose (render.py) - those stay
+metadata	1	english	
+srt_ts	1	english	
+mmss	1	english	
+RE_TS	1	english	
+RE_CUE	1	english	
+RE_INLINE	1	english	
+vtt_ts_to_sec	1	english	
+RE_SOUND_TAG	1	english	
+strip_markup	1	english	
+_CONTRACTIONS	1	english	
+RE_NE_FIM	1	english	
+RE_NE_MEIO	1	english	
+RE_PRO_LATIM	1	english	
+_expand_contractions	1	english	
+_PHONETIC_EQUIVALENTS	1	english	
+_phonetic_pattern	1	english	
+_COMMON_WORDS	1	english	
+_is_common_word	1	english	
+fix_proper_nouns	1	english	
+clean_caption	1	english	
+group_words_into_segments	1	english	
+reservas	1	renamed	-> reserved (global); utils.py reserved-regex-chars local
+_guarda	1	english	
+letra	1	renamed	-> letter (global); utils.py phonetic-equivalents loop var
+classe	1	renamed	-> char_class (global); utils.py phonetic-equivalents loop var
+achados	1	renamed	-> matches (global); utils.py regex findall results
+prev	1	english	
+REQUIRED_FIELDS	1	english	
+REQUIRED_NONEMPTY_FIELDS	1	english	
+_validate_company_or_topic	1	english	
+youtube_url	1	english	
+code	1	english	
+has_guest	1	english	
+has_company	1	english	
+vazios	1	renamed	-> empty (global); episode.py empty-required-fields list
+YT_TITLE_MAX	1	english	
+YT_DESCRIPTION_MAX	1	english	
+IG_CAPTION_MAX	1	english	
+_CREDENTIALS	1	english	
+_MP4_SUFFIX	1	english	
+_mp4	1	english	
+_read	1	english	
+_moments_by_slug	1	english	
+_post_pngs	1	english	
+_post_txt	1	english	
+precheck	1	english	
+_publish_pair	1	english	
+execute	1	english	
+unico	1	renamed	-> single (global); publish.py single-PNG-path local
+numerados	1	renamed	-> numbered (global); publish.py numbered-PNG list
+envs	1	abbreviation	
+SOURCE	1	english	
+DECISIONS	1	english	
+BRIEFS	1	english	
+PUBLISH	1	english	
+ensure_dir	1	english	
+episode	1	english	
+transcript_txt	1	english	
+source_dir	1	english	
+texts	1	english	
+schedule	1	english	
+published	1	english	
+brief	1	english	
+thumbnail	1	english	
+end_card_mp4	1	english	
+episode_txt	1	english	
+posts_png	1	english	
+_MIGRATION	1	english	
+YOUTUBE_SHORTS	1	english	
+INSTAGRAM_REELS	1	english	
+INSTAGRAM_POSTS	1	english	
+_PUBLISH_DIRS	1	english	
+_JUNK	1	english	
+_check_dirs	1	english	
+migrate	1	english	
+destino_de	1	renamed	-> dest_fn (global); compound, layout.py migration loop var (a callable)
+arquivo	1	renamed	-> file (global); layout.py _check_dirs local
+OVERLAP_THRESHOLD	1	english	
+new_state	1	english	
+overlaps	1	english	
+burned_spans	1	english	
+is_burned	1	english	
+slots_left	1	english	
+RE_HEDGED_NUMBER	1	english	
+has_hedged_number	1	english	
+_valid_boundary	1	english	
+RE_SENTENCE_END	1	english	
+_ends_sentence	1	english	
+segments_in_clip	1	english	
+guest_speech_fraction	1	english	
+sentence_ends	1	english	
+validate_clip	1	english	
+RE_FIRST_PERSON	1	english	
+SUSPECT_ATTRIBUTION_THRESHOLD	1	english	
+attribution_trustworthy	1	english	
+HOST_OPENING_MAX_S	1	english	
+host_opening	1	english	
+clip_warnings	1	english	
+KINDS	1	english	
+approve	1	english	
+reject	1	english	
+composition	1	english	
+missing_kinds	1	english	
+reasons	1	english	
+is_closed	1	english	
+to_moments	1	english	
+save_moments	1	english	
+overlap	1	english	
+menor	1	renamed	-> smaller (global); test-local comparison value
+grupo	1	renamed	-> group (global); test-local
+guest_dur	1	english	
+host_total	1	english	
+primeira_pessoa	1	renamed	-> first_person (global); compound comment/local matching RE_FIRST_PERSON
+seg_host	1	english	
+vistos	1	renamed	-> seen (global); curation.py's own seen-slugs set; different file/scope than schedule.py's already-renamed vistos->seen, no collision
+reason	1	english	
+FIXTURE	1	english	
+_block	1	english	
+TestParseTxt	1	english	
+TestRegroupIntoSentences	1	english	
+TestResolucaoDeFalante	1	renamed	-> TestSpeakerResolution (global); class name
+todo	1	renamed	-> combined (global); test_txt_parse.py joined-text local; not the English acronym TODO
+_client_secret	1	english	
+TestUpload	1	english	
+TestPrivacidade	1	renamed	-> TestPrivacy (global); class name
+_sobe	1	english	
+build_mock	1	english	
+media_mock	1	english	
+extra_env	1	english	
+ENV	1	english	
+_response	1	english	
+TestHostDoToken	1	renamed	-> TestHostForToken (global); class name, matches host_for_token()
+TestPublicaReel	1	renamed	-> TestPublishReel (global); class name, matches publish_reel()
+TestPublicaPost	1	renamed	-> TestPublishPost (global); class name, matches publish_post()
+relogio	1	renamed	-> clock (global); test-local mock-clock name
+caminhos	1	renamed	-> paths (global); plural of caminho/path, test-local list
+pai_params	1	renamed	-> parent_params (global); compound, test-local
+TestStripMarkup	1	english	
+TestMmss	1	english	
+TestCorrigeNomes	1	renamed	-> TestFixProperNouns (global); class name, matches fix_proper_nouns()
+TestCleanCaption	1	english	
+tag	1	english	
+errado	1	renamed	-> wrong (global); test-local
+_SPEC	1	english	
+youtube_auth	1	english	
+TestValidaClientSecret	1	renamed	-> TestValidateClientSecret (global); class name, matches validate_client_secret()
+TestMain	1	english	
+TestSobe	1	renamed	-> TestPut (global); class name, matches sobe->put
+TestRemove	1	english	
+cfg	1	abbreviation	
+TestMontaCard	1	renamed	-> TestComposeCard (global); class name, matches compose_card()
+TestCardCacheado	1	renamed	-> TestCachedCard (global); class name, matches cached_card()
+centro	1	renamed	-> center (global); test-local
+caminho_2	1	renamed	-> path_2 (global); compound, test-local (leftover from caminho->path pass, protected by trailing _2)
+stat_antes	1	renamed	-> stat_before (global); compound, test-local
+EXPECTED	1	english	
+TestFontesVersionadas	1	renamed	-> TestVersionedFonts (global); class name
+esperado	1	renamed	-> expected (global); test-local; EXPECTED constant already renamed uppercase, no collision (different case/scope)
+identidade	1	renamed	-> identity (global); test-local font-identity tuple
+TestMonta	1	renamed	-> TestBuild (global); class name, matches montar->build
+TestEscreve	1	renamed	-> TestWrite (global); class name, matches _escreve->_write
+TestValidaTexto	1	renamed	-> TestValidateText (global); class name
+TestTravessao	1	renamed	-> TestEmDash (global); class name, matches TRAVESSAO->EM_DASH
+TestMontaEpisodio	1	renamed	-> TestComposeEpisode (global); class name, matches compose_episode
+_valida	1	renamed	-> _validate (global); test helper method name, test_caption.py
+txts	1	english	
+TestRegistra	1	renamed	-> TestRecord (global); class name
+TestJaPublicado	1	renamed	-> TestAlreadyPublished (global); class name
+_prepare	1	english	
+MOMENTS	1	english	
+POSTS	1	english	
+TestPendente	1	renamed	-> TestPending (global); class name, matches pendente->pending
+TestSlug	1	english	
+TestBuild	1	english	
+fixa	1	renamed	-> fixed (global); test-local boolean/value
+TestValeAntes	1	renamed	-> TestValleBefore (global); class name, matches valley_before
+TestAjusteRespeitaMinimo	1	renamed	-> TestAdjustRespectsMinimum (global); class name
+TestCaudaVaza	1	renamed	-> TestClipsMidWord (global); class name, matches clips_mid_word function it tests
+TestMargemDeFim	1	renamed	-> TestEndMargin (global); class name, matches apply_end_margin
+TestSegmentsInCut	1	english	
+TestWrapByPixels	1	english	
+TestSugereFrames	1	renamed	-> TestSuggestFrames (global); class name, matches suggest_frames
+TestCaptionDoCorte	1	renamed	-> TestClipCaption (global); class name
+TestMarcaDaguaGraph	1	renamed	-> TestWatermarkGraph (global); class name, matches _watermark_graph
+_has_ffmpeg	1	english	
+TestMarcaDaguaECardIntegracao	1	renamed	-> TestWatermarkAndCardIntegration (global); class name
+TestConcatenaEncerramento	1	renamed	-> TestConcatenateEndCard (global); class name
+TestOrdemCaudaVazaAntesDoCard	1	renamed	-> TestClipsMidWordOrderBeforeCard (global); class name
+_pontos	1	english	
+_decai	1	english	
+CITACAO_DO_DESIGN	1	renamed	-> DESIGN_QUOTE (global); uppercase constant, test_render.py
+primeiro	1	renamed	-> first (global); test-local
+palavra	1	renamed	-> word (manual); singular; mostly ordinary prose ("cortando palavra") - no clean identifier site found beyond prose, kept manual
+duracao	1	renamed	-> duration (global); test-local; DURACAO_S-style constants already renamed uppercase elsewhere
+card	1	english	
+antes	1	renamed	-> before (manual); test-local var name in one file only; also ordinary prose ("antes de") everywhere else - kept manual
+duracoes_vistas	1	renamed	-> durations_seen (global); compound, test-local
+espiao	1	renamed	-> spy (global); test-local mock name
+especificacao	1	renamed	-> spec (global); test-helper param name
+TestEpisodio	1	renamed	-> TestEpisode (global); class name
+TestTextos	1	renamed	-> TestTexts (global); class name
+esperados	1	english	
+TRANSCRIPT	1	english	
+has_ffmpeg	1	english	
+TestFluxoCompleto	1	renamed	-> TestFullFlow (global); class name
+TestMigracaoAutomatica	1	renamed	-> TestAutomaticMigration (global); class name
+tearDown	1	english	
+proj	1	abbreviation	
+TestSobreposicao	1	renamed	-> TestOverlap (global); class name, matches overlaps()
+TestQueimados	1	renamed	-> TestBurned (global); class name, matches is_burned/burned_spans
+TestEstadoInicial	1	renamed	-> TestInitialState (global); class name
+TestValidacoes	1	renamed	-> TestValidations (global); class name
+TestFimEmFraseCompleta	1	renamed	-> TestEndAtCompleteSentence (global); class name
+TestFinsDeFrase	1	renamed	-> TestSentenceEnds (global); class name, matches sentence_ends()
+TestSobreposicaoEntreAprovados	1	renamed	-> TestOverlapBetweenApproved (global); class name
+TestAtribuicaoConfiavel	1	renamed	-> TestAttributionTrustworthy (global); class name, matches attribution_trustworthy()
+TestAberturaDoHost	1	renamed	-> TestHostOpening (global); class name, matches host_opening()
+TestHesitacaoNumerica	1	renamed	-> TestHedgedNumber (global); class name, matches has_hedged_number()
+TestProtagonismo	1	renamed	-> TestProminence (global); class name
+TestOperacoes	1	renamed	-> TestOperations (global); class name
+TestExportacao	1	renamed	-> TestExport (global); class name
+_inst	1	english	
+_ctx	1	english	
+ENV_OK	1	english	
+_project	1	english	
+TestPreChecagem	1	renamed	-> TestPrecheck (global); class name, matches precheck()
+TestPngsDoPost	1	english	
+TestExecutar	1	renamed	-> TestExecute (global); class name, matches execute()
+var	1	english	
+por_pl	1	renamed	-> per_pl (global); compound (Portuguese "por" + platform abbreviation), test_publish.py local
+upload_ok	1	english	
+reel_explode	1	english	
+yt_r	1	english	
+TestConfigPost	1	english	
+TestEncaixe	1	renamed	-> TestFit (global); class name
+TestRender	1	english	
+_fake_project	1	english	
+TestAutorETexto	1	renamed	-> TestAuthorAndText (global); class name
+TestGerar	1	renamed	-> TestGenerate (global); class name, matches generate()
+TestCaptionDoPost	1	renamed	-> TestPostCaption (global); class name
+TestLegendaValidaAntesDeEscrever	1	renamed	-> TestCaptionValidatedBeforeWriting (global); class name
+_com_posts	1	english	
+_posts	1	english	
+fim_5	1	renamed	-> end_5 (global); compound (protected from bare fim), test_post_instagram.py local
+fim_6	1	renamed	-> end_6 (global); compound (protected from bare fim), test_post_instagram.py local
+segundo	1	renamed	-> second (global); test_post_instagram.py's second-guest-result local; single site
+TestBrief	1	english	
+TestBriefPosts	1	english	
+TestCaminhos	1	renamed	-> TestPaths (global); class name
+TestMigracao	1	renamed	-> TestMigration (global); class name
+TestMigracaoDefensiva	1	renamed	-> TestDefensiveMigration (global); class name
+TestCaminhosPublicacao	1	renamed	-> TestPublishPaths (global); class name
+ANTIGOS	1	renamed	-> OLD_NAMES (global); uppercase constant, test_layout.py
+_projeto_antigo	1	renamed	-> _old_project (global); compound, test helper method name
+na_raiz	1	renamed	-> at_root (global); compound (protected from bare raiz), test_layout.py local
+move_que_morre	1	renamed	-> move_that_dies (global); test mock function name
+sobreviventes	1	renamed	-> survivors (global); test_layout.py local
+arquivos	1	renamed	-> files (global); test_layout.py local, plural of arquivo/file
+PROJECTS	1	english	
+platforms_from_args	1	english	
+cmd_acquire	1	english	
+cmd_transcribe	1	english	
+cmd_prep	1	english	
+cmd_render	1	english	
+cmd_thumb	1	english	
+cmd_ingest	1	english	
+cmd_brief	1	english	
+_segments	1	english	
+cmd_curate	1	english	
+cmd_post	1	english	
+cmd_publish	1	english	
+cmd_schedule	1	english	
+ep_path	1	english	
+ja_existia	1	renamed	-> already_existed (global); compound, run.py local
+momentos_path	1	renamed	-> moments_path (global); compound (protected from bare momentos), run.py local
+sem_registro	1	renamed	-> no_record (global); compound, run.py local
+add_common	1	english	
+mpath	1	english	
+flag	1	english	
+transcricao_path	1	renamed	-> transcript_path (global); compound (protected from bare transcricao), run.py local
+do_pl	1	renamed	-> by_pl (global); compound (Portuguese "do" + platform abbreviation), run.py local
+feitos	1	renamed	-> done (global); run.py's already-published-platforms list
+querido	1	renamed	-> wanted (global); run.py's requested-clip-numbers set
+sug	1	english	
+INSTALLED_KEYS	1	english	
+validate_client_secret	1	english	
+installed	1	english	
+campos	1	renamed	-> fields (manual); the identifier is only scripts/youtube_auth.py:48's local; every other "campos" is ordinary prose (including inside a couple of raised messages) - those stay
+flow	1	english	
+creds	1	english	
