@@ -38,7 +38,7 @@
 
 **Interfaces:**
 - Consumes: the current tree.
-- Produces: `rename-map.tsv`, four tab-separated columns: `kind`, `old`, `new`, `note` (`note` empty unless the chosen name is non-literal). Task 3 applies it verbatim. Every later task refers to symbols by their NEW name.
+- Produces: `rename-map.tsv`, five tab-separated columns: `kind`, `old`, `new`, `scope`, `note`. `scope` is `global` (every occurrence means the same thing, safe to substitute tree-wide) or `manual` (the word carries more than one sense, or the rename is valid only for one kind, module or call site). Task 3 substitutes the `global` entries mechanically and applies the `manual` ones site by site. Every later task refers to symbols by their NEW name.
 
 - [ ] **Step 1: Enumerate every candidate**
 
@@ -78,7 +78,7 @@ Add a fourth column `note` for any entry where you chose a non-literal name, say
 
 - [ ] **Step 4: Write the file**
 
-Tab-separated, one entry per line, sorted by kind then old name. Header row: `kind	old	new	note`. Valid `kind` values: `module`, `function`, `constant`, `json_key`, `dir`, `cli_verb`.
+Tab-separated, one entry per line, sorted by kind then old name. Header row: `kind	old	new	note`. Valid `kind` values: `module`, `function`, `constant`, `json_key`, `dir`, `cli_verb`, `cli_flag`.
 
 - [ ] **Step 5: Verify the map is complete and self-consistent**
 
@@ -213,18 +213,38 @@ git status --short
 
 `git mv` so history follows each file, as in Phase 0.
 
-- [ ] **Step 3: Apply every map entry, longest `old` first**
+- [ ] **Step 3a: Apply the `global` entries mechanically, longest `old` first**
 
-Order matters: renaming `corte` before `corte_min_s` would corrupt the longer name. Sort by descending length of `old`.
+Order matters: renaming `corte` before `corte_min_s` would corrupt the longer name. Sort by descending length of `old`. **Only `scope == global` entries go through this loop.**
 
 ```bash
 cd /data/Code/talaria
-awk -F'\t' 'NR>1{print length($2)"\t"$2"\t"$3}' docs/plans/phase-1-inputs/rename-map.tsv \
+awk -F'\t' 'NR>1 && $4=="global"{print length($2)"\t"$2"\t"$3}' docs/plans/phase-1-inputs/rename-map.tsv \
   | sort -rn | cut -f2,3 | while IFS=$'\t' read old new; do
   grep -rlZ --include='*.py' -E "\b$old\b" talaria/ tests/ run.py scripts/ \
     | xargs -0 -r sed -i "s/\b$old\b/$new/g"
 done
 ```
+
+- [ ] **Step 3b: Apply the `manual` entries one site at a time**
+
+These exist because the Portuguese word carries more than one sense, and a tree-wide substitution corrupts the other one. Four verified examples, which are why this step exists:
+
+- `data` → `date` is correct for the Portuguese date key, and WRONG at `talaria/textos.py`'s `def save(project_dir, data: dict)`, where `data` is the English word. Global substitution produces `date: dict` and `json.dump(date, f)`.
+- `fonte` → `source` is correct for the `fonte/` directory, and WRONG in `post_instagram`, where *fonte* means **font**.
+- `caminho` → its mapped name applies to one function; the other ~80 occurrences are ordinary local path variables.
+- `meta` → `target` is correct for the goal count, and WRONG for the `"meta"` string inside the common-words list, where it is a company name that happens to be a common word.
+
+For each `manual` entry: list its occurrences, read each one, and change only those matching the sense the `note` column describes.
+
+```bash
+cd /data/Code/talaria
+awk -F'\t' 'NR>1 && $4=="manual"{print $2"\t"$3"\t"$5}' docs/plans/phase-1-inputs/rename-map.tsv
+# then, per entry:
+grep -rnE "\b<old>\b" --include='*.py' talaria/ tests/ run.py scripts/
+```
+
+Record, per `manual` entry, how many occurrences you changed and how many you deliberately left. A `manual` entry where you changed every occurrence was probably mis-scoped — say so rather than assuming the map was wrong.
 
 Word boundaries do more work here than they look like they do, and it is worth knowing exactly what they protect:
 
@@ -244,9 +264,15 @@ The first should show the renamed directory constants. The second must still sho
 
 ```bash
 cd /data/Code/talaria
-awk -F'\t' 'NR>1{print $2}' docs/plans/phase-1-inputs/rename-map.tsv | while read old; do
+echo "--- global entries must be fully gone ---"
+awk -F'\t' 'NR>1 && $4=="global"{print $2}' docs/plans/phase-1-inputs/rename-map.tsv | while read old; do
   hits=$(grep -rowE "\b$old\b" --include='*.py' talaria/ tests/ run.py scripts/ | wc -l)
   [ "$hits" != "0" ] && echo "SURVIVED: $old ($hits)"
+done
+echo "--- manual entries: surviving occurrences are expected; confirm each is the other sense ---"
+awk -F'\t' 'NR>1 && $4=="manual"{print $2}' docs/plans/phase-1-inputs/rename-map.tsv | while read old; do
+  hits=$(grep -rowE "\b$old\b" --include='*.py' talaria/ tests/ run.py scripts/ | wc -l)
+  echo "$old: $hits remaining"
 done
 echo "--- mock.patch targets all point at real modules? ---"
 grep -rohE 'mock\.patch\("talaria\.[a-z_]+' tests/*.py | sed 's/.*"talaria\.//' | sort -u | while read m; do
@@ -254,7 +280,7 @@ grep -rohE 'mock\.patch\("talaria\.[a-z_]+' tests/*.py | sed 's/.*"talaria\.//' 
 done
 ```
 
-Both must print nothing. A broken `mock.patch` target fails loudly at test time, but this catches it before the suite runs and tells you which one.
+The `global` check and the `mock.patch` check must both print nothing. The `manual` listing will show remaining occurrences — that is expected, and you confirm each surviving one is genuinely the other sense of the word. A broken `mock.patch` target fails loudly at test time, but this catches it before the suite runs and tells you which one.
 
 - [ ] **Step 5: Run the suite**
 
