@@ -59,7 +59,7 @@ def validate(field: str, value, piece: str) -> None:
 # link one video to another (`videos.insert` has no relation field), and the
 # dashboard link only exists for a Short created from the long video. Writing
 # the URL into the description is what is left, and what the channel did by hand.
-EPISODE_PREFIX = "▶ Episódio completo: "
+EPISODE_PREFIX = "▶ Full episode: "
 
 
 def episode_line(url: str | None) -> str:

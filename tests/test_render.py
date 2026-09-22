@@ -365,7 +365,7 @@ class TestClipCaption(unittest.TestCase):
         with open(yt[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(
                 f.read(),
-                "A frase.\n\n▶ Episódio completo: https://youtu.be/XYZ\n\n#Um")
+                "A frase.\n\n▶ Full episode: https://youtu.be/XYZ\n\n#Um")
         with open(ig[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(f.read(), "A frase.\n\n#Um")
 

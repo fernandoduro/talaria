@@ -1,6 +1,6 @@
 """Description hashtags — a deterministic rule, not editorial judgement.
 
-Hashtags take neither spaces nor accents: "São Bento" -> #SaoBento.
+Hashtags take neither spaces nor accents: "Gdańsk Nowy" -> #GdanskNowy.
 Three are fixed in every episode; city and company vary.
 """
 from __future__ import annotations
@@ -10,11 +10,11 @@ import unicodedata
 
 # Hashtags present in every episode — channel identity. Swap in your own:
 # the rest of the rule (city, company) does not depend on these values.
-CHANNEL_TAGS = ["#MeuPodcast", "#Empreendedorismo", "#Startups"]
+CHANNEL_TAGS = ["#MyPodcast", "#Entrepreneurship", "#Startups"]
 
 
 def slug(text: str) -> str:
-    """'Ribeirão Açaí' -> 'RibeiraoAcai'. Strips accents and non-alphanumerics."""
+    """'Timișoara Nouă' -> 'TimisoaraNoua'. Strips accents and non-alphanumerics."""
     if not text:
         return ""
     unaccented = "".join(

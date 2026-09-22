@@ -54,7 +54,7 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
                     credits="", subtitle=""):
     """Composes the thumbnail. Text is fully parameterised.
 
-    badge:        orange band, top left (e.g. 'MEU PODCAST • T2E02')
+    badge:        orange band, top left (e.g. 'MY PODCAST • T2E02')
     headline_l1:  first large line (white)
     headline_l2:  second large line (orange)
     credits:      top right corner (e.g. the guests' names)

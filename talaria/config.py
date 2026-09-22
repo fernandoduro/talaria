@@ -22,8 +22,8 @@ def _bundled_font(name: str) -> str:
     path = os.path.join(_FONTS_DIR, name)
     if not os.path.exists(path):
         raise FileNotFoundError(
-            f"fonte {name} não encontrada em assets/fonts — o arquivo é "
-            f"versionado; restaure com 'git checkout assets/fonts/{name}'."
+            f"font {name} not found in assets/fonts — the file is "
+            f"versioned; restore it with 'git checkout assets/fonts/{name}'."
         )
     return path
 
@@ -95,7 +95,7 @@ ABITRATE = "160k"
 # Transcription
 # ---------------------------------------------------------------------------
 WHISPER_MODEL = "small"   # safe for 4GB GPUs; 'medium' blew up a GTX 1650
-WHISPER_LANG = "pt"
+WHISPER_LANG = "en"
 
 # Grouping words -> sentences (VTT and Whisper parsers)
 SEG_MAX_GAP = 0.7         # pause (s) that breaks the sentence
@@ -139,7 +139,7 @@ WATERMARK_MARGIN = 40
 CARD_DURATION_S = 3.5
 CARD_FADE_S = 0.35
 CARD_LOGO_W = 620
-CARD_HANDLE = "@seuperfil"
+CARD_HANDLE = "@yourhandle"
 CARD_HANDLE_COLOR = (255, 140, 66)   # orange
 CARD_BG = (10, 10, 10)
 
@@ -160,7 +160,7 @@ POST_RULE_Y = 2242
 # Footer (the rule already comes drawn on the template)
 # Show name, used in the thumbnail badge. Changing it here applies to every
 # episode — it is channel identity, not per-episode data.
-SHOW_NAME = "MEU PODCAST"
+SHOW_NAME = "MY PODCAST"
 
 POST_NAME_Y = 2338
 POST_ROLE_Y = 2459
