@@ -80,7 +80,7 @@ Add a fourth column `note` for any entry where you chose a non-literal name, say
 
 Tab-separated, one entry per line, sorted by kind then old name. Header row: `kind	old	new	note`. Valid `kind` values: `module`, `function`, `constant`, `json_key`, `dir`, `cli_verb`, `cli_flag`.
 
-- [ ] **Step 5: Verify the map is complete and self-consistent**
+- [ ] **Step 6: Verify the map is complete and self-consistent**
 
 ```bash
 cd /data/Code/talaria
@@ -92,7 +92,7 @@ grep -cP '[\x{00C0}-\x{00FF}]' <(awk -F'\t' 'NR>1{print $3}' docs/plans/phase-1-
 
 The first two must print nothing: a duplicated `new` name means two symbols map to one, a duplicated `old` means two entries disagree. The third must print nothing. The fourth confirms no new name carries an accent.
 
-- [ ] **Step 6: Commit the map, do not apply it**
+- [ ] **Step 7: Commit the map, do not apply it**
 
 ```bash
 cd /data/Code/talaria
@@ -296,7 +296,7 @@ cd /data/Code/talaria
 
 Expected: subcommands `acquire transcribe prep render thumb ingest brief curate post publish schedule` — `curar` and `agenda` replaced, the other nine unchanged.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 cd /data/Code/talaria
@@ -797,7 +797,27 @@ grep -rniE '\b(que|nao|para|uma|dos|das|pelo|pela|sem|mais|ja|ao|aos|pra|nem|ond
 ```
 Expected: only `.com` URL hits, roughly a dozen. Confirm each is a URL. `no` and `so` are deliberately absent from this pattern — they are ordinary English words. Read every other hit; do not widen the pattern to silence one.
 
-- [ ] **Step 4: Every map entry applied**
+- [ ] **Step 4: No Portuguese identifier survives, mapped or not**
+
+The two checks above cannot see an unaccented Portuguese identifier: neither
+`estado` nor `texto` nor `pasta` contains an accent or appears in any
+function-word list. Roughly 727 occurrences of that class existed after the
+first rename pass, and nothing in this plan detected them. So the criterion is
+the inventory, not a word list.
+
+```bash
+cd /data/Code/talaria
+# Re-extract and confirm every identifier we define has a verdict recorded.
+grep -c '' docs/plans/phase-1-inputs/identifier-inventory.txt
+awk -F'\t' 'NR>1 && $2!=""{print $2}' docs/plans/phase-1-inputs/rename-map.tsv | sort -u | wc -l
+```
+
+Then re-run the extraction from `identifier-inventory.txt`'s header against the
+current tree and confirm no identifier appears that is neither English nor
+present in the map as an `old` value. A new Portuguese identifier introduced
+during the prose or string passes is the failure this catches.
+
+- [ ] **Step 5: Every map entry applied**
 
 ```bash
 cd /data/Code/talaria
