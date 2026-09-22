@@ -119,7 +119,7 @@ the channel. It is the part that most affects the result.
 python3 -m unittest discover -s tests -v
 ```
 
-There are 391 tests, with no network dependency: the API calls (YouTube,
+There are 394 tests, with no network dependency: the API calls (YouTube,
 Instagram, S3) are mocked. Run them inside the venv.
 
 ## Notes

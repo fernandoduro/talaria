@@ -295,26 +295,63 @@ will incidentally fix, since it rewrites those comments anyway.
 
 ## Known issues carried past Phase 1
 
-- **`SUSPECT_ATTRIBUTION_THRESHOLD` no longer describes a measured base rate.**
-  It is 0.30, tuned against how often `a gente` and `nosso*` appear in
-  Portuguese speech. The English marker set opens with bare `we|our|us`, which
-  is more frequent, and a correctly-attributed three-segment fixture already
-  measures a host first-person fraction of 1.0 against it — so
-  `attribution_trustworthy` may now warn on every episode, and a warning that
-  always fires trains the operator to ignore it.
+- **The `SUSPECT_ATTRIBUTION_THRESHOLD` base-rate mismatch is closed, and the
+  entry that deferred it rested on two false premises.** Corrected here because
+  both premises were written into this document and one of them was the reason
+  the defect looked harmless.
 
-  Left at 0.30 deliberately rather than replaced by a guess: re-deriving the
-  fraction needs a real English transcript with known-good speaker labels, and
-  none exists in this repository. The mismatch is recorded at the constant. Two
-  candidate fixes when a transcript exists: measure and set a real threshold,
-  or narrow the marker set to own-company phrases (`my company`, `our team`)
-  so the base rate is comparable to the Portuguese set's.
+  It was not "advisory output, not a correctness bug". `clip_warnings`
+  early-returns on the gate, so `attribution_trustworthy` returning False
+  suppressed `guest speaks only N%` and `clip opens with Ns of host speech`
+  outright. With bare `we|our|us` in the marker set it returned False for every
+  English episode, so those two checks never ran at all.
 
-  This is advisory output, not a correctness bug — the function feeds a warning
-  the operator reads, not a decision the pipeline acts on.
+  And "no real English transcript exists in this repository" was wrong.
+  `tests/fixtures/example.txt` is one, with `>>`-derived known-good speaker
+  labels, and the parser tests were already reading it. Measuring needed no new
+  data and no new fixture.
+
+  Fixed by this spec's own second candidate. The marker set is narrowed to
+  own-company phrases — `my company`, `our company`, `our team`, `our own`,
+  `my co-founder`, `our first hire` — and 0.30 stays. Measured on that fixture,
+  correctly attributed: host first-person fraction **0.606 before, 0.000
+  after**, while a host segment carrying swapped guest speech still measures
+  0.857. `test_well_attributed_episode` scored 0.0 under any positive threshold
+  and now scores 0.25 against realistic host register, so both a widened marker
+  set and a threshold lowered towards zero fail it.
+
+  What is carried forward is recall, not the base rate: a guest stretch that
+  only says "we worked somewhere else" no longer registers, and no transcript
+  here has genuinely swapped labels to measure that loss against. Recorded at
+  the constant.
 
 - **`tests/test_txt_parse.py`'s sound-tag test was strengthened, not carried
   forward.** Phase 0 recorded it as vacuous (its fixture contained no sound
   tag, so the assertion could not fail). Task 6 gave it a real fixture and
   verified it failing first, so the Phase 0 carried-forward entry is now
   closed.
+
+- **`audio.clips_mid_word`'s return value has no coverage.** Mutating it to
+  `return False` leaves the suite green: `tests/test_render.py:76` reimplements
+  the decay decision inside the test instead of calling the function. The
+  structure is identical pre-Phase-1, so this is not a Phase 1 regression and
+  deserves its own change.
+
+- **`test_author_in_the_json_is_ignored_in_favour_of_the_episode` does not
+  detect what it names.** Also inherited, and honestly documented by a
+  preserved caveat comment. A spy on the `episode_author` call would close it.
+
+- **Seven `def` continuation lines no longer align with their opening paren**
+  after name-length changes: `audio.py:103`, `brief.py:51`, `caption.py:76,97`,
+  `publish.py:175`, `published.py:48`, `schedule.py:133`. There is no linter
+  config in the repository; cosmetic.
+
+- **`tests/test_publish_youtube.py:78` models a typo as `"publico"`**, which is
+  only plausible to a Portuguese speaker.
+
+- **`audio.py:5` and `render.py:160` translate a quoted transcript artifact**
+  (`"Poucas"` to `"Few"`) while `tests/test_render.py:73` keeps `"importadas."`.
+  Either choice is defensible; the two should match each other.
+
+- **`.env.example` omits `TALARIA_CAPTION_BACKEND`** (`config.py:57`).
+  Pre-existing.
