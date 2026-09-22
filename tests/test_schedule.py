@@ -8,7 +8,7 @@ import unittest
 from talaria import schedule, layout, published
 
 
-def _prepare(pd, moments=None, posts=None, agenda=None):
+def _prepare(pd, moments=None, posts=None, items=None):
     """Escreve as fontes e a agenda de um project de teste."""
     if moments is not None:
         with open(layout.ensure_dir(layout.moments(pd)), "w", encoding="utf-8") as f:
@@ -16,9 +16,9 @@ def _prepare(pd, moments=None, posts=None, agenda=None):
     if posts is not None:
         with open(layout.ensure_dir(layout.posts(pd)), "w", encoding="utf-8") as f:
             json.dump({"posts": posts}, f)
-    if agenda is not None:
+    if items is not None:
         with open(layout.ensure_dir(layout.schedule(pd)), "w", encoding="utf-8") as f:
-            json.dump({"schedule": agenda}, f)
+            json.dump({"schedule": items}, f)
 
 
 MOMENTS = [{"slug": "corte1", "start": 1.0, "end": 70.0, "title": "T"}]
@@ -34,8 +34,8 @@ class TestCarrega(unittest.TestCase):
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"date": "2026-08-25", "kind": "post", "slug": "citacao_x"},
         ])
-        agenda = schedule.load(self.pd)
-        self.assertEqual(len(agenda), 2)
+        items = schedule.load(self.pd)
+        self.assertEqual(len(items), 2)
 
     def test_sem_arquivo_explica_o_que_criar(self):
         with self.assertRaises(FileNotFoundError):

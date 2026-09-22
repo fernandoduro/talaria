@@ -3,7 +3,7 @@ cli_flag	cortes	clips	manual	flag, brief-type value, kwarg and locals all mean c
 cli_flag	exportar	export	global	
 cli_flag	materiais	materials	manual	same as cortes: the value becomes a filename, so rename prompts/materiais.md to prompts/materials.md in the same commit
 cli_flag	projeto	project	global	
-cli_verb	agenda	schedule	manual	the calendario.json key and the CLI verb; run.py:359 does `agenda = calendario.carrega(pd)` and then calls calendario.plataformas_do - renaming both shadows the schedule module with a list, so rename that local to `items`
+cli_verb	agenda	schedule	manual	the schedule.json top-level key and the CLI verb, everywhere they are identifiers - including every local variable/parameter holding the loaded list (schedule.py's load/pending, run.py's cmd_schedule, test_schedule.py's _prepare), all renamed to `items` (never `schedule`, which would shadow the imported module in every one of those scopes, not just run.py:359). The pervasive prose noun "a agenda" (the schedule/calendar concept, in docstrings/comments/messages) stays Portuguese - Task 8's job
 cli_verb	curar	curate	global	
 constant	ABERTURA_HOST_MAX_S	HOST_OPENING_MAX_S	global	
 constant	AJUSTE_AUDIO_MAX_S	AUDIO_ADJUST_MAX_S	global	
@@ -218,7 +218,7 @@ json_key	chamada_l1	headline_l1	global	chamada is the thumbnail headline
 json_key	chamada_l2	headline_l2	global	chamada is the thumbnail headline
 json_key	cidade	city	manual	the episode key and the hashtags.build/format_line params; test_render.py:214 and 253 and test_post_instagram.py:30 contain "de cidade" inside the design-quote fixture whose exact pixel wrap is asserted
 json_key	conselho	advice	global	
-json_key	convidado	guest	manual	the speaker-label VALUE at txt_parse.py:120 and curadoria.py:155 and the tests asserting it; test_integracao.py:17, 19 and 21 have convidado as prose inside a transcript fixture
+json_key	convidado	guest	manual	the speaker-label VALUE at txt_parse.py:120 and curadoria.py:155 and the tests asserting it, and every identifier holding or comparing that value, including the local accumulator at curadoria.py:146 (renamed `guest_dur`, the running total of guest-speech seconds - not left as "the other sense" the way test_integracao.py:17,19,21's transcript-fixture prose is, which does stay Portuguese for Task 8)
 json_key	convidados	guests	global	
 json_key	corte	clip	global	
 json_key	creditos	credits	global	

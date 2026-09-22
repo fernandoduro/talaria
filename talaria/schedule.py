@@ -14,7 +14,7 @@ from zoneinfo import ZoneInfo
 
 from . import config, layout, post_instagram, published
 
-# Plataformas por kind de item. Os nomes são os das pastas de publish/ e as
+# Plataformas por kind de item. Os names são os das pastas de publish/ e as
 # chaves do published.json — uma grafia só, do arquivo ao registro.
 PLATFORMS = {
     "clip": ("youtube_shorts", "instagram_reels"),
@@ -61,14 +61,14 @@ def load(pd: str) -> list:
             f'"slug": "..."}}]}}'
         )
     with open(path, encoding="utf-8") as f:
-        agenda = (json.load(f) or {}).get("schedule") or []
-    if not agenda:
+        items = (json.load(f) or {}).get("schedule") or []
+    if not items:
         raise ValueError(f"{path} não tem nenhum item em 'schedule'")
 
     # Fontes carregadas sob demanda: agenda só de posts não exige moments.json.
-    cortes = posts = None
-    vistos = set()
-    for i, item in enumerate(agenda, start=1):
+    clips = posts = None
+    seen = set()
+    for i, item in enumerate(items, start=1):
         slug = item.get("slug") or ""
         kind = item.get("kind") or ""
         onde = f"item {i} da agenda ('{slug or '?'}')"
@@ -91,12 +91,12 @@ def load(pd: str) -> list:
         # do clip que cita (é assim que `post --cortes` o nomeia), e clip e
         # post do mesmo trecho na mesma agenda é o caso comum, não repetição.
         # Publicar/registrar já separam os dois por platform.
-        if (kind, slug) in vistos:
+        if (kind, slug) in seen:
             raise ValueError(
                 f"{onde}: {kind} aparece duas vezes — para mudar a data, "
                 f"edite o item existente em vez de repetir"
             )
-        vistos.add((kind, slug))
+        seen.add((kind, slug))
         try:
             date_of(item)
         except (TypeError, ValueError):
@@ -105,12 +105,12 @@ def load(pd: str) -> list:
                 f"YYYY-MM-DD de um dia que existe"
             )
         if kind == "clip":
-            if cortes is None:
-                cortes = {m.get("slug") for m in moments(pd)}
-            if slug not in cortes:
+            if clips is None:
+                clips = {m.get("slug") for m in moments(pd)}
+            if slug not in clips:
                 raise ValueError(
                     f"{onde}: não está em {layout.moments(pd)} — "
-                    f"cortes disponíveis: {', '.join(sorted(cortes))}"
+                    f"cortes disponíveis: {', '.join(sorted(clips))}"
                 )
         else:
             if posts is None:
@@ -127,7 +127,7 @@ def load(pd: str) -> list:
                     f"Instagram aceita no máximo {CAROUSEL_MAX}; quebre em "
                     f"dois posts"
                 )
-    return agenda
+    return items
 
 
 def pending(pd: str, dia: dt.date = None, only: list = None,
@@ -164,21 +164,21 @@ def pending(pd: str, dia: dt.date = None, only: list = None,
                 f"plataforma desconhecida: {', '.join(estranhas)} — "
                 f"use {', '.join(sorted(conhecidas))}"
             )
-    agenda = load(pd)
+    items = load(pd)
     if only is not None:
-        desconhecidos = sorted(set(only) - {i["slug"] for i in agenda})
+        desconhecidos = sorted(set(only) - {i["slug"] for i in items})
         if desconhecidos:
             raise ValueError(
                 f"--only: {', '.join(desconhecidos)} não está(ão) na agenda "
                 f"({layout.schedule(pd)})"
             )
-        agenda = [i for i in agenda if i["slug"] in set(only)]
+        items = [i for i in items if i["slug"] in set(only)]
     else:
-        agenda = [i for i in agenda if date_of(i) <= dia]
+        items = [i for i in items if date_of(i) <= dia]
 
     reg = published.load(pd)
     pares = []
-    for item in agenda:
+    for item in items:
         for pl in platforms_of(item):
             if plataformas is not None and pl not in plataformas:
                 continue

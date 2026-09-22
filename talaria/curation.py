@@ -143,7 +143,7 @@ def guest_speech_fraction(faixa: tuple, segs: list) -> float:
     dentro = segments_in_clip(faixa, segs)
     if not dentro:
         return 0.0
-    total = convidado = 0.0
+    total = guest_dur = 0.0
     for s in dentro:
         speaker = s.get("speaker")
         if speaker is None:
@@ -153,10 +153,10 @@ def guest_speech_fraction(faixa: tuple, segs: list) -> float:
             continue
         total += dur
         if speaker == "guest":
-            convidado += dur
+            guest_dur += dur
     if not total:
         return 1.0        # inaferível: não alerta
-    return convidado / total
+    return guest_dur / total
 
 
 def sentence_ends(segs: list, inicio: float, lo: float, hi: float) -> list:
