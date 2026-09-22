@@ -812,10 +812,31 @@ grep -c '' docs/plans/phase-1-inputs/identifier-inventory.txt
 awk -F'\t' 'NR>1 && $2!=""{print $2}' docs/plans/phase-1-inputs/rename-map.tsv | sort -u | wc -l
 ```
 
-Then re-run the extraction from `identifier-inventory.txt`'s header against the
-current tree and confirm no identifier appears that is neither English nor
-present in the map as an `old` value. A new Portuguese identifier introduced
-during the prose or string passes is the failure this catches.
+**The verdicts file must not be trusted, only checked.** It is produced by the
+same pass it certifies, so a wrong verdict is invisible to a criterion that
+consults it. Two rows in its first version claimed a rename that was never
+applied (`todo`→`combined`, `segundo`→`second` — neither new name existed
+anywhere), and seven Portuguese identifiers sat in it verdicted `english`.
+A gate that reads those rows and believes them gates nothing.
+
+So verify the claims mechanically instead:
+
+```bash
+cd /data/Code/talaria
+# Every row verdicted `renamed` must have its old name ABSENT and its new
+# name PRESENT. This is what catches a verdict that claims work not done.
+awk -F'\t' 'NR>1 && $3=="renamed"{print $1"\t"$4}' \
+  docs/plans/phase-1-inputs/identifier-verdicts.tsv | while IFS=$'\t' read old note; do
+  n=$(grep -rowE "\b$old\b" --include='*.py' talaria/ tests/ run.py scripts/ 2>/dev/null | wc -l)
+  [ "$n" != "0" ] && echo "CLAIMS RENAMED BUT STILL PRESENT: $old ($n) — $note"
+done
+```
+
+Then re-extract identifiers from the current tree by AST, exactly as
+`identifier-inventory.txt`'s header describes, and confirm every one is either
+in the verdicts file or newly introduced and English. A new Portuguese
+identifier added during the prose or string passes is the other failure this
+catches.
 
 - [ ] **Step 5: Every map entry applied**
 
