@@ -157,9 +157,9 @@ class TestAuthorAndText(unittest.TestCase):
             default = post_instagram.episode_author(d)
             self.assertEqual(default["name"], "Marina Siqueira")
 
-            segundo = post_instagram.episode_author(d, who="Rafael Nunes")
-            self.assertEqual(segundo["name"], "Rafael Nunes")
-            self.assertEqual(segundo["role"], "CEO")
+            second = post_instagram.episode_author(d, who="Rafael Nunes")
+            self.assertEqual(second["name"], "Rafael Nunes")
+            self.assertEqual(second["role"], "CEO")
 
     def test_autor_desconhecido_da_erro_em_vez_de_atribuir_errado(self):
         with tempfile.TemporaryDirectory() as d:
@@ -181,14 +181,14 @@ class TestAuthorAndText(unittest.TestCase):
 
 
 class TestGenerate(unittest.TestCase):
-    def _com_posts(self, d, posts):
+    def _with_posts(self, d, posts):
         _fake_project(d)
         with open(layout.ensure_dir(layout.posts(d)), "w", encoding="utf-8") as f:
             json.dump({"posts": posts}, f, ensure_ascii=False)
 
     def test_card_unico_gera_um_arquivo(self):
         with tempfile.TemporaryDirectory() as d:
-            self._com_posts(d, [{"slug": "corte1_mar_azul",
+            self._with_posts(d, [{"slug": "corte1_mar_azul",
                                  "cards": ["O mar azul estava do lado."]}])
             generated = post_instagram.generate(d)
             self.assertEqual(len(generated), 1)
@@ -197,7 +197,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_carrossel_gera_arquivos_numerados_na_ordem(self):
         with tempfile.TemporaryDirectory() as d:
-            self._com_posts(d, [{"slug": "corte3_b2b", "cards": [
+            self._with_posts(d, [{"slug": "corte3_b2b", "cards": [
                 "No B2B você entrega e acabou.",
                 "A responsabilidade depois é da outra pessoa.",
             ]}])
@@ -208,7 +208,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_card_que_estoura_aborta_sem_gerar_nada(self):
         with tempfile.TemporaryDirectory() as d:
-            self._com_posts(d, [{"slug": "ok", "cards": ["Curta."]},
+            self._with_posts(d, [{"slug": "ok", "cards": ["Curta."]},
                                 {"slug": "bad", "cards": [
                                     "Às vezes a oportunidade está do seu lado "
                                     "e você está tão focado em uma coisa que "
@@ -223,7 +223,7 @@ class TestGenerate(unittest.TestCase):
         """posts.json é escrito à mão: um card numérico não pode virar
         AttributeError vindo de dentro da limpeza de texto."""
         with tempfile.TemporaryDirectory() as d:
-            self._com_posts(d, [{"slug": "a", "cards": [123]}])
+            self._with_posts(d, [{"slug": "a", "cards": [123]}])
             with self.assertRaises(ValueError) as ctx:
                 post_instagram.generate(d)
             self.assertIn("esperava texto", str(ctx.exception))
@@ -235,7 +235,7 @@ class TestGenerate(unittest.TestCase):
         FileNotFoundError obscuro do Pillow, em vez de generate o arquivo.
         """
         with tempfile.TemporaryDirectory() as d:
-            self._com_posts(d, [{"slug": "../../fora", "cards": ["Curta."]}])
+            self._with_posts(d, [{"slug": "../../fora", "cards": ["Curta."]}])
             generated = post_instagram.generate(d)
             output = os.path.realpath(layout.posts_png(d))
             self.assertTrue(os.path.realpath(generated[0]).startswith(output + os.sep))
@@ -243,7 +243,7 @@ class TestGenerate(unittest.TestCase):
 
     def test_autor_do_json_e_ignorado_em_favor_do_episodio(self):
         with tempfile.TemporaryDirectory() as d:
-            self._com_posts(d, [{"slug": "c1", "cards": ["Curta."],
+            self._with_posts(d, [{"slug": "c1", "cards": ["Curta."],
                                  "autor": {"name": "Nome Errado",
                                            "role": "X", "company": "Y"}}])
             post_instagram.generate(d)

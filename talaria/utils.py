@@ -90,11 +90,11 @@ def _expand_contractions(t: str) -> str:
     # Protege as locuções antes de mexer nas contrações; devolve no end.
     reserved = []
 
-    def _guarda(m):
+    def _reserve(m):
         reserved.append(m.group(0))
         return f"\x00{len(reserved) - 1}\x00"
 
-    t = RE_PRO_LATIM.sub(_guarda, t)
+    t = RE_PRO_LATIM.sub(_reserve, t)
 
     for pat, target in _CONTRACTIONS:
         if target is None:      # na lista só para documentar a exclusão

@@ -143,10 +143,10 @@ def render_card(text: str, author: dict, out_path: str, template: str = None):
     # Citação — ancorada pelo TOPO, não centralizada: cards de 2 e de 5 lines
     # partem da mesma altura, então o texto não pula a cada deslize do
     # carrossel.
-    fcit = _quote_font()
+    quote_font = _quote_font()
     for i, line in enumerate(wrap(text)):
         y = config.POST_QUOTE_Y + i * config.POST_QUOTE_STEP
-        d.text((config.POST_MARGIN_X, y), line, font=fcit,
+        d.text((config.POST_MARGIN_X, y), line, font=quote_font,
                fill=config.POST_QUOTE_COLOR)
 
     # Rodapé (o filete já vem desenhado no template)

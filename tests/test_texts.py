@@ -59,9 +59,9 @@ class TestTexts(unittest.TestCase):
         """Traduz l1/l2 -> headline_l1/headline_l2 sem perder campo em silêncio."""
         kwargs = texts.build_kwargs(self.d)
         sig = inspect.signature(thumbnail.build_thumbnail)
-        esperados = {n for n, p in sig.parameters.items()
+        expected = {n for n, p in sig.parameters.items()
                      if p.kind is inspect.Parameter.KEYWORD_ONLY}
-        self.assertEqual(set(kwargs), esperados)
+        self.assertEqual(set(kwargs), expected)
 
     def test_build_kwargs_traduz_os_valores(self):
         kwargs = texts.build_kwargs(self.d)

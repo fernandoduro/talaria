@@ -123,7 +123,7 @@ class TestPrecheck(unittest.TestCase):
         self.assertTrue(any("post --generate" in e for e in errors))
 
 
-class TestPngsDoPost(unittest.TestCase):
+class TestPostPngs(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
         _project(self.pd)

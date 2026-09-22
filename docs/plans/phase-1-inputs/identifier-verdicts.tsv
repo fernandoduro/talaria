@@ -350,7 +350,7 @@ url_episodio	1	renamed	-> episode_url (global); compound, caption.py param
 is_published	1	english	
 record	1	english	
 tmp	1	english	
-id_post	1	abbreviation	
+id_post	1	renamed	-> post_id (global); published.record parameter; Portuguese word order
 RE_TS_LINE	1	english	
 _ts_to_sec	1	english	
 parse_txt	1	english	
@@ -470,7 +470,7 @@ clean_quote	1	english
 render_card	1	english	
 file_slug	1	english	
 generate	1	english	
-fcit	1	abbreviation	
+fcit	1	renamed	-> quote_font (global); post_instagram.render_card local; fcit abbreviates fonte citacao
 name_font	1	english	
 role_font	1	english	
 rodape	1	renamed	-> footer (global); post_instagram.py footer-line local
@@ -520,7 +520,7 @@ fix_proper_nouns	1	english
 clean_caption	1	english	
 group_words_into_segments	1	english	
 reservas	1	renamed	-> reserved (global); utils.py reserved-regex-chars local
-_guarda	1	english	
+_guarda	1	renamed	-> _reserve (global); utils.py _expand_contractions' RE_PRO_LATIM sub callback, production code; guarda = guards/keeps
 letra	1	renamed	-> letter (global); utils.py phonetic-equivalents loop var
 classe	1	renamed	-> char_class (global); utils.py phonetic-equivalents loop var
 achados	1	renamed	-> matches (global); utils.py regex findall results
@@ -623,7 +623,7 @@ todo	1	renamed	-> combined (global); test_txt_parse.py joined-text local; not th
 _client_secret	1	english	
 TestUpload	1	english	
 TestPrivacidade	1	renamed	-> TestPrivacy (global); class name
-_sobe	1	english	
+_sobe	1	renamed	-> _put (global); test_publish_youtube.py upload helper + 5 call sites; same sense as the map's sobe->put row
 build_mock	1	english	
 media_mock	1	english	
 extra_env	1	english	
@@ -673,7 +673,7 @@ TestPendente	1	renamed	-> TestPending (global); class name, matches pendente->pe
 TestSlug	1	english	
 TestBuild	1	english	
 fixa	1	renamed	-> fixed (global); test-local boolean/value
-TestValeAntes	1	renamed	-> TestValleBefore (global); class name, matches valley_before
+TestValeAntes	1	renamed	-> TestValleyBefore (global); class name, matches valley_before (the map row said TestValleBefore, a misspelling; corrected)
 TestAjusteRespeitaMinimo	1	renamed	-> TestAdjustRespectsMinimum (global); class name
 TestCaudaVaza	1	renamed	-> TestClipsMidWord (global); class name, matches clips_mid_word function it tests
 TestMargemDeFim	1	renamed	-> TestEndMargin (global); class name, matches apply_end_margin
@@ -686,8 +686,8 @@ _has_ffmpeg	1	english
 TestMarcaDaguaECardIntegracao	1	renamed	-> TestWatermarkAndCardIntegration (global); class name
 TestConcatenaEncerramento	1	renamed	-> TestConcatenateEndCard (global); class name
 TestOrdemCaudaVazaAntesDoCard	1	renamed	-> TestClipsMidWordOrderBeforeCard (global); class name
-_pontos	1	english	
-_decai	1	english	
+_pontos	1	renamed	-> _points (global); test_render.py TestValleyBefore helper; a previous rename stopped at its internal points local
+_decai	1	renamed	-> _decays (global); test_render.py helper replaying clips_mid_word's decay decision
 CITACAO_DO_DESIGN	1	renamed	-> DESIGN_QUOTE (global); uppercase constant, test_render.py
 primeiro	1	renamed	-> first (global); test-local
 palavra	1	renamed	-> word (manual); singular; mostly ordinary prose ("cortando palavra") - no clean identifier site found beyond prose, kept manual
@@ -699,7 +699,7 @@ espiao	1	renamed	-> spy (global); test-local mock name
 especificacao	1	renamed	-> spec (global); test-helper param name
 TestEpisodio	1	renamed	-> TestEpisode (global); class name
 TestTextos	1	renamed	-> TestTexts (global); class name
-esperados	1	english	
+esperados	1	renamed	-> expected (global); test_texts.py keyword-only parameter set; single site
 TRANSCRIPT	1	english	
 has_ffmpeg	1	english	
 TestFluxoCompleto	1	renamed	-> TestFullFlow (global); class name
@@ -724,7 +724,7 @@ _ctx	1	english
 ENV_OK	1	english	
 _project	1	english	
 TestPreChecagem	1	renamed	-> TestPrecheck (global); class name, matches precheck()
-TestPngsDoPost	1	english	
+TestPngsDoPost	1	renamed	-> TestPostPngs (global); test_publish.py class name; do = 'of the'
 TestExecutar	1	renamed	-> TestExecute (global); class name, matches execute()
 var	1	english	
 por_pl	1	renamed	-> per_pl (global); compound (Portuguese "por" + platform abbreviation), test_publish.py local
@@ -739,7 +739,7 @@ TestAutorETexto	1	renamed	-> TestAuthorAndText (global); class name
 TestGerar	1	renamed	-> TestGenerate (global); class name, matches generate()
 TestCaptionDoPost	1	renamed	-> TestPostCaption (global); class name
 TestLegendaValidaAntesDeEscrever	1	renamed	-> TestCaptionValidatedBeforeWriting (global); class name
-_com_posts	1	english	
+_com_posts	1	renamed	-> _with_posts (global); test_post_instagram.py fixture helper + 6 call sites
 _posts	1	english	
 fim_5	1	renamed	-> end_5 (global); compound (protected from bare fim), test_post_instagram.py local
 fim_6	1	renamed	-> end_6 (global); compound (protected from bare fim), test_post_instagram.py local

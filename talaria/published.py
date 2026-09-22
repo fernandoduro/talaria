@@ -44,7 +44,7 @@ def is_published(reg: dict, platform: str, slug: str) -> bool:
     return any(r.get("slug") == slug for r in reg.get(platform, []))
 
 
-def record(pd: str, platform: str, slug: str, id_post: str,
+def record(pd: str, platform: str, slug: str, post_id: str,
              url: str) -> str:
     """Acrescenta UMA publicação e grava na hora, atomicamente.
 
@@ -54,7 +54,7 @@ def record(pd: str, platform: str, slug: str, id_post: str,
     reg = load(pd)
     reg.setdefault(platform, []).append({
         "slug": slug,
-        "id": id_post,
+        "id": post_id,
         "url": url,
         "published_at": dt.datetime.now(
             ZoneInfo(config.PUBLISH_TZ)).isoformat(timespec="seconds"),

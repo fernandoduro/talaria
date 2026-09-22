@@ -53,7 +53,7 @@ class TestPrivacy(unittest.TestCase):
         self.env = {"YT_CLIENT_SECRET_PATH": _client_secret(self.d),
                     "YT_REFRESH_TOKEN": "rt"}
 
-    def _sobe(self, extra_env):
+    def _put(self, extra_env):
         with mock.patch.dict("os.environ", {**self.env, **extra_env}):
             with mock.patch("talaria.publish_youtube.MediaFileUpload"), \
                  mock.patch("talaria.publish_youtube.build") as build_mock:
@@ -64,25 +64,25 @@ class TestPrivacy(unittest.TestCase):
 
     def test_sem_a_variavel_continua_publico(self):
         # O default não muda: quem não configurou nada publica como sempre.
-        self.assertEqual(self._sobe({})["privacyStatus"], "public")
+        self.assertEqual(self._put({})["privacyStatus"], "public")
 
     def test_unlisted_permite_conferir_antes_de_abrir(self):
-        self.assertEqual(self._sobe({"YT_PRIVACY": "unlisted"})["privacyStatus"],
+        self.assertEqual(self._put({"YT_PRIVACY": "unlisted"})["privacyStatus"],
                          "unlisted")
 
     def test_private_tambem_vale(self):
-        self.assertEqual(self._sobe({"YT_PRIVACY": "private"})["privacyStatus"],
+        self.assertEqual(self._put({"YT_PRIVACY": "private"})["privacyStatus"],
                          "private")
 
     def test_valor_invalido_aborta_em_vez_de_publicar_publico(self):
         # Um typo ("unlised", "publico") não pode virar publicação pública
         # em silêncio: o vídeo iria ao ar aberto quando se pediu o contrário.
         with self.assertRaises(ValueError) as ctx:
-            self._sobe({"YT_PRIVACY": "unlised"})
+            self._put({"YT_PRIVACY": "unlised"})
         self.assertIn("unlised", str(ctx.exception))
 
     def test_espaco_e_caixa_nao_atrapalham(self):
-        self.assertEqual(self._sobe({"YT_PRIVACY": " Unlisted "})["privacyStatus"],
+        self.assertEqual(self._put({"YT_PRIVACY": " Unlisted "})["privacyStatus"],
                          "unlisted")
 
 

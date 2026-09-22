@@ -57,9 +57,9 @@ class TestParseTxt(unittest.TestCase):
         self.assertGreater(last["end"] - last["start"], 1.0)
 
     def test_remove_marcacao_de_som_e_entidades(self):
-        todo = " ".join(s["text"] for s in self.segs)
-        self.assertNotIn("[música]", todo)
-        self.assertNotIn("&amp;", todo)
+        combined = " ".join(s["text"] for s in self.segs)
+        self.assertNotIn("[música]", combined)
+        self.assertNotIn("&amp;", combined)
 
 
 class TestRegroupIntoSentences(unittest.TestCase):

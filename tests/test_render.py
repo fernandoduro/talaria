@@ -11,7 +11,7 @@ import unittest
 from talaria import audio, config, layout, render
 
 
-class TestValleBefore(unittest.TestCase):
+class TestValleyBefore(unittest.TestCase):
     """Pausa só account como end de fala se o silêncio DURAR.
 
     Numa fala corrida a energia mergulha entre words a cada ~100ms. Cortar
@@ -19,7 +19,7 @@ class TestValleBefore(unittest.TestCase):
     interna de 80ms e a fala sumiu antes de "...project assim tão longo".
     """
 
-    def _pontos(self, spec):
+    def _points(self, spec):
         """[(t, dB)] a partir de [(n_janelas, dB)]."""
         points, t = [], 0.0
         for n, db in spec:
@@ -30,7 +30,7 @@ class TestValleBefore(unittest.TestCase):
 
     def test_ignora_pausa_interna_curta(self):
         """4 janelas (80ms) de silêncio no meio da fala não é end de frase."""
-        points = self._pontos([(10, -18.0), (4, -44.0), (10, -18.0)])
+        points = self._points([(10, -18.0), (4, -44.0), (10, -18.0)])
         i = 10
         self.assertLess(
             audio._silence_duration(points, i, audio.PAUSE_THRESHOLD_DB),
@@ -38,7 +38,7 @@ class TestValleBefore(unittest.TestCase):
 
     def test_aceita_silencio_longo(self):
         """15 janelas (300ms) de silêncio é end de fala."""
-        points = self._pontos([(10, -18.0), (15, -44.0)])
+        points = self._points([(10, -18.0), (15, -44.0)])
         self.assertGreaterEqual(
             audio._silence_duration(points, 10, audio.PAUSE_THRESHOLD_DB),
             audio.SILENCE_MIN_S)
@@ -69,18 +69,18 @@ class TestClipsMidWord(unittest.TestCase):
 
     def test_limiar_separa_os_casos_medidos(self):
         # clip defeituoso: -31 -28 -31 (estável, alto)
-        self.assertFalse(self._decai([-31.1, -28.5, -30.6]))
+        self.assertFalse(self._decays([-31.1, -28.5, -30.6]))
         # "importadas." correto: -25.8 -> -39.4 (despenca)
-        self.assertTrue(self._decai([-25.8, -25.9, -39.4]))
+        self.assertTrue(self._decays([-25.8, -25.9, -39.4]))
 
-    def _decai(self, dbs, threshold=-25.0):
+    def _decays(self, dbs, threshold=-25.0):
         """Reproduz a decisão de clips_mid_word sobre uma série já medida."""
         if dbs[-1] <= threshold - 10.0:
             return True
         return (dbs[0] - dbs[-1]) >= 8.0
 
     def test_silencio_no_fim_nunca_acusa(self):
-        self.assertTrue(self._decai([-44.0, -46.0, -48.0]))
+        self.assertTrue(self._decays([-44.0, -46.0, -48.0]))
 
     def test_janela_e_estreita(self):
         """Janela larga pegaria a sílaba final de qualquer fala."""
