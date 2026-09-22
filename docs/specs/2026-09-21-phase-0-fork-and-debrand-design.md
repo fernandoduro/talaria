@@ -314,6 +314,28 @@ the rest. Recorded here because the later phases touch the same files.
   described a template that no longer ships; one docstring asserted a
   concatenation strategy the code documents as broken, in the same call path.
 
+Phase 1 added three more, from eight further instances of the same shape:
+
+- **A criterion's scope needs the same review as its logic.** Two of Phase 1's
+  three acceptance greps read `--include='*.py' --include='*.md'`, so
+  `.gitignore` and `requirements.txt` were structurally invisible — nine
+  Portuguese comment lines and a stale `projetos/` path that stopped ignoring
+  source videos once the code moved to `projects/`. The logic was right; the
+  scope was the hole. Drive a criterion off `git ls-files`, not an extension
+  list.
+- **A hit is never dismissed by consulting the artifact under test.** Phase 1's
+  Step 5 correctly flagged a surviving Portuguese identifier. The report read
+  the rename map's own note, which said only what that word must *not* become,
+  and concluded the site was a sanctioned exception. The plan already warned
+  that the verdicts file "must not be trusted, only checked" because it is
+  produced by the pass it certifies — the same warning was never extended to
+  the map's notes, and a note is what overruled a correct finding.
+- **An artifact keyed on `file:line` will drift, and its own check will have a
+  blind spot.** Phase 1's classification drifted in three consecutive waves,
+  including the wave that fixed drift. Require a pointer to land on the
+  asserted line itself, not merely near one; "near one, inside the right test"
+  still let seven rows describe an assertion three lines away.
+
 The general form: verify the *property*, not the spelling you happen to have
 thought of, and prefer a criterion that fails loudly over one that comes back
 empty.
