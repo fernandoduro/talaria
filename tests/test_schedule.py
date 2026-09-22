@@ -22,7 +22,7 @@ def _prepare(pd, moments=None, posts=None, agenda=None):
 
 
 MOMENTS = [{"slug": "corte1", "start": 1.0, "end": 70.0, "title": "T"}]
-POSTS = [{"slug": "citacao_x", "cards": ["frase"], "legenda": "leg"}]
+POSTS = [{"slug": "citacao_x", "cards": ["frase"], "caption": "leg"}]
 
 
 class TestCarrega(unittest.TestCase):
@@ -83,7 +83,7 @@ class TestCarrega(unittest.TestCase):
     def test_corte_e_post_com_mesmo_slug_permitido(self):
         # O post de citação herda o slug do clip que cita; agendar os dois
         # não é repetição — são peças distintas, em plataformas distintas.
-        posts = [{"slug": "corte1", "cards": ["frase"], "legenda": "leg"}]
+        posts = [{"slug": "corte1", "cards": ["frase"], "caption": "leg"}]
         _prepare(self.pd, MOMENTS, posts, [
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"date": "2026-08-25", "kind": "post", "slug": "corte1"},
@@ -138,7 +138,7 @@ class TestCarrega(unittest.TestCase):
 
     def test_carrossel_acima_de_10_aborta(self):
         # Limite da Graph API é 10 imagens; a solução é editorial.
-        posts = [{"slug": "longo", "cards": ["c"] * 11, "legenda": "x"}]
+        posts = [{"slug": "longo", "cards": ["c"] * 11, "caption": "x"}]
         _prepare(self.pd, MOMENTS, posts,
                  [{"date": "2026-08-24", "kind": "post", "slug": "longo"}])
         with self.assertRaises(ValueError) as ctx:

@@ -20,7 +20,7 @@ def _project(pd, title="Titulo do Short"):
         json.dump(moments, f)
     with open(layout.ensure_dir(layout.posts(pd)), "w", encoding="utf-8") as f:
         json.dump({"posts": [{"slug": "cit_x", "cards": ["a", "b"],
-                              "legenda": "leg"}]}, f)
+                              "caption": "leg"}]}, f)
     with open(layout.ensure_dir(layout.schedule(pd)), "w", encoding="utf-8") as f:
         json.dump({"schedule": [
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},

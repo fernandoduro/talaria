@@ -20,7 +20,7 @@ Exemplos:
   python run.py ingest   --project ep2 --src "https://youtu.be/VIDEO_ID" \\
       --transcript ~/Downloads/ep2.txt
   python run.py brief    --project ep2 --cortes
-  python run.py curate    --project ep2 --meta 5
+  python run.py curate    --project ep2 --target 5
   python run.py thumb    --project ep2 --frame-at 1745       # texts do JSON
   python run.py post     --project ep2 --cortes 1,3
   python run.py post     --project ep2 --generate
@@ -214,14 +214,14 @@ def cmd_curate(args):
     """Mostra o estado da curation e exporta moments.json quando fecha."""
     pd = project_dir(args.project)
     ja_existia = os.path.exists(layout.curation(pd))
-    estado = curation.load(pd, meta=args.meta)
+    estado = curation.load(pd, target=args.target)
 
-    # Estado já gravado manda na meta — --meta só vale ao criar a curation.
-    # Sem este aviso, `curate --meta 8` sobre um estado com meta 5 seguia em
-    # silêncio com a meta antiga.
-    if ja_existia and estado["meta"] != args.meta:
-        print(f"[curate] aviso: estado gravado tem meta {estado['meta']}, "
-              f"ignorando --meta {args.meta}")
+    # Estado já gravado manda na target — --target só vale ao criar a curation.
+    # Sem este aviso, `curate --target 8` sobre um estado com target 5 seguia em
+    # silêncio com a target antiga.
+    if ja_existia and estado["target"] != args.target:
+        print(f"[curate] aviso: estado gravado tem target {estado['target']}, "
+              f"ignorando --target {args.target}")
 
     if args.export:
         try:
@@ -249,7 +249,7 @@ def cmd_curate(args):
 
     comp = curation.composition(estado)
     print(f"[curate] rodada {estado['rounds']} | "
-          f"{len(estado['approved'])}/{estado['meta']} aprovados | "
+          f"{len(estado['approved'])}/{estado['target']} aprovados | "
           f"{len(estado['rejected'])} rejeitados")
     print("[curate] composição: " + ", ".join(f"{t}={n}" for t, n in comp.items()))
     ausentes = curation.missing_kinds(estado)
@@ -259,7 +259,7 @@ def cmd_curate(args):
     if ms:
         print(f"[curate] motivos de rejeição acumulados: {'; '.join(ms)}")
     if curation.is_closed(estado):
-        print("[curate] meta atingida — rode com --export para gerar moments.json")
+        print("[curate] target atingida — rode com --export para gerar moments.json")
     else:
         print(f"[curate] faltam {curation.slots_left(estado)} cortes")
     curation.save(pd, estado)
@@ -433,7 +433,7 @@ def main():
 
     sp = sub.add_parser("curate", help="estado da curadoria iterativa")
     add_common(sp)
-    sp.add_argument("--meta", type=int, default=5, help="quantos cortes aprovar")
+    sp.add_argument("--target", type=int, default=5, help="quantos cortes aprovar")
     sp.add_argument("--export", action="store_true", help="gera moments.json")
     sp.set_defaults(func=cmd_curate)
 

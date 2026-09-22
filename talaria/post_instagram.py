@@ -224,7 +224,7 @@ def generate(project_dir: str) -> list:
         # A legenda é validada AQUI, não na hora de gravar o .txt: o contrato
         # desta função é abortar antes de escrever qualquer arquivo, e um kind
         # errado descoberto depois já teria deixado os PNGs na pasta.
-        caption.validate("legenda", p.get("legenda"), f"post {slug}")
+        caption.validate("caption", p.get("caption"), f"post {slug}")
         for i, bruto in enumerate(cards, start=1):
             if not isinstance(bruto, str):
                 raise ValueError(
@@ -254,7 +254,7 @@ def generate(project_dir: str) -> list:
     # Um caption por POST, não por card: um carrossel é uma publicação só, com
     # uma legenda só. Por isso a lista vem de `posts` e não de `planejado`.
     write_captions(saida,
-                     [(p.get("slug") or "post", p.get("legenda", "")) for p in posts],
+                     [(p.get("slug") or "post", p.get("caption", "")) for p in posts],
                      (texts.load(project_dir) or {}).get("hashtags", ""))
     return gerados
 
@@ -270,11 +270,11 @@ def write_captions(saida: str, legendas: list, hashtags: str) -> list:
     escreveria o `.txt` fora da pasta de publicação.
     """
     escritos = []
-    for slug, legenda in legendas:
-        caption.validate("legenda", legenda, f"post {slug}")
-        if not (legenda or "").strip():
+    for slug, text in legendas:
+        caption.validate("caption", text, f"post {slug}")
+        if not (text or "").strip():
             print(f"[caption] !! {slug}: sem legenda — o .txt sai só com as "
                   f"hashtags. Preencha em decisions/posts.json.")
         base = os.path.join(saida, f"post_{file_slug(slug)}.png")
-        escritos.append(caption.write(base, caption.compose(legenda, hashtags)))
+        escritos.append(caption.write(base, caption.compose(text, hashtags)))
     return escritos

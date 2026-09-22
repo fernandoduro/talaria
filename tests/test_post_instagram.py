@@ -329,8 +329,8 @@ class TestLegendaValidaAntesDeEscrever(unittest.TestCase):
 
     def test_legenda_invalida_nao_deixa_png_orfao(self):
         self._posts([
-            {"slug": "bom", "cards": ["Uma citação curta."], "legenda": "ok"},
-            {"slug": "ruim", "cards": ["Outra citação."], "legenda": 123},
+            {"slug": "bom", "cards": ["Uma citação curta."], "caption": "ok"},
+            {"slug": "ruim", "cards": ["Outra citação."], "caption": 123},
         ])
         with self.assertRaises(ValueError) as e:
             post_instagram.generate(self.d)

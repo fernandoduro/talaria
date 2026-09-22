@@ -59,13 +59,13 @@ class TestBrief(unittest.TestCase):
         self.assertEqual(out, "sem placeholder")
 
     def test_estado_legivel_primeira_rodada(self):
-        estado = {"meta": 5, "approved": [], "rejected": [], "rounds": 0}
+        estado = {"target": 5, "approved": [], "rejected": [], "rounds": 0}
         txt = brief.readable_curation(estado)
         self.assertIn("PRIMEIRA RODADA", txt)
         self.assertIn("10", txt)
 
     def test_estado_legivel_com_rejeitados(self):
-        estado = {"meta": 5, "rounds": 1,
+        estado = {"target": 5, "rounds": 1,
                   "approved": [{"slug": "a", "start": 100.0, "end": 170.0,
                                  "kind": "story"}],
                   "rejected": [{"start": 300.0, "end": 370.0,

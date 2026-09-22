@@ -26,7 +26,7 @@ class TestSobreposicao(unittest.TestCase):
 class TestQueimados(unittest.TestCase):
     def setUp(self):
         self.estado = {
-            "meta": 5,
+            "target": 5,
             "approved": [{"slug": "a", "start": 100.0, "end": 170.0}],
             "rejected": [{"start": 300.0, "end": 370.0, "reason": "gancho fraco"}],
             "rounds": 1,
@@ -53,8 +53,8 @@ class TestQueimados(unittest.TestCase):
 
 class TestEstadoInicial(unittest.TestCase):
     def test_novo_estado_tem_meta(self):
-        e = curation.new_state(meta=5)
-        self.assertEqual(e["meta"], 5)
+        e = curation.new_state(target=5)
+        self.assertEqual(e["target"], 5)
         self.assertEqual(e["approved"], [])
         self.assertEqual(e["rejected"], [])
         self.assertEqual(e["rounds"], 0)
@@ -88,7 +88,7 @@ class TestValidacoes(unittest.TestCase):
         self.assertTrue(any("fronteira" in m for m in msgs))
 
     def test_corte_sobre_faixa_queimada(self):
-        estado = {"meta": 5, "approved": [], "rounds": 0,
+        estado = {"target": 5, "approved": [], "rounds": 0,
                   "rejected": [{"start": 0.0, "end": 75.0}]}
         ok, msgs = curation.validate_clip((0.0, 75.0), self.segs, estado)
         self.assertFalse(ok)
@@ -173,7 +173,7 @@ class TestSobreposicaoEntreAprovados(unittest.TestCase):
     """
 
     def setUp(self):
-        self.estado = curation.new_state(meta=5)
+        self.estado = curation.new_state(target=5)
         curation.approve(self.estado, {"slug": "a", "start": 100.0, "end": 170.0})
 
     def test_recusa_corte_sobreposto(self):
@@ -376,7 +376,7 @@ class TestProtagonismo(unittest.TestCase):
 
 class TestOperacoes(unittest.TestCase):
     def setUp(self):
-        self.estado = curation.new_state(meta=5)
+        self.estado = curation.new_state(target=5)
 
     def test_aprovar_adiciona(self):
         curation.approve(self.estado, {"slug": "c1", "start": 10.0, "end": 80.0})
@@ -424,7 +424,7 @@ class TestOperacoes(unittest.TestCase):
 
 class TestExportacao(unittest.TestCase):
     def test_exporta_momentos_com_campos_do_render(self):
-        estado = curation.new_state(meta=2)
+        estado = curation.new_state(target=2)
         curation.approve(estado, {
             "slug": "corte1", "start": 10.0, "end": 80.0, "kind": "story",
             "screen_text": "O ganho sem o custo", "post_caption": "...",
@@ -438,7 +438,7 @@ class TestExportacao(unittest.TestCase):
         self.assertEqual(m["screen_text"], "O ganho sem o custo")
 
     def test_exportar_sem_aprovados_da_erro(self):
-        estado = curation.new_state(meta=5)
+        estado = curation.new_state(target=5)
         with self.assertRaises(ValueError):
             curation.to_moments(estado)
 

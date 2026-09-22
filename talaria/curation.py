@@ -1,4 +1,4 @@
-"""Estado da curation iterativa — rounds até fechar a meta de cortes approved.
+"""Estado da curation iterativa — rounds até fechar a target de cortes approved.
 
 Regras de estado:
 - trecho rejeitado fica queimado permanentemente, não volta em nenhuma rodada;
@@ -20,8 +20,8 @@ FILE_NAME = "curation.json"
 OVERLAP_THRESHOLD = 0.30
 
 
-def new_state(meta: int = 5) -> dict:
-    return {"meta": meta, "approved": [], "rejected": [], "rounds": 0}
+def new_state(target: int = 5) -> dict:
+    return {"target": target, "approved": [], "rejected": [], "rounds": 0}
 
 
 def overlaps(a: tuple, b: tuple, limiar: float = OVERLAP_THRESHOLD) -> bool:
@@ -56,13 +56,13 @@ def is_burned(faixa: tuple, estado: dict) -> bool:
 
 
 def slots_left(estado: dict) -> int:
-    return max(0, estado["meta"] - len(estado.get("approved", [])))
+    return max(0, estado["target"] - len(estado.get("approved", [])))
 
 
-def load(project_dir: str, meta: int = 5) -> dict:
+def load(project_dir: str, target: int = 5) -> dict:
     path = layout.curation(project_dir)
     if not os.path.exists(path):
-        return new_state(meta)
+        return new_state(target)
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
@@ -306,7 +306,7 @@ def clip_warnings(faixa: tuple, segs: list) -> list:
 
 
 # Tipos de clip, em ordem de preferência.
-KINDS = ["story", "thesis", "advice", "pessoal"]
+KINDS = ["story", "thesis", "advice", "personal"]
 
 
 def approve(estado: dict, clip: dict) -> dict:
@@ -333,8 +333,8 @@ def approve(estado: dict, clip: dict) -> dict:
                 f"corte {clip.get('slug')} sobrepõe o aprovado "
                 f"{ja.get('slug')} ({ja['start']:.0f}-{ja['end']:.0f}s)"
             )
-    if len(estado["approved"]) >= estado["meta"]:
-        raise ValueError(f"meta de {estado['meta']} cortes já atingida")
+    if len(estado["approved"]) >= estado["target"]:
+        raise ValueError(f"target de {estado['target']} cortes já atingida")
     estado["approved"].append(clip)
     return estado
 
@@ -377,8 +377,8 @@ def reasons(estado: dict) -> list:
 
 
 def is_closed(estado: dict) -> bool:
-    """True quando a meta de cortes approved foi atingida."""
-    return len(estado.get("approved", [])) >= estado["meta"]
+    """True quando a target de cortes approved foi atingida."""
+    return len(estado.get("approved", [])) >= estado["target"]
 
 
 def to_moments(estado: dict) -> list:

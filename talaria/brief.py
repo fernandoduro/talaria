@@ -69,7 +69,7 @@ def readable_curation(estado: dict) -> str:
 
     lines = [
         f"Rodada: {estado.get('rounds', 0)}",
-        f"Meta: {estado['meta']} cortes",
+        f"Meta: {estado['target']} cortes",
         f"Aprovados: {len(approved)}",
         f"VAGAS RESTANTES: {cur.slots_left(estado)} — proponha exatamente este número.",
         "",

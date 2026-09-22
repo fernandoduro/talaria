@@ -110,13 +110,13 @@ def _publish_container(container_id: str, token: str, conta: str) -> dict:
     return {"id": media_id, "permalink": perma.get("permalink", "")}
 
 
-def publish_reel(video_path: str, legenda: str) -> dict:
+def publish_reel(video_path: str, caption: str) -> dict:
     """Sobe o vídeo, cria o container REELS, espera processar e publica."""
     token, conta = _credentials()
     url = storage_temp.put(video_path)
     try:
         corpo = _call("post", f"{conta}/media", media_type="REELS",
-                       video_url=url, caption=legenda or "",
+                       video_url=url, caption=caption or "",
                        access_token=token)
         _wait_for_processing(corpo["id"], token)
         return _publish_container(corpo["id"], token, conta)
@@ -125,7 +125,7 @@ def publish_reel(video_path: str, legenda: str) -> dict:
         storage_temp.remove(url)
 
 
-def publish_post(png_paths: list, legenda: str) -> dict:
+def publish_post(png_paths: list, caption: str) -> dict:
     """Imagem única ou carrossel (2-10), conforme o número de PNGs.
 
     O container de IMAGEM também processa assíncrono, ao contrário do que
@@ -152,7 +152,7 @@ def publish_post(png_paths: list, legenda: str) -> dict:
             urls.append(storage_temp.put(p))
         if len(urls) == 1:
             corpo = _call("post", f"{conta}/media", image_url=urls[0],
-                           caption=legenda or "", access_token=token)
+                           caption=caption or "", access_token=token)
             _wait_for_processing(corpo["id"], token)
             return _publish_container(corpo["id"], token, conta)
         filhos = []
@@ -162,7 +162,7 @@ def publish_post(png_paths: list, legenda: str) -> dict:
             _wait_for_processing(filho, token)
             filhos.append(filho)
         pai = _call("post", f"{conta}/media", media_type="CAROUSEL",
-                     children=",".join(filhos), caption=legenda or "",
+                     children=",".join(filhos), caption=caption or "",
                      access_token=token)
         _wait_for_processing(pai["id"], token)
         return _publish_container(pai["id"], token, conta)

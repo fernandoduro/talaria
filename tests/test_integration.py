@@ -47,7 +47,7 @@ class TestFluxoCompleto(unittest.TestCase):
 
     def test_fluxo_curadoria_ate_momentos(self):
         segs = txt_parse.parse_txt(self.txt, total_duration=80.0)
-        estado = curation.new_state(meta=1)
+        estado = curation.new_state(target=1)
 
         clip = {"slug": "corte1", "start": segs[0]["start"], "end": segs[-1]["end"],
                  "kind": "story", "screen_text": "Teste de corte"}
@@ -60,7 +60,7 @@ class TestFluxoCompleto(unittest.TestCase):
         self.assertEqual(moments[0]["slug"], "corte1")
 
     def test_rejeitado_nao_volta(self):
-        estado = curation.new_state(meta=5)
+        estado = curation.new_state(target=5)
         curation.reject(estado, {"start": 0.0, "end": 70.0}, "gancho fraco")
         self.assertTrue(curation.is_burned((5.0, 75.0), estado))
         self.assertFalse(curation.is_burned((200.0, 270.0), estado))
