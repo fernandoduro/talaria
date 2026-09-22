@@ -1,31 +1,31 @@
 #!/usr/bin/env python3
-"""Talaria — orquestrador CLI.
+"""Talaria — CLI orchestrator.
 
-Fluxo por vídeo (rodado por um modelo de linguagem, com curation manual):
+Per-video flow (driven by a language model, with manual curation):
 
-  1. ingest     : baixa o vídeo + converte a transcrição .txt -> transcript.json
-                  (ou acquire + transcribe, quando a transcrição vem do Whisper)
-  2. [episode.json]: o gestor preenche os metadados do episódio
-  3. brief      : compose o pacote de leitura (--cortes ou --materiais) p/ o modelo
-  4. curate      : state da curation iterativa; --export gera moments.json
-  5. render     : gera os cortes 9:16 com legenda p/ as platforms escolhidas
-  6. thumb      : gera a thumbnail (texts do JSON, flags sobrescrevem)
-  7. post       : posts de citação p/ Instagram; --cortes compose o pacote,
-                  --generate renderiza os PNGs a partir do posts.json
+  1. ingest     : downloads the video + converts the .txt transcript -> transcript.json
+                  (or acquire + transcribe, when the transcript comes from Whisper)
+  2. [episode.json]: the manager fills in the episode metadata
+  3. brief      : composes the reading packet (--clips or --materials) for the model
+  4. curate     : iterative curation state; --export writes moments.json
+  5. render     : produces the 9:16 clips with captions for the chosen platforms
+  6. thumb      : produces the thumbnail (texts from the JSON, flags override)
+  7. post       : Instagram quote posts; --clips composes the packet,
+                  --generate renders the PNGs from posts.json
 
-Exemplos:
+Examples:
   python run.py acquire  --project ep2 --src "https://youtu.be/VIDEO_ID"
   python run.py transcribe --project ep2 --src "https://youtu.be/VIDEO_ID"
   python run.py render   --project ep2 --youtube --instagram
   python run.py ingest   --project ep2 --src "https://youtu.be/VIDEO_ID" \\
       --transcript ~/Downloads/ep2.txt
-  python run.py brief    --project ep2 --cortes
-  python run.py curate    --project ep2 --target 5
-  python run.py thumb    --project ep2 --frame-at 1745       # texts do JSON
-  python run.py post     --project ep2 --cortes 1,3
+  python run.py brief    --project ep2 --clips
+  python run.py curate   --project ep2 --target 5
+  python run.py thumb    --project ep2 --frame-at 1745       # texts from the JSON
+  python run.py post     --project ep2 --clips 1,3
   python run.py post     --project ep2 --generate
 
-  # acquire + transcribe de uma vez (para antes da curation):
+  # acquire + transcribe in one go (for before curation):
   python run.py prep     --project ep2 --src "https://youtu.be/VIDEO_ID"
 """
 from __future__ import annotations
@@ -44,20 +44,20 @@ from talaria import (acquire, environment, brief, schedule, curation,
 ROOT = os.path.dirname(os.path.abspath(__file__))
 PROJECTS = os.path.join(ROOT, "projects")
 
-# O `.env` entra no environment antes de qualquer comando: os módulos de
-# publicação leem credencial de os.environ, e sem isto o arquivo preenchido
-# não chegava neles — o publish reclamava de variável missing com a response
-# aberta na tela do gestor.
+# `.env` enters the environment before any command: the publishing modules read
+# credentials from os.environ, and without this the filled-in file never reached
+# them — publish complained about a missing variable with the answer open on the
+# manager's screen.
 environment.load()
 
 
 def project_dir(slug: str) -> str:
-    """Caminho do project, reorganizando o layout antigo se for o caso.
+    """The project path, reorganising the old layout when needed.
 
-    Todo comando passa por aqui, então episódio criado antes da separação por
-    natureza (fonte/decisions/briefs/publish) é migrado na primeira execução,
-    sem o gestor pedir. `layout.migrate` é idempotente: nas vezes seguintes não
-    move nada e não imprime nada.
+    Every command passes through here, so an episode created before the split by
+    nature (source/decisions/briefs/publish) is migrated on the first run,
+    without being asked. `layout.migrate` is idempotent: later runs move nothing
+    and print nothing.
     """
     pd = os.path.join(PROJECTS, slug)
     moved = layout.migrate(pd)
@@ -74,7 +74,7 @@ def platforms_from_args(args) -> list[str]:
         p.append("youtube")
     if args.instagram:
         p.append("instagram")
-    if not p:  # default: ambos
+    if not p:  # default: both
         p = ["youtube", "instagram"]
     return p
 
@@ -110,11 +110,11 @@ def cmd_render(args):
 
 
 def cmd_thumb(args):
-    """Gera a thumbnail: base vem do JSON, flags explícitas sobrescrevem."""
+    """Builds the thumbnail: the base comes from the JSON, flags override."""
     pd = project_dir(args.project)
 
-    # Sem --frame-at, sugere instantes dentro dos cortes approved: é onde o
-    # convidado está falando com energia. A escolha continua sendo visual.
+    # Without --frame-at it suggests instants inside the approved clips: that is
+    # where the guest is speaking with energy. The choice stays visual.
     if args.frame_at is None:
         mpath = layout.moments(pd)
         if os.path.exists(mpath):
@@ -128,14 +128,14 @@ def cmd_thumb(args):
         sys.exit("[thumb] informe --frame-at <segundos>")
     video = layout.video(pd)
 
-    # O frame extraído é intermediário, não produto — vai para um temp real em
-    # vez de sujar a raiz do project (era o `_thumb_frame.jpg` de antes).
+    # The extracted frame is intermediate, not product — it goes to a real temp
+    # file instead of littering the project root (the old `_thumb_frame.jpg`).
     fd, frame = tempfile.mkstemp(suffix=".jpg", prefix="talaria_thumb_")
     os.close(fd)
     try:
         thumbnail.extract_frame(video, args.frame_at, frame)
 
-        # Base vem do episode.json/texts.json; flags explícitas sobrescrevem.
+        # The base comes from episode.json/texts.json; explicit flags override.
         try:
             base = texts.build_kwargs(pd)
         except FileNotFoundError:
@@ -154,11 +154,11 @@ def cmd_thumb(args):
 
 
 def cmd_ingest(args):
-    """Baixa o vídeo e converte a transcrição .txt em transcript.json."""
+    """Downloads the video and converts the .txt transcript to transcript.json."""
     pd = project_dir(args.project)
 
-    # Valida a transcrição ANTES de baixar: um path errado desperdiçava o
-    # download inteiro do vídeo para só depois falhar no parse_txt.
+    # Validates the transcript BEFORE downloading: a wrong path used to waste
+    # the whole video download only to fail later in parse_txt.
     if args.transcript and not os.path.exists(args.transcript):
         sys.exit(f"transcrição não encontrada: {args.transcript}")
 
@@ -192,17 +192,17 @@ def cmd_ingest(args):
 
 
 def cmd_brief(args):
-    """Monta o pacote de leitura (materiais ou cortes) para o modelo."""
+    """Assembles the reading packet (materials or clips) for the model."""
     pd = project_dir(args.project)
-    # --cortes e --materiais são mutuamente exclusivas (ver add_mutually_exclusive_group);
-    # sem nenhuma das duas, o default é 'materiais'.
+    # --clips and --materials are mutually exclusive (see the mutually exclusive
+    # group); with neither, the default is 'materials'.
     kind = "clips" if args.clips else "materials"
     out = brief.build(pd, kind)
     print(f"[brief] {kind} -> {out}")
 
 
 def _segments(pd):
-    """Segmentos da transcrição, ou [] se o project ainda não tem uma."""
+    """The transcript segments, or [] when the project has none yet."""
     path = layout.transcript(pd)
     if not os.path.exists(path):
         return []
@@ -211,14 +211,14 @@ def _segments(pd):
 
 
 def cmd_curate(args):
-    """Mostra o state da curation e exporta moments.json quando fecha."""
+    """Shows the curation state and exports moments.json once it closes."""
     pd = project_dir(args.project)
     already_existed = os.path.exists(layout.curation(pd))
     state = curation.load(pd, target=args.target)
 
-    # Estado já gravado manda na target — --target só vale ao criar a curation.
-    # Sem este aviso, `curate --target 8` sobre um state com target 5 seguia em
-    # silêncio com a target antiga.
+    # An already-written state governs the target — --target only counts when
+    # the curation is created. Without this warning, `curate --target 8` over a
+    # state with target 5 silently carried on with the old target.
     if already_existed and state["target"] != args.target:
         print(f"[curate] aviso: estado gravado tem target {state['target']}, "
               f"ignorando --target {args.target}")
@@ -226,14 +226,14 @@ def cmd_curate(args):
     if args.export:
         try:
             path = curation.save_moments(pd, state)
-        except ValueError as e:   # nada aprovado ainda: error do operador, não bug
+        except ValueError as e:   # nothing approved yet: operator error, not a bug
             sys.exit(f"[curate] {e}")
         print(f"[curate] {len(state['approved'])} cortes -> {path}")
         return
 
-    # Revalida o que já está aprovado: o state pode ter sido gravado antes de
-    # uma regra nova existir (end em frase completa, sobreposição entre
-    # approved). Sem isto o problema só aparece no vídeo renderizado.
+    # Revalidates what is already approved: the state may have been written
+    # before a new rule existed (end on a complete sentence, overlap between
+    # approved clips). Without this the problem only shows in the rendered video.
     segs = _segments(pd)
     if segs:
         if not curation.attribution_trustworthy(segs):
@@ -266,7 +266,7 @@ def cmd_curate(args):
 
 
 def cmd_post(args):
-    """Dois passos: --cortes compose o pacote de leitura, --generate renderiza."""
+    """Two steps: --clips composes the reading packet, --generate renders."""
     pd = project_dir(args.project)
 
     if args.generate:
@@ -302,7 +302,7 @@ def cmd_post(args):
 
 
 def cmd_publish(args):
-    """Publica o que o calendário manda para hoje (ou --only, fora da data)."""
+    """Publishes what the schedule calls for today (or --only, off-date)."""
     pd = project_dir(args.project)
     only = ([s.strip() for s in args.only.split(",") if s.strip()]
             if args.only else None)
@@ -321,7 +321,7 @@ def cmd_publish(args):
     today = schedule.today().isoformat()
     for r in results:
         if r["date"] < today:
-            # Mostra a data ORIGINAL: o gestor precisa ver que atrasou.
+            # Shows the ORIGINAL date: the manager needs to see it ran late.
             print(f"[publish]    ({r['slug']} estava agendado para {r['date']})")
     for pl in ("youtube_shorts", "instagram_reels", "instagram_posts"):
         by_pl = [r for r in results if r["platform"] == pl]
@@ -335,9 +335,9 @@ def cmd_publish(args):
                                       for r in bad) + ")"
         print(line)
 
-    # Peça no ar cujo registro falhou: o published.json não sabe dela, então
-    # o próximo publish a mandaria de novo. É o aviso mais importante da
-    # execução e sai por último, onde o gestor olha.
+    # A live piece whose record failed: published.json does not know about it,
+    # so the next publish would send it again. It is the most important warning
+    # of the run and comes last, where the manager looks.
     no_record = [r for r in results if r.get("record_failed")]
     if no_record:
         print(f"\n[publish] !! {len(no_record)} peça(s) NO AR e fora do "
@@ -353,7 +353,7 @@ def cmd_publish(args):
 
 
 def cmd_schedule(args):
-    """Mostra a agenda com o status de cada item, sem publish nada."""
+    """Shows the schedule with each item's status, publishing nothing."""
     pd = project_dir(args.project)
     try:
         items = schedule.load(pd)

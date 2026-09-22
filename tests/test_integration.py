@@ -1,6 +1,6 @@
-"""Integração: transcrição .txt -> curation -> moments.json -> render.
+"""Integration: .txt transcript -> curation -> moments.json -> render.
 
-Usa vídeo sintético gerado com ffmpeg — não depende de rede nem do Drive.
+Uses a synthetic video made with ffmpeg — no network and no Drive involved.
 """
 import json
 import os
@@ -40,12 +40,12 @@ class TestFullFlow(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.pd, ignore_errors=True)
 
-    def test_parse_gera_transcricao_json(self):
+    def test_parse_produces_the_transcript_json(self):
         segs = txt_parse.parse_txt(self.txt, total_duration=80.0)
         self.assertGreater(len(segs), 0)
         self.assertEqual(segs[-1]["end"], 80.0)
 
-    def test_fluxo_curadoria_ate_momentos(self):
+    def test_curation_flow_through_to_moments(self):
         segs = txt_parse.parse_txt(self.txt, total_duration=80.0)
         state = curation.new_state(target=1)
 
@@ -59,13 +59,13 @@ class TestFullFlow(unittest.TestCase):
             moments = json.load(f)
         self.assertEqual(moments[0]["slug"], "corte1")
 
-    def test_rejeitado_nao_volta(self):
+    def test_a_rejection_does_not_return(self):
         state = curation.new_state(target=5)
         curation.reject(state, {"start": 0.0, "end": 70.0}, "gancho fraco")
         self.assertTrue(curation.is_burned((5.0, 75.0), state))
         self.assertFalse(curation.is_burned((200.0, 270.0), state))
 
-    def test_thumb_args_do_episodio(self):
+    def test_thumb_args_from_the_episode(self):
         episode.save(self.pd, {
             "season": 2, "episode": 7, "company": "Zarvik",
             "city": "Ribeirão Açaí", "uf": "SP",
@@ -75,7 +75,7 @@ class TestFullFlow(unittest.TestCase):
         self.assertEqual(args["l2"], "T2E07")
 
     @unittest.skipUnless(has_ffmpeg(), "ffmpeg não disponível")
-    def test_render_com_video_sintetico(self):
+    def test_render_with_a_synthetic_video(self):
         from talaria import render
 
         video = layout.ensure_dir(layout.video(self.pd))
@@ -98,8 +98,8 @@ class TestFullFlow(unittest.TestCase):
         self.assertTrue(os.path.exists(out))
         self.assertGreater(os.path.getsize(out), 1000)
 
-    def test_post_gerar_produz_os_arquivos(self):
-        """Fluxo do comando: posts.json -> PNGs em instagram_posts/."""
+    def test_post_generate_produces_the_files(self):
+        """The command flow: posts.json -> PNGs in instagram_posts/."""
         import json
         import os
         import tempfile
@@ -128,9 +128,9 @@ if __name__ == "__main__":
 
 
 class TestAutomaticMigration(unittest.TestCase):
-    """Episódio da estrutura antiga é reorganizado sem o gestor pedir."""
+    """An episode in the old structure is reorganised without being asked."""
 
-    def test_comando_migra_projeto_antigo(self):
+    def test_the_command_migrates_an_old_project(self):
         import json
         import os
         import tempfile

@@ -1,7 +1,7 @@
-"""Autorização única do canal: imprime o YT_REFRESH_TOKEN para o .env.
+"""One-off channel authorisation: prints the YT_REFRESH_TOKEN for the .env.
 
-Roda uma vez, na máquina de quem é dono do canal — o pipeline nunca abre
-browser. O `publish` só recebe o refresh token pelo environment.
+Runs once, on the channel owner's machine — the pipeline never opens a browser.
+`publish` receives the refresh token only through the environment.
 """
 from __future__ import annotations
 
@@ -14,12 +14,12 @@ INSTALLED_KEYS = ("client_id", "client_secret", "token_uri")
 
 
 def validate_client_secret(path: str) -> dict:
-    """Devolve o bloco `installed`, ou sai explicando o que baixar.
+    """Returns the `installed` block, or exits explaining what to download.
 
-    O publish lê client_secret["installed"]: um client do kind Web passa pelo
-    consentimento inteiro e só quebra no primeiro upload, depois de a agenda
-    já contar com ele. Um `installed` sem as chaves que
-    `publish_youtube._credentials` lê quebra do mesmo jeito.
+    publish reads client_secret["installed"]: a Web-type client passes the whole
+    consent flow and only breaks on the first upload, once the schedule already
+    counts on it. An `installed` block missing the keys
+    `publish_youtube._credentials` reads breaks the same way.
     """
     if not os.path.exists(path):
         raise SystemExit(
@@ -67,8 +67,8 @@ def main(argv: list) -> int:
     from google_auth_oauthlib.flow import InstalledAppFlow
 
     flow = InstalledAppFlow.from_client_secrets_file(path, SCOPES)
-    # access_type=offline + prompt=consent: sem os dois o Google devolve só um
-    # access token de 1h, e o publish precisa do refresh.
+    # access_type=offline + prompt=consent: without both, Google returns only a
+    # 1h access token, and publish needs the refresh one.
     creds = flow.run_local_server(port=0, access_type="offline",
                                   prompt="consent")
     if not creds.refresh_token:
