@@ -1,10 +1,10 @@
-"""Testes do estado da curation iterativa."""
+"""Testes do state da curation iterativa."""
 import unittest
 
 from talaria import curation
 
 
-class TestSobreposicao(unittest.TestCase):
+class TestOverlap(unittest.TestCase):
     def test_sobreposicao_total(self):
         self.assertTrue(curation.overlaps((10, 70), (10, 70)))
 
@@ -15,7 +15,7 @@ class TestSobreposicao(unittest.TestCase):
         self.assertFalse(curation.overlaps((10, 70), (70, 130)))
 
     def test_sobreposicao_pequena_abaixo_do_limiar(self):
-        # 5s de 60s = 8% — abaixo do limiar de 30%, não conta
+        # 5s de 60s = 8% — abaixo do threshold de 30%, não account
         self.assertFalse(curation.overlaps((10, 70), (65, 125)))
 
     def test_sobreposicao_grande_acima_do_limiar(self):
@@ -23,9 +23,9 @@ class TestSobreposicao(unittest.TestCase):
         self.assertTrue(curation.overlaps((10, 70), (20, 80)))
 
 
-class TestQueimados(unittest.TestCase):
+class TestBurned(unittest.TestCase):
     def setUp(self):
-        self.estado = {
+        self.state = {
             "target": 5,
             "approved": [{"slug": "a", "start": 100.0, "end": 170.0}],
             "rejected": [{"start": 300.0, "end": 370.0, "reason": "gancho fraco"}],
@@ -33,25 +33,25 @@ class TestQueimados(unittest.TestCase):
         }
 
     def test_faixas_incluem_aprovados_e_rejeitados(self):
-        faixas = curation.burned_spans(self.estado)
-        self.assertIn((100.0, 170.0), faixas)
-        self.assertIn((300.0, 370.0), faixas)
+        spans = curation.burned_spans(self.state)
+        self.assertIn((100.0, 170.0), spans)
+        self.assertIn((300.0, 370.0), spans)
 
     def test_proposta_sobre_rejeitado_e_queimada(self):
-        self.assertTrue(curation.is_burned((310.0, 380.0), self.estado))
+        self.assertTrue(curation.is_burned((310.0, 380.0), self.state))
 
     def test_proposta_livre_nao_e_queimada(self):
-        self.assertFalse(curation.is_burned((500.0, 570.0), self.estado))
+        self.assertFalse(curation.is_burned((500.0, 570.0), self.state))
 
     def test_vagas_restantes(self):
-        self.assertEqual(curation.slots_left(self.estado), 4)
+        self.assertEqual(curation.slots_left(self.state), 4)
 
     def test_vagas_nunca_negativa(self):
-        e = dict(self.estado, approved=[{"slug": str(i)} for i in range(7)])
+        e = dict(self.state, approved=[{"slug": str(i)} for i in range(7)])
         self.assertEqual(curation.slots_left(e), 0)
 
 
-class TestEstadoInicial(unittest.TestCase):
+class TestInitialState(unittest.TestCase):
     def test_novo_estado_tem_meta(self):
         e = curation.new_state(target=5)
         self.assertEqual(e["target"], 5)
@@ -60,12 +60,12 @@ class TestEstadoInicial(unittest.TestCase):
         self.assertEqual(e["rounds"], 0)
 
 
-class TestValidacoes(unittest.TestCase):
+class TestValidations(unittest.TestCase):
     def setUp(self):
         self.segs = [
             {"start": 0.0, "end": 30.0, "text": "Pergunta do host?", "turn": False},
             {"start": 30.0, "end": 95.0, "text": "Resposta longa do convidado.", "turn": True},
-            {"start": 95.0, "end": 120.0, "text": "Continua a resposta.", "turn": False},
+            {"start": 95.0, "end": 120.0, "text": "Continua a response.", "turn": False},
         ]
 
     def test_duracao_dentro_da_faixa(self):
@@ -88,15 +88,15 @@ class TestValidacoes(unittest.TestCase):
         self.assertTrue(any("fronteira" in m for m in msgs))
 
     def test_corte_sobre_faixa_queimada(self):
-        estado = {"target": 5, "approved": [], "rounds": 0,
+        state = {"target": 5, "approved": [], "rounds": 0,
                   "rejected": [{"start": 0.0, "end": 75.0}]}
-        ok, msgs = curation.validate_clip((0.0, 75.0), self.segs, estado)
+        ok, msgs = curation.validate_clip((0.0, 75.0), self.segs, state)
         self.assertFalse(ok)
         self.assertTrue(any("queimad" in m for m in msgs))
 
 
-class TestFimEmFraseCompleta(unittest.TestCase):
-    """O fim do clip tem que fechar frase, não só coincidir com fim de bloco.
+class TestEndAtCompleteSentence(unittest.TestCase):
+    """O end do clip tem que fechar frase, não só coincidir com end de bloco.
 
     A transcrição do YouTube quebra os blocos por TEMPO, não por pontuação:
     um bloco pode terminar no meio de uma frase. Conferir apenas o limite do
@@ -123,7 +123,7 @@ class TestFimEmFraseCompleta(unittest.TestCase):
         """Bloco 95-160 acaba sem pontuação final: o clip fica pela metade."""
         ok, msgs = curation.validate_clip((95.0, 160.0), self.segs, {})
         self.assertFalse(ok)
-        self.assertTrue(any("fim" in m.lower() for m in msgs), msgs)
+        self.assertTrue(any("end" in m.lower() for m in msgs), msgs)
 
     def test_fim_com_reticencias_e_aceito(self):
         segs = [{"start": 0.0, "end": 65.0, "text": "E aí a gente parou...", "turn": False}]
@@ -136,8 +136,8 @@ class TestFimEmFraseCompleta(unittest.TestCase):
         self.assertTrue(ok, msgs)
 
 
-class TestFinsDeFrase(unittest.TestCase):
-    """Candidatos a fim de clip, para não escolher o ponto à mão."""
+class TestSentenceEnds(unittest.TestCase):
+    """Candidatos a end de clip, para não escolher o ponto à mão."""
 
     def setUp(self):
         self.segs = [
@@ -165,7 +165,7 @@ class TestFinsDeFrase(unittest.TestCase):
         self.assertEqual(curation.sentence_ends(self.segs, 0.0, 95.0, 100.0), [])
 
 
-class TestSobreposicaoEntreAprovados(unittest.TestCase):
+class TestOverlapBetweenApproved(unittest.TestCase):
     """Dois approved no mesmo trecho competem entre si na distribuição.
 
     `validate_clip` já barrava, mas quem chamava `approve()` direto escapava —
@@ -173,17 +173,17 @@ class TestSobreposicaoEntreAprovados(unittest.TestCase):
     """
 
     def setUp(self):
-        self.estado = curation.new_state(target=5)
-        curation.approve(self.estado, {"slug": "a", "start": 100.0, "end": 170.0})
+        self.state = curation.new_state(target=5)
+        curation.approve(self.state, {"slug": "a", "start": 100.0, "end": 170.0})
 
     def test_recusa_corte_sobreposto(self):
         with self.assertRaises(ValueError) as cm:
-            curation.approve(self.estado, {"slug": "b", "start": 150.0, "end": 220.0})
+            curation.approve(self.state, {"slug": "b", "start": 150.0, "end": 220.0})
         self.assertIn("sobrepõe", str(cm.exception))
 
     def test_aceita_corte_disjunto(self):
-        curation.approve(self.estado, {"slug": "b", "start": 200.0, "end": 270.0})
-        self.assertEqual(len(self.estado["approved"]), 2)
+        curation.approve(self.state, {"slug": "b", "start": 200.0, "end": 270.0})
+        self.assertEqual(len(self.state["approved"]), 2)
 
     def test_ajuste_de_tempo_pode_encostar_em_outro(self):
         """Ajustar um clip não pode ser barrado por um vizinho distante.
@@ -191,25 +191,25 @@ class TestSobreposicaoEntreAprovados(unittest.TestCase):
         A checagem de sobreposição deve ignorar o próprio clip sendo
         substituído — senão mover 5s um clip já aprovado vira error.
         """
-        curation.approve(self.estado, {"slug": "b", "start": 200.0, "end": 270.0})
-        curation.approve(self.estado, {"slug": "b", "start": 205.0, "end": 275.0})
-        self.assertEqual(len(self.estado["approved"]), 2)
-        self.assertEqual(self.estado["approved"][1]["start"], 205.0)
+        curation.approve(self.state, {"slug": "b", "start": 200.0, "end": 270.0})
+        curation.approve(self.state, {"slug": "b", "start": 205.0, "end": 275.0})
+        self.assertEqual(len(self.state["approved"]), 2)
+        self.assertEqual(self.state["approved"][1]["start"], 205.0)
 
     def test_ajuste_nao_pode_invadir_outro_corte(self):
         """Mas mover um clip PARA CIMA de outro continua sendo error."""
-        curation.approve(self.estado, {"slug": "b", "start": 200.0, "end": 270.0})
+        curation.approve(self.state, {"slug": "b", "start": 200.0, "end": 270.0})
         with self.assertRaises(ValueError):
-            curation.approve(self.estado, {"slug": "b", "start": 120.0, "end": 190.0})
+            curation.approve(self.state, {"slug": "b", "start": 120.0, "end": 190.0})
 
     def test_mesmo_slug_e_ajuste_de_tempo(self):
         """Reaprovar o mesmo clip com outro tempo substitui, não duplica."""
-        curation.approve(self.estado, {"slug": "a", "start": 105.0, "end": 175.0})
-        self.assertEqual(len(self.estado["approved"]), 1)
-        self.assertEqual(self.estado["approved"][0]["start"], 105.0)
+        curation.approve(self.state, {"slug": "a", "start": 105.0, "end": 175.0})
+        self.assertEqual(len(self.state["approved"]), 1)
+        self.assertEqual(self.state["approved"][0]["start"], 105.0)
 
 
-class TestAtribuicaoConfiavel(unittest.TestCase):
+class TestAttributionTrustworthy(unittest.TestCase):
     """Alerta que mente treina o operador a ignorar a saída."""
 
     def test_episodio_bem_atribuido(self):
@@ -234,12 +234,12 @@ class TestAtribuicaoConfiavel(unittest.TestCase):
             {"start": 0.0, "end": 65.0, "speaker": "host",
              "text": "A gente montou nossa estrutura, nosso laboratório."},
         ]
-        alertas = curation.clip_warnings((0.0, 65.0), segs)
-        self.assertFalse(any("convidado fala só" in a for a in alertas), alertas)
-        self.assertFalse(any("abre com" in a for a in alertas), alertas)
+        alerts = curation.clip_warnings((0.0, 65.0), segs)
+        self.assertFalse(any("convidado fala só" in a for a in alerts), alerts)
+        self.assertFalse(any("abre com" in a for a in alerts), alerts)
 
 
-class TestAberturaDoHost(unittest.TestCase):
+class TestHostOpening(unittest.TestCase):
     """Corte que abre com pergunta longa perde o espectador frio."""
 
     def setUp(self):
@@ -251,12 +251,12 @@ class TestAberturaDoHost(unittest.TestCase):
         ]
 
     def test_alerta_quando_host_abre_demais(self):
-        alertas = curation.clip_warnings((0.0, 70.0), self.segs)
-        self.assertTrue(any("host" in a for a in alertas), alertas)
+        alerts = curation.clip_warnings((0.0, 70.0), self.segs)
+        self.assertTrue(any("host" in a for a in alerts), alerts)
 
     def test_sem_alerta_quando_abre_no_convidado(self):
-        alertas = curation.clip_warnings((40.0, 105.0), self.segs)
-        self.assertFalse(any("abre com" in a for a in alertas), alertas)
+        alerts = curation.clip_warnings((40.0, 105.0), self.segs)
+        self.assertFalse(any("abre com" in a for a in alerts), alerts)
 
     def test_sem_speaker_nao_alerta(self):
         """Origem sem marcador de troca: não acusar no escuro."""
@@ -264,7 +264,7 @@ class TestAberturaDoHost(unittest.TestCase):
         self.assertEqual(curation.host_opening((0.0, 65.0), segs), 0.0)
 
 
-class TestHesitacaoNumerica(unittest.TestCase):
+class TestHedgedNumber(unittest.TestCase):
     def test_detecta_uns(self):
         self.assertTrue(curation.has_hedged_number("eram uns 570, 580 clientes"))
 
@@ -284,7 +284,7 @@ class TestHesitacaoNumerica(unittest.TestCase):
         self.assertFalse(curation.has_hedged_number("acho que é importante"))
 
 
-class TestProtagonismo(unittest.TestCase):
+class TestProminence(unittest.TestCase):
     """Protagonismo do convidado.
 
     A atribuição de fala é ABSOLUTA: vem do campo `speaker`, resolvido
@@ -324,11 +324,11 @@ class TestProtagonismo(unittest.TestCase):
         segs = [
             {"start": 0.0, "end": 20.0, "text": "Pergunta do host?", "turn": False,
              "speaker": "host"},
-            {"start": 20.0, "end": 60.0, "text": "Comeco da resposta.", "turn": True,
+            {"start": 20.0, "end": 60.0, "text": "Comeco da response.", "turn": True,
              "speaker": "guest"},
-            {"start": 60.0, "end": 110.0, "text": "Meio da resposta.", "turn": False,
+            {"start": 60.0, "end": 110.0, "text": "Meio da response.", "turn": False,
              "speaker": "guest"},
-            {"start": 110.0, "end": 160.0, "text": "Fim da resposta.", "turn": False,
+            {"start": 110.0, "end": 160.0, "text": "Fim da response.", "turn": False,
              "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((60.0, 150.0), segs)
@@ -338,7 +338,7 @@ class TestProtagonismo(unittest.TestCase):
         segs = [
             {"start": 0.0, "end": 70.0, "text": "Contexto longo do host.",
              "turn": False, "speaker": "host"},
-            {"start": 70.0, "end": 90.0, "text": "Comeco da resposta.", "turn": True,
+            {"start": 70.0, "end": 90.0, "text": "Comeco da response.", "turn": True,
              "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
@@ -358,8 +358,8 @@ class TestProtagonismo(unittest.TestCase):
         segs = [
             {"start": 0.0, "end": 90.0, "text": "Uma fala.", "turn": False},
         ]
-        alertas = curation.clip_warnings((0.0, 90.0), segs)
-        self.assertFalse([a for a in alertas if "convidado fala" in a], alertas)
+        alerts = curation.clip_warnings((0.0, 90.0), segs)
+        self.assertFalse([a for a in alerts if "convidado fala" in a], alerts)
 
     def test_speaker_parcial_usa_so_o_que_esta_marcado(self):
         """Mistura de segmentos com e sem `speaker`: mede sobre os marcados."""
@@ -374,62 +374,62 @@ class TestProtagonismo(unittest.TestCase):
         self.assertAlmostEqual(frac, 0.5)
 
 
-class TestOperacoes(unittest.TestCase):
+class TestOperations(unittest.TestCase):
     def setUp(self):
-        self.estado = curation.new_state(target=5)
+        self.state = curation.new_state(target=5)
 
     def test_aprovar_adiciona(self):
-        curation.approve(self.estado, {"slug": "c1", "start": 10.0, "end": 80.0})
-        self.assertEqual(len(self.estado["approved"]), 1)
+        curation.approve(self.state, {"slug": "c1", "start": 10.0, "end": 80.0})
+        self.assertEqual(len(self.state["approved"]), 1)
 
     def test_rejeitar_registra_motivo(self):
-        curation.reject(self.estado, {"start": 10.0, "end": 80.0,
+        curation.reject(self.state, {"start": 10.0, "end": 80.0,
                                          "summary": "trecho X"}, "gancho fraco")
-        self.assertEqual(self.estado["rejected"][0]["reason"], "gancho fraco")
+        self.assertEqual(self.state["rejected"][0]["reason"], "gancho fraco")
 
     def test_aprovar_alem_da_meta_da_erro(self):
         for i in range(5):
-            curation.approve(self.estado, {"slug": f"c{i}", "start": i * 200.0,
+            curation.approve(self.state, {"slug": f"c{i}", "start": i * 200.0,
                                             "end": i * 200.0 + 70.0})
         with self.assertRaises(ValueError):
-            curation.approve(self.estado, {"slug": "c6", "start": 2000.0, "end": 2070.0})
+            curation.approve(self.state, {"slug": "c6", "start": 2000.0, "end": 2070.0})
 
     def test_composicao_por_tipo(self):
-        curation.approve(self.estado, {"slug": "a", "start": 0.0, "end": 70.0,
+        curation.approve(self.state, {"slug": "a", "start": 0.0, "end": 70.0,
                                         "kind": "story"})
-        curation.approve(self.estado, {"slug": "b", "start": 200.0, "end": 270.0,
+        curation.approve(self.state, {"slug": "b", "start": 200.0, "end": 270.0,
                                         "kind": "story"})
-        comp = curation.composition(self.estado)
+        comp = curation.composition(self.state)
         self.assertEqual(comp["story"], 2)
 
     def test_tipos_ausentes(self):
-        curation.approve(self.estado, {"slug": "a", "start": 0.0, "end": 70.0,
+        curation.approve(self.state, {"slug": "a", "start": 0.0, "end": 70.0,
                                         "kind": "story"})
-        faltando = curation.missing_kinds(self.estado)
-        self.assertIn("thesis", faltando)
-        self.assertNotIn("story", faltando)
+        missing = curation.missing_kinds(self.state)
+        self.assertIn("thesis", missing)
+        self.assertNotIn("story", missing)
 
     def test_motivos_acumulados(self):
-        curation.reject(self.estado, {"start": 0.0, "end": 70.0}, "muito técnico")
-        curation.reject(self.estado, {"start": 200.0, "end": 270.0}, "muito técnico")
-        self.assertEqual(curation.reasons(self.estado), ["muito técnico"])
+        curation.reject(self.state, {"start": 0.0, "end": 70.0}, "muito técnico")
+        curation.reject(self.state, {"start": 200.0, "end": 270.0}, "muito técnico")
+        self.assertEqual(curation.reasons(self.state), ["muito técnico"])
 
     def test_fechado_quando_atinge_meta(self):
-        self.assertFalse(curation.is_closed(self.estado))
+        self.assertFalse(curation.is_closed(self.state))
         for i in range(5):
-            curation.approve(self.estado, {"slug": f"c{i}", "start": i * 200.0,
+            curation.approve(self.state, {"slug": f"c{i}", "start": i * 200.0,
                                             "end": i * 200.0 + 70.0})
-        self.assertTrue(curation.is_closed(self.estado))
+        self.assertTrue(curation.is_closed(self.state))
 
 
-class TestExportacao(unittest.TestCase):
+class TestExport(unittest.TestCase):
     def test_exporta_momentos_com_campos_do_render(self):
-        estado = curation.new_state(target=2)
-        curation.approve(estado, {
+        state = curation.new_state(target=2)
+        curation.approve(state, {
             "slug": "corte1", "start": 10.0, "end": 80.0, "kind": "story",
             "screen_text": "O ganho sem o custo", "post_caption": "...",
         })
-        moments = curation.to_moments(estado)
+        moments = curation.to_moments(state)
         self.assertEqual(len(moments), 1)
         m = moments[0]
         self.assertEqual(m["slug"], "corte1")
@@ -438,9 +438,9 @@ class TestExportacao(unittest.TestCase):
         self.assertEqual(m["screen_text"], "O ganho sem o custo")
 
     def test_exportar_sem_aprovados_da_erro(self):
-        estado = curation.new_state(target=5)
+        state = curation.new_state(target=5)
         with self.assertRaises(ValueError):
-            curation.to_moments(estado)
+            curation.to_moments(state)
 
 
 if __name__ == "__main__":

@@ -10,7 +10,7 @@ from PIL import Image
 from talaria import config, end_card
 
 
-class TestMontaCard(unittest.TestCase):
+class TestComposeCard(unittest.TestCase):
     def test_tamanho_do_frame_bate_com_o_video(self):
         img = end_card.compose_card()
         self.assertEqual(img.size, (config.FRAME_W, config.FRAME_H))
@@ -25,24 +25,24 @@ class TestMontaCard(unittest.TestCase):
         # varia com o design, então o teste confere que ALGO foi desenhado
         # ali (não é mais o fundo liso) em vez de fixar posição de pixel.
         img = end_card.compose_card()
-        centro = img.getpixel((config.FRAME_W // 2, config.FRAME_H // 2))
-        self.assertNotEqual(centro, config.CARD_BG)
+        center = img.getpixel((config.FRAME_W // 2, config.FRAME_H // 2))
+        self.assertNotEqual(center, config.CARD_BG)
 
     def test_logo_ausente_da_mensagem_clara(self):
         # Mesmo padrão do POST_TEMPLATE em post_instagram.py: error explícito
         # dizendo onde o asset deveria estar, não um FileNotFoundError cru
         # do Pillow apontando pra um path sem contexto.
-        antigo = config.LOGO_PATH
+        old_path = config.LOGO_PATH
         config.LOGO_PATH = "/path/que/nao/existe/logo.png"
         try:
             with self.assertRaises(FileNotFoundError) as e:
                 end_card.compose_card()
             self.assertIn("assets/", str(e.exception))
         finally:
-            config.LOGO_PATH = antigo
+            config.LOGO_PATH = old_path
 
 
-class TestCardCacheado(unittest.TestCase):
+class TestCachedCard(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
@@ -63,8 +63,8 @@ class TestCardCacheado(unittest.TestCase):
         path = end_card.cached_card(self.d)
         mtime_1 = os.path.getmtime(path)
         time.sleep(0.05)
-        caminho_2 = end_card.cached_card(self.d)
-        self.assertEqual(path, caminho_2)
+        path_2 = end_card.cached_card(self.d)
+        self.assertEqual(path, path_2)
         self.assertEqual(os.path.getmtime(path), mtime_1)
 
     def test_logo_trocado_invalida_o_cache(self):
@@ -73,25 +73,25 @@ class TestCardCacheado(unittest.TestCase):
         # Guarda o mtime ANTES de mexer, em vez de reconstruí-lo do git no
         # final: fora de um clone git (tarball, cópia do código) o comando não
         # devolve nada, a restauração não acontece em silêncio e o logo fica
-        # no futuro — quebrando o teste de cache que roda depois deste.
-        stat_antes = os.stat(config.LOGO_PATH)
-        futuro = time.time() + 5
-        os.utime(config.LOGO_PATH, (futuro, futuro))
+        # no future — quebrando o teste de cache que roda depois deste.
+        stat_before = os.stat(config.LOGO_PATH)
+        future = time.time() + 5
+        os.utime(config.LOGO_PATH, (future, future))
         try:
             time.sleep(0.05)
             end_card.cached_card(self.d)
             self.assertGreater(os.path.getmtime(path), mtime_1)
         finally:
             os.utime(config.LOGO_PATH,
-                     (stat_antes.st_atime, stat_antes.st_mtime))
+                     (stat_before.st_atime, stat_before.st_mtime))
 
     def test_nao_deixa_temporario_para_tras(self):
         # A escrita passa por um .tmp.mp4/.tmp.png com o PID — nenhum dos
         # dois pode sobrar depois de cached_card() terminar com sucesso.
-        destino = end_card.cached_card(self.d)
-        pasta = os.path.dirname(destino)
-        sobras = [n for n in os.listdir(pasta) if ".tmp" in n]
-        self.assertEqual(sobras, [], f"temporário ficou para trás: {sobras}")
+        destination = end_card.cached_card(self.d)
+        folder = os.path.dirname(destination)
+        leftovers = [n for n in os.listdir(folder) if ".tmp" in n]
+        self.assertEqual(leftovers, [], f"temporário ficou para trás: {leftovers}")
 
     def test_race_entre_dois_processos_nao_corrompe(self):
         # Simula dois "processos" concorrentes chamando cached_card() para

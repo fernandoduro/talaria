@@ -11,58 +11,58 @@ import unittest
 from talaria import audio, config, layout, render
 
 
-class TestValeAntes(unittest.TestCase):
-    """Pausa só conta como fim de fala se o silêncio DURAR.
+class TestValleBefore(unittest.TestCase):
+    """Pausa só account como end de fala se o silêncio DURAR.
 
-    Numa fala corrida a energia mergulha entre palavras a cada ~100ms. Cortar
+    Numa fala corrida a energia mergulha entre words a cada ~100ms. Cortar
     no primeiro mergulho parte a frase: um clip terminou numa pausa
     interna de 80ms e a fala sumiu antes de "...project assim tão longo".
     """
 
-    def _pontos(self, especificacao):
+    def _pontos(self, spec):
         """[(t, dB)] a partir de [(n_janelas, dB)]."""
-        pontos, t = [], 0.0
-        for n, db in especificacao:
+        points, t = [], 0.0
+        for n, db in spec:
             for _ in range(n):
-                pontos.append((round(t, 3), db))
+                points.append((round(t, 3), db))
                 t += audio.WINDOW_S
-        return pontos
+        return points
 
     def test_ignora_pausa_interna_curta(self):
-        """4 janelas (80ms) de silêncio no meio da fala não é fim de frase."""
-        pontos = self._pontos([(10, -18.0), (4, -44.0), (10, -18.0)])
+        """4 janelas (80ms) de silêncio no meio da fala não é end de frase."""
+        points = self._pontos([(10, -18.0), (4, -44.0), (10, -18.0)])
         i = 10
         self.assertLess(
-            audio._silence_duration(pontos, i, audio.PAUSE_THRESHOLD_DB),
+            audio._silence_duration(points, i, audio.PAUSE_THRESHOLD_DB),
             audio.SILENCE_MIN_S)
 
     def test_aceita_silencio_longo(self):
-        """15 janelas (300ms) de silêncio é fim de fala."""
-        pontos = self._pontos([(10, -18.0), (15, -44.0)])
+        """15 janelas (300ms) de silêncio é end de fala."""
+        points = self._pontos([(10, -18.0), (15, -44.0)])
         self.assertGreaterEqual(
-            audio._silence_duration(pontos, 10, audio.PAUSE_THRESHOLD_DB),
+            audio._silence_duration(points, 10, audio.PAUSE_THRESHOLD_DB),
             audio.SILENCE_MIN_S)
 
     def test_silencio_minimo_e_maior_que_pausa_entre_palavras(self):
-        """Pausa entre palavras roda em 40-100ms; o limiar tem que ficar acima."""
+        """Pausa entre words roda em 40-100ms; o threshold tem que ficar acima."""
         self.assertGreater(audio.SILENCE_MIN_S, 0.12)
 
 
-class TestAjusteRespeitaMinimo(unittest.TestCase):
+class TestAdjustRespectsMinimum(unittest.TestCase):
     """Nem o vale nem a margem podem levar o clip abaixo da duração mínima."""
 
     def test_margem_nao_derruba_abaixo_do_minimo(self):
         from talaria import config
-        inicio = 100.0
-        fim = inicio + config.CLIP_MIN_S          # exatamente no limite
+        start = 100.0
+        end = start + config.CLIP_MIN_S          # exatamente no limite
         self.assertGreaterEqual(
-            render.apply_end_margin(fim, inicio) - inicio, config.CLIP_MIN_S)
+            render.apply_end_margin(end, start) - start, config.CLIP_MIN_S)
 
 
-class TestCaudaVaza(unittest.TestCase):
+class TestClipsMidWord(unittest.TestCase):
     """Distinguir fala que TERMINA de fala que foi CORTADA.
 
-    Toda fala acaba com uma sílaba, então "tem energia no fim" acusa qualquer
+    Toda fala acaba com uma sílaba, então "tem energia no end" acusa qualquer
     clip. O sinal é o decaimento: palavra terminando decai; palavra cortada
     para de repente ainda no nível alto. Números medidos.
     """
@@ -73,9 +73,9 @@ class TestCaudaVaza(unittest.TestCase):
         # "importadas." correto: -25.8 -> -39.4 (despenca)
         self.assertTrue(self._decai([-25.8, -25.9, -39.4]))
 
-    def _decai(self, dbs, limiar=-25.0):
+    def _decai(self, dbs, threshold=-25.0):
         """Reproduz a decisão de clips_mid_word sobre uma série já medida."""
-        if dbs[-1] <= limiar - 10.0:
+        if dbs[-1] <= threshold - 10.0:
             return True
         return (dbs[0] - dbs[-1]) >= 8.0
 
@@ -86,16 +86,16 @@ class TestCaudaVaza(unittest.TestCase):
         """Janela larga pegaria a sílaba final de qualquer fala."""
         import inspect
         sig = inspect.signature(audio.clips_mid_word)
-        self.assertLessEqual(sig.parameters["janela"].default, 0.08)
+        self.assertLessEqual(sig.parameters["window"].default, 0.08)
 
 
-class TestMargemDeFim(unittest.TestCase):
-    """O fim do clip precisa de folga para não pegar a palavra seguinte.
+class TestEndMargin(unittest.TestCase):
+    """O end do clip precisa de folga para não pegar a palavra seguinte.
 
     Os tempos vêm da transcrição, cuja resolução é de 1 segundo — cortar
     exatamente no limite de um bloco encosta no ataque da próxima palavra. Um
     clip terminava em 901.0 e deixava vazar o "Poucas" que abre o bloco
-    seguinte (a pausa entre as duas palavras dura ~50ms).
+    seguinte (a pausa entre as duas words dura ~50ms).
     """
 
     def test_recua_o_fim_pela_margem(self):
@@ -105,8 +105,8 @@ class TestMargemDeFim(unittest.TestCase):
 
     def test_margem_nao_inverte_o_corte(self):
         """Corte curto demais para a margem mantém pelo menos o início."""
-        fim = render.apply_end_margin(10.05, 10.0)
-        self.assertGreater(fim, 10.0)
+        end = render.apply_end_margin(10.05, 10.0)
+        self.assertGreater(end, 10.0)
 
     def test_margem_e_pequena(self):
         """Margem grande cortaria a última sílaba da fala aproveitada."""
@@ -133,30 +133,30 @@ class TestSegmentsInCut(unittest.TestCase):
         ]
 
     def test_segmento_fora_do_corte_nao_entra(self):
-        itens = render._segments_in_cut(self.segs, 0.0, 20.0)
-        self.assertEqual(len(itens), 2)
-        self.assertNotIn("Depois do corte", " ".join(t for _, _, t in itens))
+        items = render._segments_in_cut(self.segs, 0.0, 20.0)
+        self.assertEqual(len(items), 2)
+        self.assertNotIn("Depois do corte", " ".join(t for _, _, t in items))
 
     def test_tempos_sao_relativos_ao_inicio_do_corte(self):
-        itens = render._segments_in_cut(self.segs, 10.0, 30.0)
-        self.assertEqual(itens[0][0], 0.0)
+        items = render._segments_in_cut(self.segs, 10.0, 30.0)
+        self.assertEqual(items[0][0], 0.0)
 
     def test_texto_aparado_quando_corte_termina_no_meio(self):
         """Corte em 15.0 pega metade do bloco 10-20: texto tem que encolher."""
-        itens = render._segments_in_cut(self.segs, 0.0, 15.0)
-        ultimo = itens[-1][2]
-        self.assertIn("Vai conseguir reproduzir", ultimo)
-        self.assertNotIn("primeiro ponto", ultimo)
+        items = render._segments_in_cut(self.segs, 0.0, 15.0)
+        last = items[-1][2]
+        self.assertIn("Vai conseguir reproduzir", last)
+        self.assertNotIn("primeiro ponto", last)
 
     def test_texto_inteiro_quando_segmento_cabe_no_corte(self):
-        itens = render._segments_in_cut(self.segs, 0.0, 20.0)
-        self.assertIn("primeiro ponto", itens[-1][2])
+        items = render._segments_in_cut(self.segs, 0.0, 20.0)
+        self.assertIn("primeiro ponto", items[-1][2])
 
     def test_ignora_fatia_curta_demais_para_ler(self):
-        """Sobra de milissegundos no fim não pode virar legenda piscando.
+        """Sobra de milissegundos no end não pode virar legenda piscando.
 
-        O clip termina alguns ms depois do início do bloco seguinte (o fim vem
-        do vale de áudio, não da grade da transcrição). Sem piso de duração,
+        O clip termina alguns ms depois do início do bloco seguinte (o end vem
+        do vale de áudio, não da grade da transcrição). Sem floor de duração,
         esse bloco vira um PNG de 1 frame — o clip exibia "Poucas"
         por 20ms, justamente a palavra que o ajuste de áudio tirou.
         """
@@ -164,9 +164,9 @@ class TestSegmentsInCut(unittest.TestCase):
             {"start": 0.0, "end": 60.0, "text": "Fala aproveitada.", "turn": False},
             {"start": 60.0, "end": 70.0, "text": "Poucas pessoas fazendo.", "turn": False},
         ]
-        itens = render._segments_in_cut(segs, 0.0, 60.02)
-        self.assertEqual(len(itens), 1, itens)
-        self.assertNotIn("Poucas", " ".join(t for _, _, t in itens))
+        items = render._segments_in_cut(segs, 0.0, 60.02)
+        self.assertEqual(len(items), 1, items)
+        self.assertNotIn("Poucas", " ".join(t for _, _, t in items))
 
     def test_mantem_fatia_curta_mas_legivel(self):
         """Piso não pode engolir legenda curta legítima."""
@@ -174,17 +174,17 @@ class TestSegmentsInCut(unittest.TestCase):
             {"start": 0.0, "end": 60.0, "text": "Fala aproveitada.", "turn": False},
             {"start": 60.0, "end": 70.0, "text": "Sim.", "turn": False},
         ]
-        itens = render._segments_in_cut(segs, 0.0, 61.0)
-        self.assertEqual(len(itens), 2, itens)
+        items = render._segments_in_cut(segs, 0.0, 61.0)
+        self.assertEqual(len(items), 2, items)
 
     def test_texto_aparado_no_inicio_do_corte(self):
         """Corte começando no meio de um bloco não mostra o que já passou."""
-        itens = render._segments_in_cut(self.segs, 15.0, 30.0)
-        primeiro = itens[0][2]
-        self.assertNotIn("Vai conseguir reproduzir", primeiro)
+        items = render._segments_in_cut(self.segs, 15.0, 30.0)
+        first = items[0][2]
+        self.assertNotIn("Vai conseguir reproduzir", first)
 
     def test_apara_estende_ate_pontuacao_proxima(self):
-        """Fatia que para 1-2 palavras antes do ponto final deve alcançá-lo.
+        """Fatia que para 1-2 words antes do ponto final deve alcançá-lo.
 
         Truncar antes da pontuação deixa a legenda pendurada ("muito mais do")
         quando o áudio completou a frase ("muito mais do mesmo."). Caso real.
@@ -194,24 +194,24 @@ class TestSegmentsInCut(unittest.TestCase):
 
     def test_apara_nao_estende_atraves_de_frase_inteira(self):
         """A extensão é local: não pode arrastar a frase seguinte inteira."""
-        txt = "primeira. " + " ".join(f"p{i}" for i in range(20)) + " fim."
+        txt = "primeira. " + " ".join(f"p{i}" for i in range(20)) + " end."
         out = render._trim_text(txt, 0.0, 0.2)
-        self.assertNotIn("fim.", out)
+        self.assertNotIn("end.", out)
 
     def test_apara_respeita_fronteira_de_palavra(self):
         """O texto aparado nunca termina com palavra pela metade."""
-        itens = render._segments_in_cut(self.segs, 0.0, 13.0)
-        ultimo = itens[-1][2]
-        self.assertFalse(ultimo.endswith("re"), ultimo)
-        for palavra in ultimo.split():
-            self.assertIn(palavra.strip(".,!?"),
+        items = render._segments_in_cut(self.segs, 0.0, 13.0)
+        last = items[-1][2]
+        self.assertFalse(last.endswith("re"), last)
+        for word in last.split():
+            self.assertIn(word.strip(".,!?"),
                           self.segs[1]["text"].replace(".", " ").split())
 
 
 class TestWrapByPixels(unittest.TestCase):
     """wrap_by_pixels serve a legenda queimada E o post de citação."""
 
-    CITACAO_DO_DESIGN = ("A gente descobriu que não precisava mudar de cidade "
+    DESIGN_QUOTE = ("A gente descobriu que não precisava mudar de cidade "
                          "para construir algo grande. Precisava ficar.")
 
     def test_wrap_aceita_fonte_e_largura_alternativas(self):
@@ -224,16 +224,16 @@ class TestWrapByPixels(unittest.TestCase):
         from PIL import ImageFont
         from talaria import config, render
         fnt = ImageFont.truetype(config.POST_FONT, config.POST_QUOTE_SIZE)
-        lines = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
+        lines = render.wrap_by_pixels(self.DESIGN_QUOTE, fnt=fnt,
                                        width=config.POST_TEXT_W)
         self.assertGreater(len(lines), 1)
-        for linha in lines:
+        for line in lines:
             # Palavra sozinha maior que a largura é exceção conhecida: ela vai
             # para a linha mesmo assim, porque não há onde quebrar.
-            if len(linha.split()) > 1:
-                self.assertLessEqual(fnt.getlength(linha),
+            if len(line.split()) > 1:
+                self.assertLessEqual(fnt.getlength(line),
                                      config.POST_TEXT_W)
-        self.assertEqual(" ".join(lines), self.CITACAO_DO_DESIGN)
+        self.assertEqual(" ".join(lines), self.DESIGN_QUOTE)
 
     def test_quebra_do_design_com_a_fonte_do_design(self):
         """A citação de referência quebra em 5 lines na fonte versionada.
@@ -246,7 +246,7 @@ class TestWrapByPixels(unittest.TestCase):
         from talaria import config, render
         fnt = ImageFont.truetype(config.POST_FONT, config.POST_QUOTE_SIZE)
         self.assertEqual(fnt.getname(), ("Poppins", "SemiBold"))
-        lines = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
+        lines = render.wrap_by_pixels(self.DESIGN_QUOTE, fnt=fnt,
                                        width=config.POST_TEXT_W)
         self.assertEqual(lines, ["A gente descobriu que",
                                   "não precisava mudar",
@@ -264,7 +264,7 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class TestSugereFrames(unittest.TestCase):
+class TestSuggestFrames(unittest.TestCase):
     """Onde procurar frame de thumbnail: dentro dos cortes approved.
 
     A escolha final é visual e fica com o gestor — o que se automatiza é a
@@ -293,30 +293,30 @@ class TestSugereFrames(unittest.TestCase):
         self.assertEqual(self.thumbnail.suggest_frames([]), [])
 
 
-class TestCaptionDoCorte(unittest.TestCase):
+class TestClipCaption(unittest.TestCase):
     """O .txt de publicação gravado ao lado de cada peça renderizada."""
 
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    def _textos(self, dados):
+    def _texts(self, data):
         p = layout.ensure_dir(layout.texts(self.d))
         with open(p, "w", encoding="utf-8") as f:
-            json.dump(dados, f)
+            json.dump(data, f)
 
-    def _episodio(self, url):
+    def _episode(self, url):
         p = layout.ensure_dir(layout.episode(self.d))
         with open(p, "w", encoding="utf-8") as f:
             json.dump({"youtube_url": url}, f)
 
     def test_grava_txt_para_cada_plataforma(self):
         # Cada peça renderizada ganha um .txt irmão.
-        self._textos({"hashtags": "#Um #Dois"})
-        pecas = [os.path.join(self.d, "youtube_shorts", "c1_short.mp4"),
+        self._texts({"hashtags": "#Um #Dois"})
+        pieces = [os.path.join(self.d, "youtube_shorts", "c1_short.mp4"),
                  os.path.join(self.d, "instagram_reels", "c1_reel.mp4")]
         render.write_captions(self.d, {"slug": "c1",
-                                         "post_caption": "A frase."}, pecas)
-        for p in pecas:
+                                         "post_caption": "A frase."}, pieces)
+        for p in pieces:
             txt = p[:-4] + ".txt"
             self.assertTrue(os.path.exists(txt), txt)
             with open(txt, encoding="utf-8") as f:
@@ -324,40 +324,40 @@ class TestCaptionDoCorte(unittest.TestCase):
 
     def test_sem_legenda_post_avisa_e_grava_hashtags(self):
         # Ausência não pode passar silenciosa.
-        self._textos({"hashtags": "#Um"})
-        peca = os.path.join(self.d, "youtube_shorts", "c5_short.mp4")
+        self._texts({"hashtags": "#Um"})
+        piece = os.path.join(self.d, "youtube_shorts", "c5_short.mp4")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            render.write_captions(self.d, {"slug": "c5"}, [peca])
+            render.write_captions(self.d, {"slug": "c5"}, [piece])
         self.assertIn("c5", buf.getvalue())
         self.assertIn("sem post_caption", buf.getvalue())
-        with open(peca[:-4] + ".txt", encoding="utf-8") as f:
+        with open(piece[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(f.read(), "#Um")
 
     def test_com_legenda_post_nao_avisa(self):
-        self._textos({"hashtags": "#Um"})
-        self._episodio("https://youtu.be/XYZ")
-        peca = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
+        self._texts({"hashtags": "#Um"})
+        self._episode("https://youtu.be/XYZ")
+        piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             render.write_captions(self.d, {"slug": "c1",
-                                             "post_caption": "A frase."}, [peca])
+                                             "post_caption": "A frase."}, [piece])
         self.assertEqual(buf.getvalue(), "")
 
     def test_sem_textos_json_nao_quebra(self):
         # Episódio sem texts.json ainda rende caption.
-        peca = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
+        piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         render.write_captions(self.d, {"slug": "c1",
-                                         "post_caption": "A frase."}, [peca])
-        with open(peca[:-4] + ".txt", encoding="utf-8") as f:
+                                         "post_caption": "A frase."}, [piece])
+        with open(piece[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(f.read(), "A frase.")
 
 
     def test_link_do_episodio_so_no_youtube(self):
         # A URL do episódio entra na descrição do Short e NÃO na legenda do
         # Reels: no Instagram ela não é clicável e manda o leitor para fora.
-        self._textos({"hashtags": "#Um"})
-        self._episodio("https://youtu.be/XYZ")
+        self._texts({"hashtags": "#Um"})
+        self._episode("https://youtu.be/XYZ")
         yt = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         ig = os.path.join(self.d, "instagram_reels", "c1_reel.mp4")
         render.write_captions(self.d, {"slug": "c1",
@@ -373,51 +373,51 @@ class TestCaptionDoCorte(unittest.TestCase):
         # Corte renderizado antes de o vídeo longo subir é o caso normal —
         # não pode quebrar, mas também não pode passar silencioso: o Short
         # iria ao ar sem a chamada, e isso só se percebe depois de published.
-        self._textos({"hashtags": "#Um"})
-        peca = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
+        self._texts({"hashtags": "#Um"})
+        piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             render.write_captions(self.d, {"slug": "c1",
                                              "post_caption": "A frase."},
-                                    [peca])
+                                    [piece])
         self.assertIn("youtube_url", buf.getvalue())
-        with open(peca[:-4] + ".txt", encoding="utf-8") as f:
+        with open(piece[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(f.read(), "A frase.\n\n#Um")
 
     def test_episodio_json_invalido_nao_quebra_o_caption(self):
         # episode.json incompleto aborta no `load`, que validate o episódio
         # inteiro. O caption lê só a URL, que é opcional, e segue sem ela.
-        self._textos({"hashtags": "#Um"})
+        self._texts({"hashtags": "#Um"})
         with open(layout.ensure_dir(layout.episode(self.d)), "w",
                   encoding="utf-8") as f:
             f.write("{ nao é json")
-        peca = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
+        piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         with contextlib.redirect_stdout(io.StringIO()):
             render.write_captions(self.d, {"slug": "c1",
                                              "post_caption": "A frase."},
-                                    [peca])
-        with open(peca[:-4] + ".txt", encoding="utf-8") as f:
+                                    [piece])
+        with open(piece[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(f.read(), "A frase.\n\n#Um")
 
 
-class TestCaptionDoEpisodio(unittest.TestCase):
+class TestEpisodeCaption(unittest.TestCase):
     """O .txt com título e descrição do episódio, na raiz de publish/."""
 
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    def _textos(self, dados):
+    def _texts(self, data):
         p = layout.ensure_dir(layout.texts(self.d))
         with open(p, "w", encoding="utf-8") as f:
-            json.dump(dados, f)
+            json.dump(data, f)
 
-    def _episodio(self, url):
+    def _episode(self, url):
         p = layout.ensure_dir(layout.episode(self.d))
         with open(p, "w", encoding="utf-8") as f:
             json.dump({"youtube_url": url}, f)
 
     def test_grava_titulo_descricao_e_hashtags(self):
-        self._textos({"title": "O Título", "description": "A descrição.",
+        self._texts({"title": "O Título", "description": "A descrição.",
                       "hashtags": "#Um"})
         out = render.write_episode_caption(self.d)
         self.assertEqual(out, layout.episode_txt(self.d))
@@ -430,12 +430,12 @@ class TestCaptionDoEpisodio(unittest.TestCase):
         self.assertFalse(os.path.exists(layout.episode_txt(self.d)))
 
     def test_textos_json_vazio_nao_gera_arquivo(self):
-        self._textos({})
+        self._texts({})
         self.assertIsNone(render.write_episode_caption(self.d))
         self.assertFalse(os.path.exists(layout.episode_txt(self.d)))
 
 
-class TestMarcaDaguaGraph(unittest.TestCase):
+class TestWatermarkGraph(unittest.TestCase):
     """O overlay da marca d'água, encadeado depois de [outv]."""
 
     def test_encadeia_apos_outv_e_produz_outv2(self):
@@ -455,7 +455,7 @@ def _has_ffmpeg():
     return shutil.which("ffmpeg") is not None
 
 
-class TestMarcaDaguaECardIntegracao(unittest.TestCase):
+class TestWatermarkAndCardIntegration(unittest.TestCase):
     """Render real, com ffmpeg de verdade: confirma que o comando roda e
     produz um arquivo com marca d'água + card, não só que a string do
     filtergraph parece certa.
@@ -490,10 +490,10 @@ class TestMarcaDaguaECardIntegracao(unittest.TestCase):
         r = subprocess.run(
             ["ffprobe", "-v", "error", "-show_entries", "format=duration",
              "-of", "csv=p=0", out], capture_output=True, text=True, check=True)
-        duracao = float(r.stdout.strip())
+        duration = float(r.stdout.strip())
         # A duração do clip propriamente dito varia com o ajuste por áudio
         # (adjust_end_by_audio); o card acrescenta CARD_DURATION_S por cima.
-        self.assertGreater(duracao, config.CARD_DURATION_S)
+        self.assertGreater(duration, config.CARD_DURATION_S)
 
         # O card cacheado deve existir na raiz de publish/ (não numa pasta
         # de platform) e ser reaproveitado, não um por clip.
@@ -501,7 +501,7 @@ class TestMarcaDaguaECardIntegracao(unittest.TestCase):
         self.assertTrue(os.path.exists(card))
 
 
-class TestConcatenaEncerramento(unittest.TestCase):
+class TestConcatenateEndCard(unittest.TestCase):
     """Concatenação clip + card pelo concat filter."""
 
     def setUp(self):
@@ -539,10 +539,10 @@ class TestConcatenaEncerramento(unittest.TestCase):
             "-shortest", clip,
         ], check=True)
 
-        antes = os.path.getsize(clip)
+        before = os.path.getsize(clip)
         render.append_end_card(clip, self.d)
         self.assertTrue(os.path.exists(clip))
-        self.assertGreater(os.path.getsize(clip), antes)
+        self.assertGreater(os.path.getsize(clip), before)
 
     @unittest.skipUnless(_has_ffmpeg(), "ffmpeg não disponível")
     def test_caminho_com_apostrofo_nao_quebra(self):
@@ -562,7 +562,7 @@ class TestConcatenaEncerramento(unittest.TestCase):
         self.assertTrue(os.path.exists(clip))
 
 
-class TestOrdemCaudaVazaAntesDoCard(unittest.TestCase):
+class TestClipsMidWordOrderBeforeCard(unittest.TestCase):
     """clips_mid_word precisa medir o clip ANTES do card ser concatenado.
 
     Risco real: se a checagem rodar no arquivo já com o card grudado, o
@@ -592,25 +592,25 @@ class TestOrdemCaudaVazaAntesDoCard(unittest.TestCase):
         with open(layout.ensure_dir(layout.moments(self.d)), "w", encoding="utf-8") as f:
             json.dump([{"slug": "c1", "start": 0.0, "end": 5.0}], f)
 
-        duracoes_vistas = []
+        durations_seen = []
         original = audio.clips_mid_word
 
-        def espiao(video_path, fim, *a, **kw):
+        def spy(video_path, end, *a, **kw):
             r = subprocess.run(
                 ["ffprobe", "-v", "error", "-show_entries", "format=duration",
                  "-of", "csv=p=0", video_path],
                 capture_output=True, text=True, check=True)
-            duracoes_vistas.append(float(r.stdout.strip()))
-            return original(video_path, fim, *a, **kw)
+            durations_seen.append(float(r.stdout.strip()))
+            return original(video_path, end, *a, **kw)
 
         import unittest.mock as mock
-        with mock.patch("talaria.render.audio.clips_mid_word", side_effect=espiao):
+        with mock.patch("talaria.render.audio.clips_mid_word", side_effect=spy):
             render.render_all(self.d, ["youtube"])
 
-        self.assertEqual(len(duracoes_vistas), 1)
+        self.assertEqual(len(durations_seen), 1)
         # O arquivo visto pela checagem não pode já ter os +3.5s do card —
         # senão ela está medindo o instante errado.
-        self.assertLess(duracoes_vistas[0], 5.0 + config.CARD_DURATION_S,
+        self.assertLess(durations_seen[0], 5.0 + config.CARD_DURATION_S,
                         "clips_mid_word recebeu o arquivo já concatenado com o "
                         "card — a checagem precisa rodar ANTES do concat")
 

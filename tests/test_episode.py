@@ -7,7 +7,7 @@ import unittest
 from talaria import episode
 
 
-class TestEpisodio(unittest.TestCase):
+class TestEpisode(unittest.TestCase):
     def _write(self, data):
         d = tempfile.mkdtemp()
         p = os.path.join(d, "episode.json")
@@ -66,13 +66,13 @@ class TestEpisodio(unittest.TestCase):
 
     def test_save_load_roundtrip_preserva_acento(self):
         d = tempfile.mkdtemp()
-        dados = {"season": 2, "episode": 7, "company": "Zarvik",
+        data = {"season": 2, "episode": 7, "company": "Zarvik",
                  "city": "Ribeirão Açaí", "uf": "SP", "guests": []}
-        path = episode.save(d, dados)
+        path = episode.save(d, data)
         self.assertTrue(os.path.exists(path))
         with open(path, encoding="utf-8") as f:
             self.assertIn("Ribeirão Açaí", f.read())
-        self.assertEqual(episode.load(d), dados)
+        self.assertEqual(episode.load(d), data)
 
     def test_template_em_branco_e_recusado(self):
         d = tempfile.mkdtemp()
@@ -124,7 +124,7 @@ class TestEpisodio(unittest.TestCase):
         self.assertEqual(ep["company"], "")
 
     def test_sem_convidado_e_sem_tema_e_recusado(self):
-        """Sem company, o tema é a origem da linha 1 da thumb e da hashtag."""
+        """Sem company, o tema é a origin da linha 1 da thumb e da hashtag."""
         d = self._write({
             "season": 3, "episode": 1, "company": "",
             "city": "Pedra Nova", "uf": "SP", "guests": [], "topics": [],

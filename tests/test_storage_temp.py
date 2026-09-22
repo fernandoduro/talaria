@@ -5,7 +5,7 @@ from unittest import mock
 from talaria import storage_temp
 
 
-class TestSobe(unittest.TestCase):
+class TestPut(unittest.TestCase):
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_sobe_no_prefixo_e_devolve_url_assinada(self, boto3_mock):
@@ -72,7 +72,7 @@ class TestRemove(unittest.TestCase):
         # existe e falhava calado — o arquivo ficava público até expirar.
         s3 = boto3_mock.client.return_value
         storage_temp.remove(
-            "https://conta.r2.cloudflarestorage.com/meu-bucket/"
+            "https://account.r2.cloudflarestorage.com/meu-bucket/"
             "tmp-publish/abc_v.mp4?X-Amz-Signature=x")
         s3.delete_object.assert_called_once_with(
             Bucket="meu-bucket", Key="tmp-publish/abc_v.mp4")

@@ -8,7 +8,7 @@ import unittest
 from talaria import layout, texts, thumbnail
 
 
-class TestTextos(unittest.TestCase):
+class TestTexts(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
         with open(os.path.join(self.d, "episode.json"), "w", encoding="utf-8") as f:

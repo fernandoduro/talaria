@@ -27,8 +27,8 @@ class TestSlug(unittest.TestCase):
 class TestBuild(unittest.TestCase):
     def test_inclui_as_tres_fixas(self):
         tags = hashtags.build(city="Ribeirão Açaí", company="Zarvik")
-        for fixa in hashtags.CHANNEL_TAGS:
-            self.assertIn(fixa, tags)
+        for fixed in hashtags.CHANNEL_TAGS:
+            self.assertIn(fixed, tags)
 
     def test_inclui_cidade_e_empresa(self):
         tags = hashtags.build(city="Ribeirão Açaí", company="Zarvik")
@@ -36,7 +36,7 @@ class TestBuild(unittest.TestCase):
         self.assertIn("#Zarvik", tags)
 
     def test_sem_empresa_usa_fallback(self):
-        tags = hashtags.build(city="Pedra Nova", company="", fallback_tema="Inovação")
+        tags = hashtags.build(city="Pedra Nova", company="", fallback_topic="Inovação")
         self.assertIn("#Inovacao", tags)
 
     def test_sem_duplicatas(self):

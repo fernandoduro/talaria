@@ -17,7 +17,7 @@ def _client_secret(d):
     return path
 
 
-class TestCredenciais(unittest.TestCase):
+class TestCredentials(unittest.TestCase):
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_sem_credencial_diz_qual_variavel_e_o_script(self):
         with self.assertRaises(RuntimeError) as ctx:
@@ -41,13 +41,13 @@ class TestUpload(unittest.TestCase):
             r = publish_youtube.upload("/tmp/v.mp4", "Titulo", "Descricao")
         self.assertEqual(r, {"id": "V1D",
                              "url": "https://www.youtube.com/shorts/V1D"})
-        corpo = insert.call_args.kwargs["body"]
-        self.assertEqual(corpo["snippet"]["title"], "Titulo")
-        self.assertEqual(corpo["snippet"]["description"], "Descricao")
-        self.assertEqual(corpo["status"]["privacyStatus"], "public")
+        body = insert.call_args.kwargs["body"]
+        self.assertEqual(body["snippet"]["title"], "Titulo")
+        self.assertEqual(body["snippet"]["description"], "Descricao")
+        self.assertEqual(body["status"]["privacyStatus"], "public")
 
 
-class TestPrivacidade(unittest.TestCase):
+class TestPrivacy(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
         self.env = {"YT_CLIENT_SECRET_PATH": _client_secret(self.d),

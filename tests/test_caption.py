@@ -8,7 +8,7 @@ import unittest
 from talaria import caption
 
 
-class TestMonta(unittest.TestCase):
+class TestBuild(unittest.TestCase):
     def test_junta_descricao_e_hashtags(self):
         t = caption.compose("A frase do corte.", "#Um #Dois")
         self.assertEqual(t, "A frase do corte.\n\n#Um #Dois")
@@ -18,7 +18,7 @@ class TestMonta(unittest.TestCase):
         self.assertEqual(caption.compose("A frase.", ""), "A frase.")
 
     def test_so_hashtags_quando_nao_ha_descricao(self):
-        # Corte sem post_caption: o arquivo sai, mas sem linha em branco no topo.
+        # Corte sem post_caption: o arquivo sai, mas sem linha em branco no top.
         self.assertEqual(caption.compose("", "#Um"), "#Um")
 
     def test_vazio_dos_dois_lados(self):
@@ -33,35 +33,35 @@ class TestMonta(unittest.TestCase):
         self.assertEqual(caption.compose("  A frase.  ", " #Um "), "A frase.\n\n#Um")
 
 
-class TestEscreve(unittest.TestCase):
+class TestWrite(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
     def test_troca_extensao_da_peca(self):
-        peca = os.path.join(self.d, "corte1_short.mp4")
-        out = caption.write(peca, "texto")
+        piece = os.path.join(self.d, "corte1_short.mp4")
+        out = caption.write(piece, "texto")
         self.assertEqual(out, os.path.join(self.d, "corte1_short.txt"))
         self.assertTrue(os.path.exists(out))
 
     def test_conteudo_gravado_em_utf8(self):
-        peca = os.path.join(self.d, "post_x.png")
-        caption.write(peca, "Ação e coração.\n\n#RibeiraoAcai")
+        piece = os.path.join(self.d, "post_x.png")
+        caption.write(piece, "Ação e coração.\n\n#RibeiraoAcai")
         with open(os.path.join(self.d, "post_x.txt"), encoding="utf-8") as f:
             self.assertEqual(f.read(), "Ação e coração.\n\n#RibeiraoAcai")
 
     def test_sobrescreve_sem_duplicar(self):
         # Regerar duas vezes deixa um arquivo só, com o conteúdo novo.
-        peca = os.path.join(self.d, "corte1_short.mp4")
-        caption.write(peca, "primeira")
-        caption.write(peca, "segunda")
+        piece = os.path.join(self.d, "corte1_short.mp4")
+        caption.write(piece, "primeira")
+        caption.write(piece, "segunda")
         with open(os.path.join(self.d, "corte1_short.txt"), encoding="utf-8") as f:
             self.assertEqual(f.read(), "segunda")
         txts = [n for n in os.listdir(self.d) if n.endswith(".txt")]
         self.assertEqual(txts, ["corte1_short.txt"])
 
     def test_cria_diretorio_que_falta(self):
-        peca = os.path.join(self.d, "sub", "nova", "corte1_short.mp4")
-        out = caption.write(peca, "texto")
+        piece = os.path.join(self.d, "sub", "nova", "corte1_short.mp4")
+        out = caption.write(piece, "texto")
         self.assertTrue(os.path.exists(out))
 
     def test_nome_base_do_carrossel_vem_de_quem_chama(self):
@@ -73,7 +73,7 @@ class TestEscreve(unittest.TestCase):
 
 
 
-class TestValidaTexto(unittest.TestCase):
+class TestValidateText(unittest.TestCase):
     """Tipo errado no JSON dá error nomeado, não AttributeError cru.
 
     O `compose()` é a autoridade única do formato, então a validação mora aqui:
@@ -99,27 +99,27 @@ class TestValidaTexto(unittest.TestCase):
         self.assertIsNone(caption.validate("legenda", "ok", "c1"))
         self.assertIsNone(caption.validate("legenda", None, "c1"))
 
-class TestTravessao(unittest.TestCase):
+class TestEmDash(unittest.TestCase):
     """O canal não usa travessão em legenda: sai com cara de texto de IA."""
 
-    def _valida(self, valor):
+    def _validate(self, value):
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
-            caption.validate("post_caption", valor, "corte1")
+            caption.validate("post_caption", value, "corte1")
         return buf.getvalue()
 
     def test_avisa_quando_tem_travessao(self):
-        saida = self._valida("Ele avisou — e errou assim mesmo.")
-        self.assertIn("travessão", saida)
-        self.assertIn("corte1", saida)
+        output = self._validate("Ele avisou — e errou assim mesmo.")
+        self.assertIn("travessão", output)
+        self.assertIn("corte1", output)
 
     def test_nao_avisa_sem_travessao(self):
-        self.assertEqual(self._valida("Ele avisou. E errou assim mesmo."), "")
+        self.assertEqual(self._validate("Ele avisou. E errou assim mesmo."), "")
 
     def test_hifen_e_meia_risca_nao_disparam(self):
         # Hífen de palavra composta e meia-risca de intervalo são pontuação
         # legítima; só o travessão (—) é a construção que o gestor rejeita.
-        self.assertEqual(self._valida("e-mail, 30–40 minutos"), "")
+        self.assertEqual(self._validate("e-mail, 30–40 minutos"), "")
 
     def test_travessao_nao_aborta(self):
         # É questão de estilo: avisa e deixa seguir. Abortar travaria um
@@ -127,7 +127,7 @@ class TestTravessao(unittest.TestCase):
         caption.validate("post_caption", "Com — travessão", "corte1")
 
 
-class TestMontaEpisodio(unittest.TestCase):
+class TestComposeEpisode(unittest.TestCase):
     """Caption do episódio inteiro: título na 1ª linha, depois descrição."""
 
     def test_titulo_descricao_e_hashtags(self):

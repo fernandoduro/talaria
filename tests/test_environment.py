@@ -7,14 +7,14 @@ from unittest import mock
 from talaria import environment
 
 
-class TestCarrega(unittest.TestCase):
+class TestLoad(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
         self.env = os.path.join(self.d, ".env")
 
-    def _write(self, texto):
+    def _write(self, text):
         with open(self.env, "w", encoding="utf-8") as f:
-            f.write(texto)
+            f.write(text)
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_le_par_simples(self):

@@ -59,21 +59,21 @@ class TestBrief(unittest.TestCase):
         self.assertEqual(out, "sem placeholder")
 
     def test_estado_legivel_primeira_rodada(self):
-        estado = {"target": 5, "approved": [], "rejected": [], "rounds": 0}
-        txt = brief.readable_curation(estado)
+        state = {"target": 5, "approved": [], "rejected": [], "rounds": 0}
+        txt = brief.readable_curation(state)
         self.assertIn("PRIMEIRA RODADA", txt)
         self.assertIn("10", txt)
 
     def test_estado_legivel_com_rejeitados(self):
-        estado = {"target": 5, "rounds": 1,
+        state = {"target": 5, "rounds": 1,
                   "approved": [{"slug": "a", "start": 100.0, "end": 170.0,
                                  "kind": "story"}],
                   "rejected": [{"start": 300.0, "end": 370.0,
                                   "reason": "gancho fraco", "summary": "trecho X"}]}
-        txt = brief.readable_curation(estado)
+        txt = brief.readable_curation(state)
         self.assertIn("gancho fraco", txt)
         self.assertIn("4", txt)          # slots_left restantes
-        self.assertIn("05:00", txt)      # faixa queimada em mm:ss
+        self.assertIn("05:00", txt)      # span queimada em mm:ss
 
 
 class TestBriefPosts(unittest.TestCase):
@@ -100,42 +100,42 @@ class TestBriefPosts(unittest.TestCase):
     def test_traz_a_fala_dentro_do_corte(self):
         out = brief.build_posts(self.d, [self.clip])
         with open(out, encoding="utf-8") as f:
-            texto = f.read()
-        self.assertIn("corte1_mar_azul", texto)
-        self.assertIn("A oportunidade estava do lado.", texto)
-        self.assertIn("E a gente não viu.", texto)
+            text = f.read()
+        self.assertIn("corte1_mar_azul", text)
+        self.assertIn("A oportunidade estava do lado.", text)
+        self.assertIn("E a gente não viu.", text)
 
     def test_traz_a_fala_do_segmento_que_atravessa_a_fronteira(self):
         """Segmento cortado ao meio pela fronteira ainda é fala do clip.
 
         Exigir contenção total escondia a ÚLTIMA frase de todo clip —
         justamente onde costuma estar a frase de impacto. O vídeo mostra essa
-        fala (render._segments_in_cut apara o texto), então o pacote de leitura
+        fala (render._segments_in_cut apara o text), então o pacote de leitura
         precisa mostrá-la também.
         """
         clip = {"slug": "c", "start": 10.0, "end": 16.0, "kind": "thesis",
                  "screen_text": "", "post_caption": "", "trecho": ""}
-        texto = brief.clip_speech(self.d, clip)
-        self.assertIn("A oportunidade estava do lado.", texto)
+        text = brief.clip_speech(self.d, clip)
+        self.assertIn("A oportunidade estava do lado.", text)
         # O 2º segmento (14–18s) é aparado pela fronteira em 16s: entra a
         # metade que o clip alcança, não o bloco inteiro nem nada.
-        self.assertIn("E a", texto)
-        self.assertNotIn("não viu", texto)
+        self.assertIn("E a", text)
+        self.assertNotIn("não viu", text)
 
     def test_nao_traz_fala_de_fora_do_corte(self):
         out = brief.build_posts(self.d, [self.clip])
         with open(out, encoding="utf-8") as f:
-            texto = f.read()
-        self.assertNotIn("Fala de outro trecho.", texto)
+            text = f.read()
+        self.assertNotIn("Fala de outro trecho.", text)
 
     def test_traz_metadados_e_limite_de_encaixe(self):
         out = brief.build_posts(self.d, [self.clip])
         with open(out, encoding="utf-8") as f:
-            texto = f.read()
-        self.assertIn("Marina Siqueira", texto)
-        self.assertIn("100 caracteres", texto)
+            text = f.read()
+        self.assertIn("Marina Siqueira", text)
+        self.assertIn("100 caracteres", text)
         # os placeholders do prompt têm que ter sido substituídos
-        self.assertNotIn("{{", texto)
+        self.assertNotIn("{{", text)
 
     def test_grava_em_brief_posts_md(self):
         out = brief.build_posts(self.d, [self.clip])

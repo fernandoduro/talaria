@@ -12,7 +12,7 @@ EXPECTED = {
 }
 
 
-class TestFontesVersionadas(unittest.TestCase):
+class TestVersionedFonts(unittest.TestCase):
     """As fontes vêm do repositório, não do sistema.
 
     O texto é queimado no vídeo: fonte resolvida pelo fontconfig muda com a
@@ -20,17 +20,17 @@ class TestFontesVersionadas(unittest.TestCase):
     """
 
     def test_cada_fonte_e_um_arquivo_do_repositorio(self):
-        raiz = os.path.dirname(os.path.dirname(os.path.abspath(config.__file__)))
-        esperado = os.path.join(raiz, "assets", "fonts")
+        root = os.path.dirname(os.path.dirname(os.path.abspath(config.__file__)))
+        expected = os.path.join(root, "assets", "fonts")
         for name in EXPECTED:
             path = getattr(config, name)
             self.assertTrue(os.path.isfile(path), f"{name}: {path}")
-            self.assertEqual(os.path.dirname(path), esperado, name)
+            self.assertEqual(os.path.dirname(path), expected, name)
 
     def test_cada_fonte_tem_a_identidade_esperada(self):
-        for name, identidade in EXPECTED.items():
+        for name, identity in EXPECTED.items():
             fnt = ImageFont.truetype(getattr(config, name), 40)
-            self.assertEqual(fnt.getname(), identidade, name)
+            self.assertEqual(fnt.getname(), identity, name)
 
     def test_fonte_ausente_aborta_com_mensagem_util(self):
         with self.assertRaises(FileNotFoundError) as ctx:

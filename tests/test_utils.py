@@ -44,7 +44,7 @@ class TestMmss(unittest.TestCase):
         self.assertEqual(utils.mmss(0), "00:00")
 
 
-class TestCorrigeNomes(unittest.TestCase):
+class TestFixProperNouns(unittest.TestCase):
     """A legenda tem que grafar name próprio como o episode.json manda.
 
     A transcrição automática erra name próprio: a mesma company aparece como
@@ -53,9 +53,9 @@ class TestCorrigeNomes(unittest.TestCase):
     """
 
     def test_corrige_variantes_foneticas(self):
-        for errado in ("Zarvic", "Zarvyk", "Zarvyc"):
+        for wrong in ("Zarvic", "Zarvyk", "Zarvyc"):
             self.assertEqual(
-                utils.fix_proper_nouns(f"a gente montou a {errado}, né", ["Zarvik"]),
+                utils.fix_proper_nouns(f"a gente montou a {wrong}, né", ["Zarvik"]),
                 "a gente montou a Zarvik, né")
 
     def test_preserva_grafia_correta(self):
@@ -64,7 +64,7 @@ class TestCorrigeNomes(unittest.TestCase):
 
     def test_nao_altera_palavra_comum_parecida(self):
         """Correção não pode atropelar palavra do idioma."""
-        txt = "zarpa origem foi essa"
+        txt = "zarpa origin foi essa"
         self.assertEqual(utils.fix_proper_nouns(txt, ["Zarvik"]), txt)
 
     def test_sem_nomes_nao_faz_nada(self):

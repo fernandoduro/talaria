@@ -7,16 +7,16 @@ from talaria import publish_instagram
 ENV = {"IG_PAGE_TOKEN": "tok", "IG_BUSINESS_ACCOUNT_ID": "123"}
 
 
-def _response(corpo, status=200):
+def _response(body, status=200):
     r = mock.Mock()
     r.status_code = status
     r.content = b"x"
-    r.json.return_value = corpo
-    r.text = str(corpo)
+    r.json.return_value = body
+    r.text = str(body)
     return r
 
 
-class TestCredenciais(unittest.TestCase):
+class TestCredentials(unittest.TestCase):
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_sem_credencial_diz_qual_variavel(self):
         with self.assertRaises(RuntimeError) as ctx:
@@ -24,7 +24,7 @@ class TestCredenciais(unittest.TestCase):
         self.assertIn("IG_PAGE_TOKEN", str(ctx.exception))
 
 
-class TestHostDoToken(unittest.TestCase):
+class TestHostForToken(unittest.TestCase):
     """A Meta tem dois fluxos, com hosts diferentes e tokens de prefixo
     diferente. Mandar o token de um para o host do outro devolve
     'Cannot parse access token', error que não diz qual é o problema."""
@@ -62,7 +62,7 @@ class TestHostDoToken(unittest.TestCase):
 @mock.patch.dict("os.environ", ENV)
 @mock.patch("talaria.publish_instagram.storage_temp")
 @mock.patch("talaria.publish_instagram.requests")
-class TestPublicaReel(unittest.TestCase):
+class TestPublishReel(unittest.TestCase):
     def test_container_poll_publish_e_limpa(self, req, storage):
         storage.put.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [
@@ -92,24 +92,24 @@ class TestPublicaReel(unittest.TestCase):
         storage.put.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [_response({"id": "cont1"})]
         req.get.return_value = _response({"status_code": "IN_PROGRESS"})
-        relogio = iter([0, 100, 200, 400])  # estoura os 300s no 4º tique
+        clock = iter([0, 100, 200, 400])  # estoura os 300s no 4º tique
         with mock.patch("talaria.publish_instagram.time") as t:
-            t.monotonic.side_effect = relogio
+            t.monotonic.side_effect = clock
             with self.assertRaises(RuntimeError) as ctx:
                 publish_instagram.publish_reel("/tmp/v.mp4", "leg")
         self.assertIn("desisti", str(ctx.exception))
 
     def test_corpo_que_nao_e_json_ainda_vira_erro_legivel(self, req, storage):
-        # Proxy/balanceador na frente do Graph devolve HTML no 502. Deixar o
+        # Proxy/balanceador na ahead do Graph devolve HTML no 502. Deixar o
         # r.json() estourar troca "Graph API: 502" por um JSONDecodeError que
         # não diz o que aconteceu — justo na hora do incidente.
         storage.put.return_value = "https://assinada/v.mp4"
-        ruim = mock.Mock()
-        ruim.status_code = 502
-        ruim.content = b"<html>Bad Gateway</html>"
-        ruim.json.side_effect = ValueError("Expecting value")
-        ruim.text = "<html>Bad Gateway</html>"
-        req.post.side_effect = [ruim]
+        bad = mock.Mock()
+        bad.status_code = 502
+        bad.content = b"<html>Bad Gateway</html>"
+        bad.json.side_effect = ValueError("Expecting value")
+        bad.text = "<html>Bad Gateway</html>"
+        req.post.side_effect = [bad]
         with self.assertRaises(RuntimeError) as ctx:
             publish_instagram.publish_reel("/tmp/v.mp4", "leg")
         self.assertIn("Bad Gateway", str(ctx.exception))
@@ -126,7 +126,7 @@ class TestPublicaReel(unittest.TestCase):
 @mock.patch.dict("os.environ", ENV)
 @mock.patch("talaria.publish_instagram.storage_temp")
 @mock.patch("talaria.publish_instagram.requests")
-class TestPublicaPost(unittest.TestCase):
+class TestPublishPost(unittest.TestCase):
     def test_imagem_unica_sem_carrossel(self, req, storage):
         storage.put.return_value = "https://assinada/p.png"
         req.post.side_effect = [
@@ -162,8 +162,8 @@ class TestPublicaPost(unittest.TestCase):
             r = publish_instagram.publish_post(["/tmp/p.png"], "leg")
         self.assertEqual(r["id"], "media1")
         # O media_publish só sai DEPOIS do container ficar FINISHED.
-        caminhos = [c.args[0] for c in req.post.call_args_list]
-        self.assertTrue(caminhos[1].endswith("media_publish"))
+        paths = [c.args[0] for c in req.post.call_args_list]
+        self.assertTrue(paths[1].endswith("media_publish"))
         self.assertEqual(req.get.call_count, 3)
 
     def test_imagem_com_container_em_erro_nao_publica(self, req, storage):
@@ -179,7 +179,7 @@ class TestPublicaPost(unittest.TestCase):
 
     def test_upload_que_falha_no_meio_limpa_o_que_ja_subiu(self, req, storage):
         # Falha no 3º de 5: os 2 primeiros já estão no bucket e precisam sair.
-        # Uma list comprehension só liga o name no fim, então o `finally`
+        # Uma list comprehension só liga o name no end, então o `finally`
         # veria [] e deixaria os temporários órfãos lá.
         storage.put.side_effect = ["https://a/1.png", "https://a/2.png",
                                     Exception("upload caiu")]
@@ -193,23 +193,23 @@ class TestPublicaPost(unittest.TestCase):
     def test_carrossel_cria_filhos_e_pai(self, req, storage):
         storage.put.side_effect = ["https://a/1.png", "https://a/2.png"]
         req.post.side_effect = [
-            _response({"id": "f1"}), _response({"id": "f2"}),  # filhos
-            _response({"id": "pai"}),                          # carrossel
+            _response({"id": "f1"}), _response({"id": "f2"}),  # children
+            _response({"id": "parent"}),                          # carrossel
             _response({"id": "media2"}),                       # publish
         ]
-        # Um poll por filho e um do pai: montar o pai sobre filho ainda
-        # IN_PROGRESS falha, e aí sem dizer qual dos filhos era.
+        # Um poll por child e um do parent: montar o parent sobre child ainda
+        # IN_PROGRESS falha, e aí sem dizer qual dos children era.
         req.get.side_effect = [
             _response({"status_code": "FINISHED"}),   # f1
             _response({"status_code": "FINISHED"}),   # f2
-            _response({"status_code": "FINISHED"}),   # pai
+            _response({"status_code": "FINISHED"}),   # parent
             _response({"permalink": "https://ig/p/2"}),
         ]
         r = publish_instagram.publish_post(["/tmp/1.png", "/tmp/2.png"], "leg")
         self.assertEqual(r["id"], "media2")
-        pai_params = req.post.call_args_list[2].kwargs["params"]
-        self.assertEqual(pai_params["children"], "f1,f2")
-        self.assertEqual(pai_params["media_type"], "CAROUSEL")
+        parent_params = req.post.call_args_list[2].kwargs["params"]
+        self.assertEqual(parent_params["children"], "f1,f2")
+        self.assertEqual(parent_params["media_type"], "CAROUSEL")
         self.assertEqual(storage.remove.call_count, 2)  # limpa os dois
 
 

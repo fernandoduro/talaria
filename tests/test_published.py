@@ -7,7 +7,7 @@ import unittest
 from talaria import layout, published
 
 
-class TestCarrega(unittest.TestCase):
+class TestLoad(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
 
@@ -25,7 +25,7 @@ class TestCarrega(unittest.TestCase):
         self.assertIn("corrompido", str(ctx.exception))
 
 
-class TestRegistra(unittest.TestCase):
+class TestRecord(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
 
@@ -49,16 +49,16 @@ class TestRegistra(unittest.TestCase):
     def test_escrita_atomica_nao_deixa_tmp(self):
         # temp + os.replace: ou o arquivo novo inteiro, ou o antigo intacto.
         published.record(self.pd, "instagram_posts", "post_x", "c", "u3")
-        pasta = os.path.dirname(layout.published(self.pd))
-        sobras = [n for n in os.listdir(pasta) if n.endswith(".tmp")]
-        self.assertEqual(sobras, [])
+        folder = os.path.dirname(layout.published(self.pd))
+        leftovers = [n for n in os.listdir(folder) if n.endswith(".tmp")]
+        self.assertEqual(leftovers, [])
 
 
-class TestJaPublicado(unittest.TestCase):
+class TestAlreadyPublished(unittest.TestCase):
     def test_encontra_por_plataforma_e_slug(self):
         reg = {"youtube_shorts": [{"slug": "corte1", "id": "a"}]}
         self.assertTrue(published.is_published(reg, "youtube_shorts", "corte1"))
-        # Mesma peça, platform diferente: NÃO conta — a unidade de pendência
+        # Mesma peça, platform diferente: NÃO account — a unidade de pendência
         # é (slug, platform). Corte meio published retenta só o que faltou.
         self.assertFalse(published.is_published(reg, "instagram_reels", "corte1"))
         self.assertFalse(published.is_published(reg, "youtube_shorts", "corte2"))

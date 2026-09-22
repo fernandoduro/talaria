@@ -16,9 +16,9 @@ Primeira fala do host apresentando o episódio de teste.
 0:10
 >> Resposta do convidado que começa aqui e segue por um bom tempo.
 0:20
-Continuação da resposta do convidado com mais detalhes concretos.
+Continuação da response do convidado com mais detalhes concretos.
 0:30
-Ainda o convidado, desenvolvendo o raciocínio até o fim da ideia.
+Ainda o convidado, desenvolvendo o raciocínio até o end da ideia.
 0:40
 E aqui ele fecha o pensamento com uma conclusão clara.
 1:10
@@ -30,7 +30,7 @@ def has_ffmpeg():
     return shutil.which("ffmpeg") is not None
 
 
-class TestFluxoCompleto(unittest.TestCase):
+class TestFullFlow(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
         self.txt = layout.ensure_dir(layout.transcript_txt(self.pd))
@@ -47,23 +47,23 @@ class TestFluxoCompleto(unittest.TestCase):
 
     def test_fluxo_curadoria_ate_momentos(self):
         segs = txt_parse.parse_txt(self.txt, total_duration=80.0)
-        estado = curation.new_state(target=1)
+        state = curation.new_state(target=1)
 
         clip = {"slug": "corte1", "start": segs[0]["start"], "end": segs[-1]["end"],
                  "kind": "story", "screen_text": "Teste de corte"}
-        curation.approve(estado, clip)
-        self.assertTrue(curation.is_closed(estado))
+        curation.approve(state, clip)
+        self.assertTrue(curation.is_closed(state))
 
-        path = curation.save_moments(self.pd, estado)
+        path = curation.save_moments(self.pd, state)
         with open(path, encoding="utf-8") as f:
             moments = json.load(f)
         self.assertEqual(moments[0]["slug"], "corte1")
 
     def test_rejeitado_nao_volta(self):
-        estado = curation.new_state(target=5)
-        curation.reject(estado, {"start": 0.0, "end": 70.0}, "gancho fraco")
-        self.assertTrue(curation.is_burned((5.0, 75.0), estado))
-        self.assertFalse(curation.is_burned((200.0, 270.0), estado))
+        state = curation.new_state(target=5)
+        curation.reject(state, {"start": 0.0, "end": 70.0}, "gancho fraco")
+        self.assertTrue(curation.is_burned((5.0, 75.0), state))
+        self.assertFalse(curation.is_burned((200.0, 270.0), state))
 
     def test_thumb_args_do_episodio(self):
         episode.save(self.pd, {
@@ -117,8 +117,8 @@ class TestFluxoCompleto(unittest.TestCase):
                           f, ensure_ascii=False)
 
             from talaria import post_instagram
-            gerados = post_instagram.generate(proj)
-            self.assertEqual(len(gerados), 1)
+            generated = post_instagram.generate(proj)
+            self.assertEqual(len(generated), 1)
             self.assertTrue(os.path.exists(
                 os.path.join(layout.posts_png(proj), "post_c1.png")))
 
@@ -127,7 +127,7 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class TestMigracaoAutomatica(unittest.TestCase):
+class TestAutomaticMigration(unittest.TestCase):
     """Episódio da estrutura antiga é reorganizado sem o gestor pedir."""
 
     def test_comando_migra_projeto_antigo(self):

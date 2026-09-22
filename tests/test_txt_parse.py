@@ -53,8 +53,8 @@ class TestParseTxt(unittest.TestCase):
         self.assertEqual(segs[-1]["end"], 4000.0)
 
     def test_ultimo_segmento_estimado_por_ritmo_de_fala(self):
-        ultimo = self.segs[-1]
-        self.assertGreater(ultimo["end"] - ultimo["start"], 1.0)
+        last = self.segs[-1]
+        self.assertGreater(last["end"] - last["start"], 1.0)
 
     def test_remove_marcacao_de_som_e_entidades(self):
         todo = " ".join(s["text"] for s in self.segs)
@@ -78,7 +78,7 @@ class TestRegroupIntoSentences(unittest.TestCase):
     def test_troca_de_turno_quebra_segmento(self):
         blocks = [
             _block(0.0, 5.0, "fala sem pontuacao final"),
-            _block(5.0, 10.0, "resposta do outro", turn=True),
+            _block(5.0, 10.0, "response do outro", turn=True),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertEqual(len(segs), 2)
@@ -94,7 +94,7 @@ class TestRegroupIntoSentences(unittest.TestCase):
         self.assertEqual(txt_parse.regroup_into_sentences([]), [])
 
 
-class TestResolucaoDeFalante(unittest.TestCase):
+class TestSpeakerResolution(unittest.TestCase):
     """O falante é resolvido globalmente, sobre o episódio inteiro.
 
     O marcador '>>' diz QUE trocou de interlocutor, não QUEM passou a falar.
@@ -114,24 +114,24 @@ class TestResolucaoDeFalante(unittest.TestCase):
         self.assertEqual(self.segs[0]["speaker"], "host")
 
     def test_speaker_alterna_em_cada_turno(self):
-        anterior = None
+        previous = None
         for s in self.segs:
-            if anterior is not None and s["turn"]:
-                self.assertNotEqual(s["speaker"], anterior["speaker"], msg=str(s))
-            anterior = s
+            if previous is not None and s["turn"]:
+                self.assertNotEqual(s["speaker"], previous["speaker"], msg=str(s))
+            previous = s
 
     def test_segmentos_entre_turnos_herdam_o_mesmo_speaker(self):
-        anterior = None
+        previous = None
         for s in self.segs:
-            if anterior is not None and not s["turn"]:
-                self.assertEqual(s["speaker"], anterior["speaker"], msg=str(s))
-            anterior = s
+            if previous is not None and not s["turn"]:
+                self.assertEqual(s["speaker"], previous["speaker"], msg=str(s))
+            previous = s
 
     def test_alternancia_explicita(self):
         blocks = [
             _block(0.0, 5.0, "Abertura do host."),
             _block(5.0, 10.0, "Resposta do convidado.", turn=True),
-            _block(10.0, 15.0, "Continua a resposta."),
+            _block(10.0, 15.0, "Continua a response."),
             _block(15.0, 20.0, "Pergunta do host?", turn=True),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
@@ -154,7 +154,7 @@ class TestResolucaoDeFalante(unittest.TestCase):
     def test_backchannel_do_host_desloca_atribuicao(self):
         """RISCO CONHECIDO, não corrigido — documenta o comportamento atual.
 
-        Um "Sei."/"Certo." do host marcado com '>>' conta como troca real e
+        Um "Sei."/"Certo." do host marcado com '>>' account como troca real e
         desloca tudo o que vem depois. Aqui o segundo trecho do convidado sai
         rotulado como host. Nenhuma heurística conservadora foi aplicada: na
         transcrição real o backchannel ('>> Maravilha.') aparece com 29s de
@@ -164,14 +164,14 @@ class TestResolucaoDeFalante(unittest.TestCase):
         """
         blocks = [
             _block(0.0, 5.0, "Pergunta do host?"),
-            _block(5.0, 10.0, "Comeco da resposta.", turn=True),
+            _block(5.0, 10.0, "Comeco da response.", turn=True),
             _block(10.0, 12.0, "Sei.", turn=True),          # backchannel do host
             _block(12.0, 20.0, "Continuo respondendo."),    # ainda o convidado
             _block(20.0, 30.0, "E foi assim que crescemos."),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
         # O ideal seria [host, convidado, host, convidado, convidado]. Com um
-        # número ímpar de trocas espúrias, a resposta do convidado sai rotulada
+        # número ímpar de trocas espúrias, a response do convidado sai rotulada
         # como host daí em diante e subestima a fração no clip.
         self.assertEqual([s["speaker"] for s in segs],
                          ["host", "guest", "host", "host", "host"])

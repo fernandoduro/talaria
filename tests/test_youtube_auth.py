@@ -11,24 +11,24 @@ youtube_auth = importlib.util.module_from_spec(_SPEC)
 _SPEC.loader.exec_module(youtube_auth)
 
 
-def _write(d, conteudo):
+def _write(d, content):
     path = os.path.join(d, "cs.json")
     with open(path, "w", encoding="utf-8") as f:
-        f.write(conteudo)
+        f.write(content)
     return path
 
 
-class TestValidaClientSecret(unittest.TestCase):
+class TestValidateClientSecret(unittest.TestCase):
     """O publish lê client_secret["installed"]: um client Web passa pelo
     consentimento e só quebra no primeiro upload. Falhar aqui é o ponto."""
 
     def test_aceita_client_desktop(self):
         with tempfile.TemporaryDirectory() as d:
-            dados = {"installed": {"client_id": "x", "client_secret": "y",
+            data = {"installed": {"client_id": "x", "client_secret": "y",
                                    "token_uri": "https://oauth2.example/token"}}
-            path = _write(d, json.dumps(dados))
+            path = _write(d, json.dumps(data))
             self.assertEqual(youtube_auth.validate_client_secret(path),
-                             dados["installed"])
+                             data["installed"])
 
     def test_recusa_client_web_dizendo_o_que_fazer(self):
         with tempfile.TemporaryDirectory() as d:

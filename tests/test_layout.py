@@ -1,4 +1,4 @@
-"""Testes do layout de arquivos do project."""
+"""Testes do layout de files do project."""
 import os
 import tempfile
 import unittest
@@ -6,7 +6,7 @@ import unittest
 from talaria import layout
 
 
-class TestCaminhos(unittest.TestCase):
+class TestPaths(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
@@ -35,19 +35,19 @@ class TestCaminhos(unittest.TestCase):
         self.assertTrue(layout.posts_png(self.d).endswith("publish/instagram_posts"))
 
     def test_garante_cria_a_pasta_do_arquivo(self):
-        alvo = layout.ensure_dir(layout.moments(self.d))
-        self.assertTrue(os.path.isdir(os.path.dirname(alvo)))
+        target = layout.ensure_dir(layout.moments(self.d))
+        self.assertTrue(os.path.isdir(os.path.dirname(target)))
 
 
-class TestMigracao(unittest.TestCase):
-    ANTIGOS = ["source.mp4", "transcript.json", "transcript.txt",
+class TestMigration(unittest.TestCase):
+    OLD_NAMES = ["source.mp4", "transcript.json", "transcript.txt",
                "curation.json", "moments.json", "texts.json", "posts.json",
                "brief_materials.md", "brief_clips.md", "brief_posts.md",
                "thumbnail.jpg", "_thumb_frame.jpg", "episode.json"]
 
-    def _projeto_antigo(self):
+    def _old_project(self):
         d = tempfile.mkdtemp()
-        for name in self.ANTIGOS:
+        for name in self.OLD_NAMES:
             with open(os.path.join(d, name), "w", encoding="utf-8") as f:
                 f.write(name)
         for sub in ("youtube_shorts", "instagram_reels", "instagram_posts"):
@@ -57,9 +57,9 @@ class TestMigracao(unittest.TestCase):
         return d
 
     def test_move_tudo_para_o_lugar_certo(self):
-        d = self._projeto_antigo()
-        movidos = layout.migrate(d)
-        self.assertGreater(len(movidos), 0)
+        d = self._old_project()
+        moved = layout.migrate(d)
+        self.assertGreater(len(moved), 0)
         self.assertTrue(os.path.exists(layout.video(d)))
         self.assertTrue(os.path.exists(layout.transcript(d)))
         self.assertTrue(os.path.exists(layout.moments(d)))
@@ -69,31 +69,31 @@ class TestMigracao(unittest.TestCase):
             os.path.join(layout.platform(d, "youtube_shorts"), "x.mp4")))
 
     def test_conteudo_preservado(self):
-        d = self._projeto_antigo()
+        d = self._old_project()
         layout.migrate(d)
         with open(layout.moments(d), encoding="utf-8") as f:
             self.assertEqual(f.read(), "moments.json")
 
     def test_episodio_json_fica_na_raiz(self):
-        d = self._projeto_antigo()
+        d = self._old_project()
         layout.migrate(d)
         self.assertTrue(os.path.exists(layout.episode(d)))
         self.assertEqual(os.path.dirname(layout.episode(d)), d)
 
     def test_lixo_temporario_e_removido(self):
-        d = self._projeto_antigo()
+        d = self._old_project()
         layout.migrate(d)
         self.assertFalse(os.path.exists(os.path.join(d, "_thumb_frame.jpg")))
 
     def test_raiz_fica_so_com_episodio_e_as_pastas(self):
-        d = self._projeto_antigo()
+        d = self._old_project()
         layout.migrate(d)
-        na_raiz = {n for n in os.listdir(d) if not n.startswith(".")}
-        self.assertEqual(na_raiz, {"episode.json", "source", "decisions",
+        at_root = {n for n in os.listdir(d) if not n.startswith(".")}
+        self.assertEqual(at_root, {"episode.json", "source", "decisions",
                                    "briefs", "publish"})
 
     def test_e_idempotente(self):
-        d = self._projeto_antigo()
+        d = self._old_project()
         layout.migrate(d)
         self.assertEqual(layout.migrate(d), [])   # 2ª vez não move nada
         self.assertTrue(os.path.exists(layout.moments(d)))
@@ -104,7 +104,7 @@ class TestMigracao(unittest.TestCase):
 
     def test_nao_sobrescreve_arquivo_ja_migrado(self):
         """Se os dois existem, o da posição NOVA vence — é o mais recente."""
-        d = self._projeto_antigo()
+        d = self._old_project()
         layout.migrate(d)
         with open(layout.moments(d), "w", encoding="utf-8") as f:
             f.write("NOVO")
@@ -118,7 +118,7 @@ class TestMigracao(unittest.TestCase):
             self.assertEqual(f.read(), "ANTIGO")
 
 
-class TestMigracaoDefensiva(unittest.TestCase):
+class TestDefensiveMigration(unittest.TestCase):
     """Cenários em que a migração poderia perder ou esconder trabalho."""
 
     def test_duplicata_nao_e_apagada_em_silencio(self):
@@ -135,7 +135,7 @@ class TestMigracaoDefensiva(unittest.TestCase):
         with open(os.path.join(d, "moments.json"), "w", encoding="utf-8") as f:
             f.write("ANTIGO")
 
-        movidos = layout.migrate(d)
+        moved = layout.migrate(d)
 
         with open(layout.moments(d), encoding="utf-8") as f:
             self.assertEqual(f.read(), "NOVO")          # o novo continua valendo
@@ -144,8 +144,8 @@ class TestMigracaoDefensiva(unittest.TestCase):
         self.assertTrue(os.path.exists(bak))            # o antigo não sumiu
         with open(bak, encoding="utf-8") as f:
             self.assertEqual(f.read(), "ANTIGO")
-        self.assertTrue(any("bak" in destino for _, destino in movidos),
-                        f"o relatório precisa mencionar o .bak: {movidos}")
+        self.assertTrue(any("bak" in destination for _, destination in moved),
+                        f"o relatório precisa mencionar o .bak: {moved}")
 
     def test_nome_de_pasta_ocupado_por_arquivo_da_erro_util(self):
         """Um arquivo chamado 'decisions' impede a pasta — o error tem que dizer isso."""
@@ -167,7 +167,7 @@ class TestMigracaoDefensiva(unittest.TestCase):
     def test_avisa_quando_a_duplicata_descartada_e_maior(self):
         """Arquivo pela metade na posição nova não pode passar despercebido.
 
-        O tamanho não decide qual vale (um JSON menor é normal), mas um vídeo
+        O tamanho não decide qual vale (um JSON smaller é normal), mas um vídeo
         de 15 bytes virando o ativo enquanto o de 2GB vira .bak precisa saltar
         aos olhos no relatório.
         """
@@ -178,10 +178,10 @@ class TestMigracaoDefensiva(unittest.TestCase):
         with open(os.path.join(d, "source.mp4"), "w") as f:
             f.write("V" * 30000)                  # vídeo real na antiga
 
-        movidos = layout.migrate(d)
+        moved = layout.migrate(d)
 
-        self.assertTrue(any("MAIOR" in destino for _, destino in movidos),
-                        f"o relatório precisa avisar: {movidos}")
+        self.assertTrue(any("MAIOR" in destination for _, destination in moved),
+                        f"o relatório precisa avisar: {moved}")
 
     def test_pasta_de_saida_duplicada_e_reportada(self):
         """Pasta antiga com conteúdo que a nova não tem não pode ficar órfã.
@@ -198,16 +198,16 @@ class TestMigracaoDefensiva(unittest.TestCase):
             with open(os.path.join(d, "youtube_shorts", n), "w") as f:
                 f.write("antigo " + n)
 
-        movidos = layout.migrate(d)
+        moved = layout.migrate(d)
 
         # o que só existia na antiga foi trazido
-        destino = os.path.join(d, layout.PUBLISH, "youtube_shorts")
-        self.assertTrue(os.path.exists(os.path.join(destino, "c2.mp4")))
+        destination = os.path.join(d, layout.PUBLISH, "youtube_shorts")
+        self.assertTrue(os.path.exists(os.path.join(destination, "c2.mp4")))
         # o que já existia na nova não foi sobrescrito
-        with open(os.path.join(destino, "c1.mp4"), encoding="utf-8") as f:
+        with open(os.path.join(destination, "c1.mp4"), encoding="utf-8") as f:
             self.assertEqual(f.read(), "novo")
         # e o relatório não fica em silêncio
-        self.assertTrue(movidos, "mover conteúdo órfão precisa aparecer no relatório")
+        self.assertTrue(moved, "mover conteúdo órfão precisa aparecer no relatório")
         self.assertFalse(os.path.isdir(os.path.join(d, "youtube_shorts")))
 
     def test_interrupcao_e_recuperavel(self):
@@ -221,15 +221,15 @@ class TestMigracaoDefensiva(unittest.TestCase):
                 f.write(n)
 
         original = _sh.move
-        estado = {"n": 0}
+        state = {"n": 0}
 
-        def move_que_morre(a, b):
-            estado["n"] += 1
-            if estado["n"] == 3:
+        def move_that_dies(a, b):
+            state["n"] += 1
+            if state["n"] == 3:
                 raise KeyboardInterrupt("simula ctrl-c no meio")
             return original(a, b)
 
-        _sh.move = move_que_morre
+        _sh.move = move_that_dies
         try:
             with self.assertRaises(KeyboardInterrupt):
                 layout.migrate(d)
@@ -238,10 +238,10 @@ class TestMigracaoDefensiva(unittest.TestCase):
 
         layout.migrate(d)                      # 2ª execução completa
 
-        sobreviventes = []
-        for raiz, _, arquivos in os.walk(d):
-            sobreviventes += arquivos
-        self.assertEqual(len(sobreviventes), len(names))
+        survivors = []
+        for root, _, files in os.walk(d):
+            survivors += files
+        self.assertEqual(len(survivors), len(names))
         self.assertTrue(os.path.exists(layout.moments(d)))
         self.assertTrue(os.path.exists(layout.video(d)))
 
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     unittest.main()
 
 
-class TestCaptionDoEpisodio(unittest.TestCase):
+class TestEpisodeCaption(unittest.TestCase):
     def test_fica_na_raiz_de_publicar(self):
         # Ao lado da thumbnail: são os dois artefatos do episódio inteiro,
         # não de uma peça específica.
@@ -259,7 +259,7 @@ class TestCaptionDoEpisodio(unittest.TestCase):
                          os.path.join(d, "publish", "episode.txt"))
 
 
-class TestCaminhosPublicacao(unittest.TestCase):
+class TestPublishPaths(unittest.TestCase):
     def test_calendario_em_decisoes(self):
         self.assertEqual(layout.schedule("/p/ep8"),
                          os.path.join("/p/ep8", "decisions", "schedule.json"))
