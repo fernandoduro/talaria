@@ -1,4 +1,4 @@
-"""Testes dos utilitários compartilhados."""
+"""Tests for the shared helpers."""
 import unittest
 
 from talaria import utils
@@ -37,7 +37,7 @@ class TestStripMarkup(unittest.TestCase):
 
 
 class TestMmss(unittest.TestCase):
-    def test_formato(self):
+    def test_format(self):
         self.assertEqual(utils.mmss(1745), "29:05")
 
     def test_zero(self):
@@ -58,7 +58,7 @@ class TestFixProperNouns(unittest.TestCase):
                 utils.fix_proper_nouns(f"we built {variant} in a garage", ["Kestril"]),
                 "we built Kestril in a garage", msg=variant)
 
-    def test_preserva_grafia_correta(self):
+    def test_correct_spelling_is_preserved(self):
         self.assertEqual(utils.fix_proper_nouns("a Zarvik hoje", ["Zarvik"]),
                          "a Zarvik hoje")
 
@@ -71,7 +71,7 @@ class TestFixProperNouns(unittest.TestCase):
         txt = "the kestrel circled the field"
         self.assertEqual(utils.fix_proper_nouns(txt, ["Kestril"]), txt)
 
-    def test_sem_nomes_nao_faz_nada(self):
+    def test_no_names_does_nothing(self):
         self.assertEqual(utils.fix_proper_nouns("texto qualquer", []), "texto qualquer")
 
     def test_word_boundary_is_respected(self):
@@ -96,8 +96,8 @@ class TestFixProperNouns(unittest.TestCase):
         self.assertEqual(utils.fix_proper_nouns("at kestril today", ["Kestril"]),
                          "at Kestril today")
 
-    def test_ainda_corrige_nome_inventado(self):
-        """O caso que motivou a função continua funcionando."""
+    def test_still_corrects_an_invented_name(self):
+        """The case that motivated the function still works."""
         self.assertEqual(utils.fix_proper_nouns("montar a Zarvic", ["Zarvik"]),
                          "montar a Zarvik")
 

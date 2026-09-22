@@ -1,18 +1,18 @@
-"""Onde cada arquivo do project mora. Autoridade única sobre os paths.
+"""Where every project file lives. The single authority over paths.
 
-Antes disto cada módulo montava o seu com string literal
-(`os.path.join(project_dir, "moments.json")` aparecia em 5 files), e o
-resultado era uma dúzia de files soltos na raiz do episódio, de naturezas
-diferentes misturadas.
+Before this each module built its own with a literal string
+(`os.path.join(project_dir, "moments.json")` appeared in 5 files), and the
+result was a dozen loose files in the episode root, of different natures
+mixed together.
 
-A pasta é organizada por NATUREZA:
+The folder is organised by NATURE:
 
-    <slug>/episode.json     o gestor preenche à mão — fica na raiz de
-                             propósito, para não esconder a única tarefa manual
-    <slug>/fonte/            entrada: vídeo e transcrição
-    <slug>/decisions/         o que o gestor e o modelo decidiram
-    <slug>/briefs/           pacotes de leitura, regeneráveis
-    <slug>/publish/         o que vai ao ar
+    <slug>/episode.json      the manager fills it in by hand — it sits in the
+                             root on purpose, so the one manual task is visible
+    <slug>/source/           input: video and transcript
+    <slug>/decisions/        what the manager and the model decided
+    <slug>/briefs/           reading packets, regenerable
+    <slug>/publish/          what goes live
 """
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ PUBLISH = "publish"
 
 
 def ensure_dir(path: str) -> str:
-    """Cria a pasta do arquivo, se preciso. Devolve o próprio path."""
+    """Creates the file's folder if needed. Returns the path itself."""
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     return path
 
@@ -67,12 +67,12 @@ def posts(pd: str) -> str:
 
 
 def schedule(pd: str) -> str:
-    """Agenda de publicação: que peça sai em que day. Decisão editorial."""
+    """Publishing schedule: which piece goes out on which day. Editorial."""
     return os.path.join(pd, DECISIONS, "schedule.json")
 
 
 def published(pd: str) -> str:
-    """Registro do que já foi ao ar — a trava contra post duplicado."""
+    """Record of what already went live — the lock against a duplicate post."""
     return os.path.join(pd, DECISIONS, "published.json")
 
 
@@ -86,25 +86,25 @@ def thumbnail(pd: str) -> str:
 
 
 def end_card_mp4(pd: str) -> str:
-    """Card de end_card cacheado — igual em todo clip do episódio.
+    """Cached end card — identical across every clip of the episode.
 
-    Fica na raiz de `publish/`, como a thumbnail: artefato do episódio, não
-    de uma peça, e nunca é commitado (`projects/` inteiro é git-ignored).
+    Sits in the root of `publish/`, like the thumbnail: an episode artefact,
+    not a per-piece one, and never committed (all of `projects/` is git-ignored).
     """
     return os.path.join(pd, PUBLISH, "_end_card.mp4")
 
 
 def episode_txt(pd: str) -> str:
-    """Título e descrição do episódio, prontos para colar no YouTube.
+    """Episode title and description, ready to paste into YouTube.
 
-    Fica na raiz de `publish/`, ao lado da thumbnail: os dois são do episódio
-    inteiro, não de uma peça — por isso não entram nas pastas de platform.
+    Sits in the root of `publish/`, next to the thumbnail: both belong to the
+    whole episode, not to one piece — hence not inside a platform folder.
     """
     return os.path.join(pd, PUBLISH, "episode.txt")
 
 
 def platform(pd: str, name: str) -> str:
-    """Pasta de saída de uma platform de vídeo (youtube_shorts, ...)."""
+    """Output folder for a video platform (youtube_shorts, ...)."""
     return os.path.join(pd, PUBLISH, name)
 
 
@@ -112,12 +112,12 @@ def posts_png(pd: str) -> str:
     return os.path.join(pd, PUBLISH, "instagram_posts")
 
 
-# Posição antiga -> nova. O prefixo do name antigo era necessário quando tudo
-# ficava na mesma pasta; dentro da subpasta ele vira redundância.
+# Old position -> new. The prefix in the old name was needed while everything
+# sat in the same folder; inside the subfolder it becomes redundant.
 #
-# Esta tabela descreve um layout pré-Phase-1 (nomes em Portuguese); nenhum
-# `projects/` real está nesse state, então ela não é testada contra data
-# de verdade — só contra fixtures que a recriam.
+# This table describes a pre-Phase-1 layout (Portuguese names); no real
+# `projects/` is in that state, so it is not exercised against real data —
+# only against fixtures that recreate it.
 _MIGRATION = [
     ("source.mp4", video),
     ("transcript.json", transcript),
@@ -132,26 +132,26 @@ _MIGRATION = [
     ("thumbnail.jpg", thumbnail),
 ]
 
-# Pastas de saída que só mudam de lugar, sem renomear o conteúdo.
-# Nome da pasta de cada platform. Nomeadas porque não são só diretório: o
-# `render` distingue por elas qual caption recebe a chamada do episódio (a
-# do YouTube), já que o mp4 das duas é idêntico e só o diretório difere.
+# Output folders that only move, without the contents being renamed.
+# Folder name for each platform. Named because they are more than directories:
+# `render` uses them to tell which caption gets the episode call-to-action (the
+# YouTube one), since both mp4s are identical and only the directory differs.
 YOUTUBE_SHORTS = "youtube_shorts"
 INSTAGRAM_REELS = "instagram_reels"
 INSTAGRAM_POSTS = "instagram_posts"
 
 _PUBLISH_DIRS = (YOUTUBE_SHORTS, INSTAGRAM_REELS, INSTAGRAM_POSTS)
 
-# Temporários que vazaram para a raiz em versões anteriores.
+# Temporary files that leaked into the root in earlier versions.
 _JUNK = ("_thumb_frame.jpg",)
 
 
 def _check_dirs(pd: str) -> None:
-    """Recusa migrate se um name de pasta estiver ocupado por um arquivo.
+    """Refuses to migrate if a folder name is taken by a file.
 
-    Sem isto o `shutil.move` explode no meio com um FileExistsError cru, que
-    não diz ao gestor o que ele precisa resolver — e deixa o project meio
-    migrado.
+    Without this `shutil.move` blows up halfway with a raw FileExistsError,
+    which does not tell the manager what he has to sort out — and leaves the
+    project half migrated.
     """
     for name in (SOURCE, DECISIONS, BRIEFS, PUBLISH):
         path = os.path.join(pd, name)
@@ -163,19 +163,19 @@ def _check_dirs(pd: str) -> None:
 
 
 def migrate(pd: str) -> list:
-    """Move um project da estrutura antiga (tudo solto) para a nova.
+    """Moves a project from the old (everything loose) structure to the new one.
 
-    Idempotente: roda no início de todo comando e não faz nada quando o project
-    já está organizado. Devolve a lista de (origin, destination) do que moveu.
+    Idempotent: runs at the start of every command and does nothing when the
+    project is already organised. Returns the list of (origin, destination) moved.
 
-    Quando o arquivo existe nas DUAS posições, a nova vence — é o que os
-    comandos vêm escrevendo desde a migração. A antiga NÃO é apagada: vira
-    `.bak` e entra no relatório. O gestor pode ter copiado um backup para a
-    raiz de propósito, e apagar o trabalho dele em silêncio seria pior que
-    deixar um arquivo sobrando.
+    When the file exists in BOTH positions, the new one wins — it is what the
+    commands have been writing since the migration. The old one is NOT deleted:
+    it becomes `.bak` and enters the report. The manager may have copied a
+    backup into the root on purpose, and silently deleting his work would be
+    worse than leaving a spare file behind.
 
-    Move item a item, sem state intermediário: interrupção no meio deixa o
-    project parcialmente migrado, e rodar de novo termina o serviço.
+    Moves item by item, with no intermediate state: an interruption partway
+    leaves the project partially migrated, and running again finishes the job.
     """
     import shutil
 
@@ -196,10 +196,10 @@ def migrate(pd: str) -> list:
                 os.remove(bak)
             os.rename(origin, bak)
             note = "(duplicata)"
-            # Sinaliza quando o descartado é maior que o ativo: pode ser um
-            # arquivo pela metade na posição nova (escrita interrompida) que
-            # passaria a valer sem ninguém notar. O tamanho não decide nada —
-            # JSON smaller é normal —, mas o gestor precisa ver para conferir.
+            # Flag when the discarded file is bigger than the active one: the
+            # new position may hold a half-written file (interrupted write) that
+            # would silently take over. Size decides nothing — a smaller JSON is
+            # normal — but the manager needs to see it to check.
             try:
                 if os.path.getsize(bak) > os.path.getsize(destination):
                     note = "(duplicata — o .bak é MAIOR, confira qual vale)"
@@ -223,15 +223,15 @@ def migrate(pd: str) -> list:
             moved.append((name + "/", os.path.relpath(destination, pd) + "/"))
             continue
 
-        # As duas existem: traz o que só está na antiga e some com ela. Pular
-        # deixaria clip já renderizado fora da estrutura documentada, sem
-        # aviso — e ele sumiria na próxima limpeza da pasta do episódio.
+        # Both exist: bring over what is only in the old one and remove it.
+        # Skipping would leave an already-rendered clip outside the documented
+        # structure, unannounced — and it would vanish at the next cleanup.
         for file in sorted(os.listdir(origin)):
             target = os.path.join(destination, file)
             current = os.path.join(origin, file)
             if os.path.exists(target):
-                # O da posição nova vale; o antigo vira .bak ao lado dele, pela
-                # mesma razão dos files soltos: não destruir em silêncio.
+                # The new position wins; the old becomes .bak beside it, for the
+                # same reason as the loose files: never destroy silently.
                 bak = target + ".bak"
                 if os.path.exists(bak):
                     os.remove(bak)

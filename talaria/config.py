@@ -1,18 +1,18 @@
-"""Configuração central do pipeline.
+"""Central pipeline configuration.
 
-Todas as constantes de render/thumbnail/transcrição ficam aqui — nada de path
-absoluto ou texto específico de episódio espalhado pelo código.
+Every render/thumbnail/transcription constant lives here — no absolute paths
+and no episode-specific text scattered through the code.
 """
 import os
 import shutil
 
 # ---------------------------------------------------------------------------
-# Fontes — versionadas em assets/fonts/.
+# Fonts — versioned under assets/fonts/.
 #
-# O texto é queimado no vídeo e rasterizado nos PNG, então a fonte decide o
-# resultado published. O fc-match substitui em silêncio: pede-se Poppins e vem
-# Noto Sans, e o layout sai errado sem nenhum error. Arquivo no repositório =
-# mesmo render em qualquer máquina, e falta de arquivo aborta na importação.
+# Text is burned into the video and rasterised into the PNGs, so the font
+# decides the published result. fc-match substitutes silently: ask for Poppins
+# and get Noto Sans, and the layout comes out wrong with no error. A file in the
+# repository = same render on any machine, and a missing file aborts at import.
 # ---------------------------------------------------------------------------
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _FONTS_DIR = os.path.join(_ROOT, "assets", "fonts")
@@ -31,16 +31,16 @@ def _bundled_font(name: str) -> str:
 FONT = _bundled_font("DejaVuSans-Bold.ttf")
 
 # ---------------------------------------------------------------------------
-# Backend de legenda — detectado em runtime.
+# Caption backend — detected at runtime.
 #
-# 'drawtext' é o path padrão, mas exige ffmpeg compilado com
-# libfreetype. Builds mínimas (ex.: Homebrew no macOS) não têm o filtro; nesse
-# caso caímos para 'overlay': legendas rasterizadas em PNG com Pillow e
-# sobrepostas com overlay+enable. Mesmo resultado visual, sem depender de libs
-# externas do ffmpeg.
+# 'drawtext' is the default path, but it needs ffmpeg built with
+# libfreetype. Minimal builds (e.g. Homebrew on macOS) lack the filter; in that
+# case we fall back to 'overlay': captions rasterised to PNG with Pillow and
+# composited with overlay+enable. Same visual result, with no dependency on
+# ffmpeg's external libs.
 # ---------------------------------------------------------------------------
 def has_drawtext() -> bool:
-    """True se o ffmpeg deste environment tem o filtro drawtext."""
+    """True if this environment's ffmpeg has the drawtext filter."""
     ff = shutil.which("ffmpeg")
     if not ff:
         return False
@@ -53,35 +53,35 @@ def has_drawtext() -> bool:
     return any(line.split()[1:2] == ["drawtext"] for line in out.splitlines() if line.strip())
 
 
-# 'drawtext' | 'overlay' — sobrescreva com TALARIA_CAPTION_BACKEND para forçar.
+# 'drawtext' | 'overlay' — override with TALARIA_CAPTION_BACKEND to force one.
 CAPTION_BACKEND = os.environ.get(
     "TALARIA_CAPTION_BACKEND",
     "drawtext" if has_drawtext() else "overlay",
 )
 
 # ---------------------------------------------------------------------------
-# Vídeo vertical (Shorts / Reels)
+# Vertical video (Shorts / Reels)
 # ---------------------------------------------------------------------------
 FRAME_W = 1080
 FRAME_H = 1920
 
-# Legenda (drawtext) — libass não desenha de forma confiável neste environment.
+# Caption (drawtext) — libass does not draw reliably in this environment.
 FONTSIZE = 40
-SAFE_W = 980            # largura máx. da linha em px (deixa ~50px de margem/lado)
-LINE_H = 58             # espaçamento vertical entre lines
-# y da base da ÚLTIMA linha. As lines empilham para cima, então este valor
-# precisa deixar espaço abaixo da span de vídeo para a legenda mais alta:
-# com fonte 1280x720 escalada para FG_SCALE_W, a span termina em y=1340 e
-# sobram 580px de blur. Em 1360 uma legenda de 5 lines subia até y=1128 e
-# invadia o vídeo; em 1560 ela começa em 1328 e fica inteira no blur.
+SAFE_W = 980            # max line width in px (leaves ~50px of margin per side)
+LINE_H = 58             # vertical spacing between lines
+# y of the LAST line's baseline. Lines stack upwards, so this value has to
+# leave room below the video band for the tallest caption: with a 1280x720
+# source scaled to FG_SCALE_W the band ends at y=1340 and 580px of blur remain.
+# At 1360 a 5-line caption climbed to y=1128 and invaded the video; at 1560 it
+# starts at 1328 and stays entirely inside the blur.
 BASE_Y = 1560
-CAP_BORDER = 4          # contorno do texto
-CAP_BOX_ALPHA = 0.55    # opacidade da caixa atrás do texto
-CAP_BOX_BORDER = 12     # padding da caixa
+CAP_BORDER = 4          # text outline
+CAP_BOX_ALPHA = 0.55    # opacity of the box behind the text
+CAP_BOX_BORDER = 12     # box padding
 
-# Enquadramento 9:16 com fundo blur
-BG_BLUR_SIGMA = 28      # desfoque do fundo
-FG_SCALE_W = 1350       # largura do vídeo em 1º plano (pessoas com boa presença)
+# 9:16 framing over a blurred background
+BG_BLUR_SIGMA = 28      # background blur
+FG_SCALE_W = 1350       # foreground video width (people with good presence)
 
 # Encode
 VCODEC = "libx264"
@@ -92,23 +92,23 @@ ACODEC = "aac"
 ABITRATE = "160k"
 
 # ---------------------------------------------------------------------------
-# Transcrição
+# Transcription
 # ---------------------------------------------------------------------------
-WHISPER_MODEL = "small"   # seguro p/ GPUs de 4GB; 'medium' estourou uma GTX 1650
+WHISPER_MODEL = "small"   # safe for 4GB GPUs; 'medium' blew up a GTX 1650
 WHISPER_LANG = "pt"
 
-# Agrupamento de words -> frases (parser VTT e Whisper)
-SEG_MAX_GAP = 0.7         # pausa (s) que quebra a frase
-SEG_MAX_DUR = 5.0         # duração máx. (s) de um segmento
-SEG_MAX_CHARS = 75        # nº máx. de caracteres antes de quebrar
-SEG_END_PAD = 0.4         # padding no end de cada segmento (s)
+# Grouping words -> sentences (VTT and Whisper parsers)
+SEG_MAX_GAP = 0.7         # pause (s) that breaks the sentence
+SEG_MAX_DUR = 5.0         # max duration (s) of a segment
+SEG_MAX_CHARS = 75        # max characters before breaking
+SEG_END_PAD = 0.4         # padding at the end of each segment (s)
 
 # ---------------------------------------------------------------------------
-# Curadoria
+# Curation
 # ---------------------------------------------------------------------------
-CLIP_MIN_S = 60         # duração mínima de um clip
-CLIP_MAX_S = 90         # duração máxima
-GUEST_SPEECH_MIN = 0.5 # fração mínima de fala do convidado no clip
+CLIP_MIN_S = 60         # minimum clip duration
+CLIP_MAX_S = 90         # maximum duration
+GUEST_SPEECH_MIN = 0.5 # minimum fraction of guest speech in the clip
 
 # ---------------------------------------------------------------------------
 # Thumbnail (YouTube)
@@ -121,16 +121,17 @@ THUMB_BRIGHTNESS = 0.82
 THUMB_CONTRAST = 1.08
 
 # ---------------------------------------------------------------------------
-# Post de citação para Instagram (4:5)
+# Instagram quote post (4:5)
 #
-# As medidas saem do próprio template (assets/template_instagram.png), medido
-# pixel a pixel. O placeholder traz gradiente, filete e barra; logo e aspas
-# são do canal. O código write citação, name e role por cima.
+# The measurements come from the template itself
+# (assets/template_instagram.png), measured pixel by pixel. The placeholder
+# carries gradient, rule and bar; logo and quote marks are the channel's. The
+# code writes quote, name and role on top.
 # ---------------------------------------------------------------------------
 POST_TEMPLATE = os.path.join(_ROOT, "assets", "template_instagram.png")
 
 # ---------------------------------------------------------------------------
-# Marca d'água e card de end_card
+# Watermark and end card
 # ---------------------------------------------------------------------------
 LOGO_PATH = os.path.join(_ROOT, "assets", "logo.png")
 WATERMARK_W = 170
@@ -139,34 +140,34 @@ CARD_DURATION_S = 3.5
 CARD_FADE_S = 0.35
 CARD_LOGO_W = 620
 CARD_HANDLE = "@seuperfil"
-CARD_HANDLE_COLOR = (255, 140, 66)   # laranja
+CARD_HANDLE_COLOR = (255, 140, 66)   # orange
 CARD_BG = (10, 10, 10)
 
 POST_W = 2160
 POST_H = 2700
 
-POST_MARGIN_X = 195       # margem esquerda de todo o texto
-POST_TEXT_W = 1800  # largura máx. da linha da citação
+POST_MARGIN_X = 195       # left margin for all text
+POST_TEXT_W = 1800  # max width of a quote line
 
-# Citação. As lines empilham para BAIXO a partir de POST_QUOTE_Y, herdado do
-# layout original: o placeholder não desenha nada nessa altura para conferir.
+# Quote. Lines stack DOWNWARDS from POST_QUOTE_Y, inherited from the original
+# layout: the placeholder draws nothing at that height to check against.
 POST_QUOTE_Y = 1144
-POST_QUOTE_STEP = 190      # distância entre inícios de linha consecutivos
-POST_QUOTE_LINE_H = 160     # altura de uma linha de texto
-POST_QUOTE_MAX_LINES = 5   # a 6ª invadiria o filete em y=2242
+POST_QUOTE_STEP = 190      # distance between consecutive line starts
+POST_QUOTE_LINE_H = 160     # height of one text line
+POST_QUOTE_MAX_LINES = 5   # a 6th would invade the rule at y=2242
 POST_RULE_Y = 2242
 
-# Rodapé (o filete já vem desenhado no template)
-# Nome do programa, usado no badge da thumbnail. Trocar aqui vale para todos
-# os episódios — é identity do canal, não dado de um episódio.
+# Footer (the rule already comes drawn on the template)
+# Show name, used in the thumbnail badge. Changing it here applies to every
+# episode — it is channel identity, not per-episode data.
 SHOW_NAME = "MEU PODCAST"
 
 POST_NAME_Y = 2338
 POST_ROLE_Y = 2459
 
-# 150 e não 160: a Poppins é mais larga que a Avenir Next Demi Bold em que o
-# layout foi medido, e a 160 a citação de referência vira 6 lines — a 6ª
-# cruzaria o filete em y=2242. A 150 sobram 83px na linha mais cheia.
+# 150 and not 160: Poppins is wider than the Avenir Next Demi Bold the layout
+# was measured in, and at 160 the reference quote becomes 6 lines — the 6th
+# would cross the rule at y=2242. At 150 the fullest line has 83px to spare.
 POST_QUOTE_SIZE = 150
 POST_NAME_SIZE = 62
 POST_ROLE_SIZE = 38
@@ -175,13 +176,13 @@ POST_QUOTE_COLOR = (245, 242, 234)
 POST_NAME_COLOR = (255, 255, 255)
 POST_ROLE_COLOR = (154, 149, 144)
 
-# Fonte da citação e do rodapé do post.
+# Font for the post's quote and footer.
 POST_FONT = _bundled_font("Poppins-SemiBold.ttf")
 POST_MONO = _bundled_font("DejaVuSansMono-Bold.ttf")
 
 # ---------------------------------------------------------------------------
-# Publicação agendada
+# Scheduled publishing
 # ---------------------------------------------------------------------------
-# Fuso da publicação — explícito porque máquina em UTC perto da meia-noite
-# mudaria o day da publicação em silêncio — data sempre com zona.
+# Publishing timezone — explicit because a machine on UTC near midnight would
+# silently shift the publication day — dates always carry a zone.
 PUBLISH_TZ = "America/Sao_Paulo"

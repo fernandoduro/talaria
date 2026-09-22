@@ -1,4 +1,4 @@
-"""Utilitários compartilhados: timestamps, regex de VTT, limpeza e agrupamento de texto.
+"""Shared helpers: timestamps, VTT regexes, text cleanup and grouping.
 """
 import re
 
@@ -8,7 +8,7 @@ from . import config
 # Timestamps
 # ---------------------------------------------------------------------------
 def srt_ts(seconds: float) -> str:
-    """Segundos -> 'hh:mm:ss,ms' (formato SRT)."""
+    """Seconds -> 'hh:mm:ss,ms' (SRT format)."""
     ms = int(round(seconds * 1000))
     h, ms = divmod(ms, 3_600_000)
     m, ms = divmod(ms, 60_000)
@@ -17,13 +17,13 @@ def srt_ts(seconds: float) -> str:
 
 
 def mmss(seconds: float) -> str:
-    """Segundos -> 'mm:ss' (rótulo curto p/ curation)."""
+    """Seconds -> 'mm:ss' (short label for curation)."""
     m, s = divmod(int(seconds), 60)
     return f"{m:02d}:{s:02d}"
 
 
 # ---------------------------------------------------------------------------
-# VTT (legenda automática de rolagem do YouTube)
+# VTT (YouTube's automatic rolling captions)
 # ---------------------------------------------------------------------------
 RE_TS = re.compile(r"(\d{2}):(\d{2}):(\d{2})\.(\d{3})")
 RE_CUE = re.compile(r"^(\d{2}:\d{2}:\d{2}\.\d{3}) --> (\d{2}:\d{2}:\d{2}\.\d{3})")
@@ -36,7 +36,7 @@ def vtt_ts_to_sec(ts: str) -> float:
 
 
 # ---------------------------------------------------------------------------
-# Limpeza de texto
+# Text cleanup
 # ---------------------------------------------------------------------------
 # YouTube sound annotations. The tag list is an explicit alternation rather
 # than "anything in brackets": transcripts also carry bracketed words that
@@ -48,7 +48,7 @@ RE_SOUND_TAG = re.compile(
 
 
 def strip_markup(txt: str) -> str:
-    """Remove entidades HTML e marcações de som ([música], [risadas], ...)."""
+    """Strips HTML entities and sound tags ([music], [laughter], ...)."""
     t = (txt.replace("&gt;", "").replace("&lt;", "").replace("&amp;", "&"))
     t = RE_SOUND_TAG.sub("", t)
     t = re.sub(r"\s{2,}", " ", t)
@@ -193,13 +193,13 @@ def clean_caption(txt: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Agrupamento de words (t, palavra) -> segmentos {start, end, text}
+# Grouping words (t, word) -> segments {start, end, text}
 # ---------------------------------------------------------------------------
 def group_words_into_segments(words):
-    """Agrupa uma lista de (tempo, palavra) em segmentos de frase.
+    """Groups a list of (time, word) into sentence segments.
 
-    Quebra por pausa (SEG_MAX_GAP), duração (SEG_MAX_DUR), tamanho
-    (SEG_MAX_CHARS) ou pontuação final.
+    Breaks on pause (SEG_MAX_GAP), duration (SEG_MAX_DUR), length
+    (SEG_MAX_CHARS) or closing punctuation.
     """
     segs = []
     cur = []

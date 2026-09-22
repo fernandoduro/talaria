@@ -1,30 +1,30 @@
-"""Carrega o `.env` para dentro do environment do processo.
+"""Loads `.env` into the process environment.
 
-Os módulos de publicação leem credencial de `os.environ`, mas quem write o
-`.env` é o gestor num editor — sem esta ponte o arquivo fica preenchido e o
-`publish` reclama de variável não definida, que é o error mais confuso possível
-(a response está no arquivo aberto na tela).
+The publishing modules read credentials from `os.environ`, but the person who
+writes `.env` is the manager in an editor — without this bridge the file is
+filled in and `publish` complains about an undefined variable, the most
+confusing error possible (the answer is in the file open on screen).
 
-É um parser mínimo de propósito: o `.env` tem uma dúzia de lines
-`CHAVE=valor` escritas à mão. Não interpola `${OUTRA}`, não expande `~`, não
-lê multilinha — cada uma dessas seria uma regra a mais para o gestor lembrar
-ao colar um token, e nenhuma delas apareceu em uso.
+It is a minimal parser on purpose: `.env` holds a dozen hand-written
+`KEY=value` lines. It does not interpolate `${OTHER}`, does not expand `~` and
+does not read multi-line values — each of those would be one more rule for the
+manager to remember when pasting a token, and none of them showed up in use.
 """
 from __future__ import annotations
 
 import os
 
-# A raiz do repo, dois níveis acima deste arquivo (talaria/environment.py).
+# The repo root, two levels above this file (talaria/environment.py).
 DEFAULT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                       ".env")
 
 
 def _clean_value(value: str) -> str:
-    """Tira espaço das pontas e um par de aspas, se houver.
+    """Strips surrounding whitespace and one pair of quotes, if present.
 
-    Colar de um console traz aspas junto com frequência, e um token entre
-    aspas falha na API com "credencial inválida" — error que não aponta para
-    o par de aspas como causa.
+    Pasting from a console often brings the quotes along, and a quoted token
+    fails at the API with "invalid credential" — an error that does not point
+    at the quote pair as the cause.
     """
     value = value.strip()
     if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
@@ -33,15 +33,16 @@ def _clean_value(value: str) -> str:
 
 
 def load(path: str = None) -> int:
-    """Põe no environment o que estiver no `.env`. Devolve quantas entraram.
+    """Puts whatever is in `.env` into the environment. Returns how many entered.
 
-    O que já está no environment VENCE o arquivo: `IG_PAGE_TOKEN=x python run.py`
-    precisa sobrepor, que é como se testa outra credencial sem editar nada.
+    What is already in the environment WINS over the file: `IG_PAGE_TOKEN=x
+    python run.py` has to override, which is how another credential gets tested
+    without editing anything.
 
-    Arquivo ausente não é error — quem só renderiza clip nunca criou um.
-    Variável declarada e vazia também não entra: "não configurada" é o state
-    honesto, e uma string vazia faria a checagem de credencial passar para a
-    API recusar depois, com mensagem pior.
+    A missing file is not an error — someone who only renders clips never made
+    one. A variable declared empty does not enter either: "not configured" is
+    the honest state, and an empty string would let the credential check pass
+    for the API to refuse later, with a worse message.
     """
     path = path or DEFAULT_PATH
     if not os.path.exists(path):
@@ -55,7 +56,7 @@ def load(path: str = None) -> int:
                 continue
             if line.startswith("export "):
                 line = line[len("export "):]
-            key, value = line.split("=", 1)   # '=' no valor fica no valor
+            key, value = line.split("=", 1)   # '=' in the value stays in the value
             key = key.strip()
             value = _clean_value(value)
             if not key or not value or key in os.environ:

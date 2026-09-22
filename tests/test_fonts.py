@@ -13,13 +13,13 @@ EXPECTED = {
 
 
 class TestVersionedFonts(unittest.TestCase):
-    """As fontes vêm do repositório, não do sistema.
+    """Fonts come from the repository, not from the system.
 
-    O texto é queimado no vídeo: fonte resolvida pelo fontconfig muda com a
-    máquina e o error só aparece no vídeo published, que não se corrige.
+    Text is burned into the video: a font resolved by fontconfig changes with
+    the machine and the error only shows in the published video, too late to fix.
     """
 
-    def test_cada_fonte_e_um_arquivo_do_repositorio(self):
+    def test_each_font_is_a_repository_file(self):
         root = os.path.dirname(os.path.dirname(os.path.abspath(config.__file__)))
         expected = os.path.join(root, "assets", "fonts")
         for name in EXPECTED:
@@ -27,12 +27,12 @@ class TestVersionedFonts(unittest.TestCase):
             self.assertTrue(os.path.isfile(path), f"{name}: {path}")
             self.assertEqual(os.path.dirname(path), expected, name)
 
-    def test_cada_fonte_tem_a_identidade_esperada(self):
+    def test_each_font_has_the_expected_identity(self):
         for name, identity in EXPECTED.items():
             fnt = ImageFont.truetype(getattr(config, name), 40)
             self.assertEqual(fnt.getname(), identity, name)
 
-    def test_fonte_ausente_aborta_com_mensagem_util(self):
+    def test_missing_font_aborts_with_a_useful_message(self):
         with self.assertRaises(FileNotFoundError) as ctx:
             config._bundled_font("NaoExiste-Bold.ttf")
         self.assertIn("NaoExiste-Bold.ttf", str(ctx.exception))
