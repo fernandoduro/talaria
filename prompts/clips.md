@@ -6,7 +6,7 @@ become 60-to-90-second vertical clips (Shorts/Reels).
 ═══════════════════════════════════════════════════════════════
 
 Write your channel's editorial criteria here. It is the part that matters
-most and the part only use can calibrate. Some axes usually worth defining:
+most and the part only actual use can calibrate. Some axes usually worth defining:
 
 - what holds attention in the first three seconds
 - what kind of speech stands up outside the episode's context

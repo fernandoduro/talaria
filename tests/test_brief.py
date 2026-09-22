@@ -64,7 +64,7 @@ class TestBrief(unittest.TestCase):
         state = {"target": 5, "approved": [], "rejected": [], "rounds": 0}
         txt = brief.readable_curation(state)
         self.assertIn("FIRST ROUND", txt)
-        self.assertIn("10", txt)
+        self.assertIn("Propose 10 stretches", txt)
 
     def test_readable_state_with_rejections(self):
         state = {"target": 5, "rounds": 1,
@@ -74,7 +74,7 @@ class TestBrief(unittest.TestCase):
                                   "reason": "weak hook", "summary": "stretch X"}]}
         txt = brief.readable_curation(state)
         self.assertIn("weak hook", txt)
-        self.assertIn("4", txt)          # slots_left remaining
+        self.assertIn("SLOTS LEFT: 4", txt)
         self.assertIn("05:00", txt)      # burned span in mm:ss
 
 
