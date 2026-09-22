@@ -1,11 +1,10 @@
-"""Card de end_card: logo + @ ao final de cada clip, com fade-in.
+"""End card: logo + @handle at the end of every clip, with a fade-in.
 
-O card é estático — igual em todo clip, não depende do conteúdo do vídeo.
-Gerá-lo dentro do filtergraph de cada render obrigaria refazer o mesmo PNG a
-cada clip; em vez disso ele é montado uma vez com Pillow e cacheado como um
-`.mp4` mudo no mesmo codec/resolução do pipeline, que o `render_cut`
-concatena com o concat filter — o porquê está em
-`render.append_end_card`.
+The card is static — identical in every clip, independent of the video content.
+Building it inside each render's filtergraph would mean remaking the same PNG
+for every clip; instead it is composed once with Pillow and cached as a silent
+`.mp4` in the pipeline's codec/resolution, which `render_cut` concatenates with
+the concat filter — the reason for that is in `render.append_end_card`.
 """
 from __future__ import annotations
 
@@ -20,10 +19,11 @@ _HANDLE_SIZE = 50
 
 
 def compose_card() -> Image.Image:
-    """O frame estático do card: fundo sólido, logo + @ centralizados.
+    """The card's static frame: solid background, logo + @handle centred.
 
-    Devolve a imagem em memória — quem chama decide se grava PNG, vídeo, ou só
-    inspeciona (é o que os testes fazem, sem precisar do ffmpeg cacheado).
+    Returns the image in memory — the caller decides whether to write a PNG, a
+    video, or only inspect it (which is what the tests do, without needing the
+    cached ffmpeg run).
     """
     if not os.path.exists(config.LOGO_PATH):
         raise FileNotFoundError(
@@ -43,9 +43,9 @@ def compose_card() -> Image.Image:
     bbox = d.textbbox((0, 0), config.CARD_HANDLE, font=fonte)
     handle_h = bbox[3] - bbox[1]
 
-    # Bloco logo + espaço + @ centralizado como uma unidade, não cada peça
-    # centralizada isoladamente — senão a distância entre as duas varia com o
-    # tamanho da fonte do sistema.
+    # The logo + gap + @handle block is centred as one unit, not each piece
+    # centred on its own — otherwise the distance between them varies with the
+    # system font size.
     space = 40
     block_h = logo_h + space + handle_h
     top = (config.FRAME_H - block_h) // 2
@@ -58,25 +58,25 @@ def compose_card() -> Image.Image:
 
 
 def cached_card(project_dir: str) -> str:
-    """Caminho do card em vídeo, gerando (ou regerando) quando preciso.
+    """Path of the card as video, generating (or regenerating) when needed.
 
-    Cache por mtime do logo: se `LOGO_PATH` for mais recente que o card já
-    gravado, regenera. Trocar o arquivo do logo (redesign) já basta — não é
-    preciso apagar nada à mão.
+    Cached on the logo's mtime: if `LOGO_PATH` is newer than the card already
+    written, it regenerates. Replacing the logo file (a redesign) is enough —
+    nothing has to be deleted by hand.
     """
     destination = layout.ensure_dir(layout.end_card_mp4(project_dir))
     exists = os.path.exists(destination)
     if exists and os.path.getmtime(destination) >= os.path.getmtime(config.LOGO_PATH):
         return destination
 
-    # Escreve num arquivo temporário próprio deste processo e só troca pelo
-    # name final com os.replace (atômico no mesmo filesystem) — mesmo padrão
-    # do published.json. Sem isso, dois `render` concorrentes no mesmo
-    # episódio (comum: um terminal por clip) escreveriam no mesmo
-    # `frame_path`/`destination` e um corromperia o card do outro no meio do
-    # ffmpeg, sem nenhum error visível.
-    # ffmpeg decide o formato de saída pela extensão — precisa terminar em
-    # .mp4/.png, não pode ser um sufixo qualquer depois delas.
+    # Writes to a temporary file of this process alone and only swaps it for
+    # the final name with os.replace (atomic on the same filesystem) — the same
+    # pattern as published.json. Without it, two concurrent `render` runs on the
+    # same episode (common: one terminal per clip) would write to the same
+    # `frame_path`/`destination` and one would corrupt the other's card
+    # mid-ffmpeg, with no visible error.
+    # ffmpeg picks the output format from the extension — it has to end in
+    # .mp4/.png, not in some arbitrary suffix after them.
     stem = destination[:-4] if destination.endswith(".mp4") else destination
     tmp_dest = f"{stem}.{os.getpid()}.tmp.mp4"
     frame_path = f"{stem}.{os.getpid()}.tmp.png"

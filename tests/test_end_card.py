@@ -1,4 +1,4 @@
-"""Card de end_card: logo + @ ao final de cada clip."""
+"""End card: logo + @handle at the end of every clip."""
 import os
 import subprocess
 import tempfile
@@ -11,27 +11,27 @@ from talaria import config, end_card
 
 
 class TestComposeCard(unittest.TestCase):
-    def test_tamanho_do_frame_bate_com_o_video(self):
+    def test_frame_size_matches_the_video(self):
         img = end_card.compose_card()
         self.assertEqual(img.size, (config.FRAME_W, config.FRAME_H))
 
-    def test_fundo_e_o_configurado(self):
+    def test_background_is_the_configured_one(self):
         img = end_card.compose_card()
-        # Canto da imagem não tem logo nem texto — é fundo puro.
+        # The image corner has no logo and no text — it is pure background.
         self.assertEqual(img.getpixel((5, 5)), config.CARD_BG)
 
-    def test_logo_aparece_centralizado(self):
-        # O bloco logo+@ é centralizado; o pixel exato do meio-meio da tela
-        # varia com o design, então o teste confere que ALGO foi desenhado
-        # ali (não é mais o fundo liso) em vez de fixar posição de pixel.
+    def test_logo_appears_centred(self):
+        # The logo+@handle block is centred; the exact dead-centre pixel varies
+        # with the design, so the test checks that SOMETHING was drawn there (it
+        # is no longer flat background) rather than pinning a pixel position.
         img = end_card.compose_card()
         center = img.getpixel((config.FRAME_W // 2, config.FRAME_H // 2))
         self.assertNotEqual(center, config.CARD_BG)
 
-    def test_logo_ausente_da_mensagem_clara(self):
-        # Mesmo padrão do POST_TEMPLATE em post_instagram.py: error explícito
-        # dizendo onde o asset deveria estar, não um FileNotFoundError cru
-        # do Pillow apontando pra um path sem contexto.
+    def test_missing_logo_gives_a_clear_message(self):
+        # Same pattern as POST_TEMPLATE in post_instagram.py: an explicit error
+        # saying where the asset should be, not a raw Pillow FileNotFoundError
+        # pointing at a path with no context.
         old_path = config.LOGO_PATH
         config.LOGO_PATH = "/path/que/nao/existe/logo.png"
         try:
@@ -46,11 +46,11 @@ class TestCachedCard(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    def test_gera_o_arquivo_na_primeira_chamada(self):
+    def test_writes_the_file_on_the_first_call(self):
         path = end_card.cached_card(self.d)
         self.assertTrue(os.path.exists(path))
 
-    def test_duracao_do_arquivo_bate_com_config(self):
+    def test_file_duration_matches_config(self):
         path = end_card.cached_card(self.d)
         r = subprocess.run(
             ["ffprobe", "-v", "error", "-show_entries", "format=duration",
@@ -59,7 +59,7 @@ class TestCachedCard(unittest.TestCase):
         self.assertAlmostEqual(float(r.stdout.strip()),
                                config.CARD_DURATION_S, delta=0.15)
 
-    def test_reaproveita_sem_regravar(self):
+    def test_reuses_without_rewriting(self):
         path = end_card.cached_card(self.d)
         mtime_1 = os.path.getmtime(path)
         time.sleep(0.05)
@@ -67,13 +67,13 @@ class TestCachedCard(unittest.TestCase):
         self.assertEqual(path, path_2)
         self.assertEqual(os.path.getmtime(path), mtime_1)
 
-    def test_logo_trocado_invalida_o_cache(self):
+    def test_replacing_the_logo_invalidates_the_cache(self):
         path = end_card.cached_card(self.d)
         mtime_1 = os.path.getmtime(path)
-        # Guarda o mtime ANTES de mexer, em vez de reconstruí-lo do git no
-        # final: fora de um clone git (tarball, cópia do código) o comando não
-        # devolve nada, a restauração não acontece em silêncio e o logo fica
-        # no future — quebrando o teste de cache que roda depois deste.
+        # Keeps the mtime BEFORE touching it, instead of rebuilding it from git
+        # at the end: outside a git clone (tarball, copy of the code) the command
+        # returns nothing, the restore silently does not happen and the logo is
+        # left in the future — breaking the cache test that runs after this one.
         stat_before = os.stat(config.LOGO_PATH)
         future = time.time() + 5
         os.utime(config.LOGO_PATH, (future, future))
@@ -85,20 +85,20 @@ class TestCachedCard(unittest.TestCase):
             os.utime(config.LOGO_PATH,
                      (stat_before.st_atime, stat_before.st_mtime))
 
-    def test_nao_deixa_temporario_para_tras(self):
-        # A escrita passa por um .tmp.mp4/.tmp.png com o PID — nenhum dos
-        # dois pode sobrar depois de cached_card() terminar com sucesso.
+    def test_leaves_no_temporary_behind(self):
+        # The write goes through a .tmp.mp4/.tmp.png carrying the PID — neither
+        # may be left over once cached_card() finishes successfully.
         destination = end_card.cached_card(self.d)
         folder = os.path.dirname(destination)
         leftovers = [n for n in os.listdir(folder) if ".tmp" in n]
         self.assertEqual(leftovers, [], f"temporário ficou para trás: {leftovers}")
 
-    def test_race_entre_dois_processos_nao_corrompe(self):
-        # Simula dois "processos" concorrentes chamando cached_card() para
-        # o MESMO episódio, cada um com seu PID simulado (o teste roda no
-        # mesmo processo, então cada chamada usa os.getpid() real — o que
-        # importa aqui é que o produto final é sempre um mp4 válido e
-        # completo, nunca um arquivo pela metade de uma escrita concorrente).
+    def test_race_between_two_processes_does_not_corrupt(self):
+        # Simulates two concurrent "processes" calling cached_card() for the
+        # SAME episode (the test runs in one process, so each call uses the real
+        # os.getpid() — what matters here is that the final product is always a
+        # valid, complete mp4, never a file left half-written by a concurrent
+        # write).
         r1 = end_card.cached_card(self.d)
         r2 = end_card.cached_card(self.d)
         self.assertEqual(r1, r2)

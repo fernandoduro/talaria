@@ -1,7 +1,7 @@
-"""Gera a thumbnail do YouTube (1280x720) a partir de um frame do vídeo.
+"""Builds the YouTube thumbnail (1280x720) from a frame of the video.
 
-Todo o texto vem de parâmetros (nada hardcoded de episódio). Composição:
-frame escurecido + gradiente na base + badge, chamada em destaque e créditos.
+All text comes from parameters (nothing episode-specific hardcoded).
+Composition: darkened frame + base gradient + badge, headline and credits.
 """
 import os
 import subprocess
@@ -12,14 +12,14 @@ from . import config
 
 
 def suggest_frames(moments: list, n: int = 5) -> list:
-    """Instantes candidatos a frame de thumbnail, tirados dos cortes approved.
+    """Candidate instants for the thumbnail frame, taken from approved clips.
 
-    A escolha final é visual — expressão, mãos, enquadramento — e fica com o
-    gestor. O que dá para automatizar é ONDE procurar: dentro de um clip
-    aprovado o convidado está falando com energia, ao contrário de um instante
-    sorteado no episódio, que costuma pegar pausa ou o host.
+    The final choice is visual — expression, hands, framing — and stays with the
+    manager. What can be automated is WHERE to look: inside an approved clip the
+    guest is speaking with energy, unlike an instant drawn at random from the
+    episode, which usually catches a pause or the host.
 
-    Devolve o meio de cada clip, que evita as bordas (entrada e saída de fala).
+    Returns the midpoint of each clip, which avoids the edges (speech in and out).
     """
     midpoints = sorted((m["start"] + m["end"]) / 2 for m in moments or [])
     if len(midpoints) <= n:
@@ -29,7 +29,7 @@ def suggest_frames(moments: list, n: int = 5) -> list:
 
 
 def extract_frame(video_path: str, at_seconds: float, out_path: str):
-    """Extrai um frame 16:9 do vídeo no tempo indicado."""
+    """Extracts a 16:9 frame from the video at the given time."""
     subprocess.run(
         ["ffmpeg", "-y", "-ss", str(at_seconds), "-i", video_path,
          "-frames:v", "1", "-update", "1", out_path],
@@ -52,20 +52,20 @@ def _outlined(draw, xy, text, fnt, fill, ow=4, anchor="la"):
 
 def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
                     credits="", subtitle=""):
-    """Monta a thumbnail. Textos totalmente parametrizados.
+    """Composes the thumbnail. Text is fully parameterised.
 
-    badge:        span laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
-    headline_l1:  1ª linha grande (branca)
-    headline_l2:  2ª linha grande (laranja)
-    credits:    canto superior direito (ex.: names dos guests)
-    subtitle:   abaixo dos créditos
+    badge:        orange band, top left (e.g. 'MEU PODCAST • T2E02')
+    headline_l1:  first large line (white)
+    headline_l2:  second large line (orange)
+    credits:      top right corner (e.g. the guests' names)
+    subtitle:     below the credits
     """
     W, H = config.THUMB_W, config.THUMB_H
     img = Image.open(frame_path).convert("RGB").resize((W, H))
     img = ImageEnhance.Brightness(img).enhance(config.THUMB_BRIGHTNESS)
     img = ImageEnhance.Contrast(img).enhance(config.THUMB_CONTRAST)
 
-    # gradiente escuro na base p/ destacar a chamada
+    # dark gradient at the base to set off the headline
     grad = Image.new("L", (1, H), 0)
     for y in range(H):
         v = int(230 * max(0, (y - H * 0.45) / (H * 0.55)))
@@ -75,7 +75,7 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
 
     d = ImageDraw.Draw(img)
 
-    # badge (span laranja)
+    # badge (orange band)
     if badge:
         ftag = _font(30)
         tb = d.textbbox((0, 0), badge, font=ftag)
@@ -84,13 +84,13 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
                     fill=config.THUMB_ORANGE)
         d.text((28 + pad, 30 + pad - tb[1]), badge, font=ftag, fill=config.THUMB_WHITE)
 
-    # chamada principal (2 lines na base)
+    # main headline (2 lines at the base)
     if headline_l1:
         _outlined(d, (40, H - 210), headline_l1, _font(72), config.THUMB_WHITE, ow=5)
     if headline_l2:
         _outlined(d, (40, H - 120), headline_l2, _font(56), config.THUMB_ORANGE, ow=5)
 
-    # créditos (canto superior direito)
+    # credits (top right corner)
     if credits:
         _outlined(d, (W - 40, 40), credits, _font(28), config.THUMB_WHITE, ow=3, anchor="ra")
     if subtitle:
