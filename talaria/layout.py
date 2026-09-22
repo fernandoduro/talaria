@@ -1,8 +1,8 @@
-"""Onde cada arquivo do project mora. Autoridade única sobre os caminhos.
+"""Onde cada arquivo do project mora. Autoridade única sobre os paths.
 
 Antes disto cada módulo montava o seu com string literal
-(`os.path.join(project_dir, "moments.json")` aparecia em 5 arquivos), e o
-resultado era uma dúzia de arquivos soltos na raiz do episódio, de naturezas
+(`os.path.join(project_dir, "moments.json")` aparecia em 5 files), e o
+resultado era uma dúzia de files soltos na raiz do episódio, de naturezas
 diferentes misturadas.
 
 A pasta é organizada por NATUREZA:
@@ -67,7 +67,7 @@ def posts(pd: str) -> str:
 
 
 def schedule(pd: str) -> str:
-    """Agenda de publicação: que peça sai em que dia. Decisão editorial."""
+    """Agenda de publicação: que peça sai em que day. Decisão editorial."""
     return os.path.join(pd, DECISIONS, "schedule.json")
 
 
@@ -116,7 +116,7 @@ def posts_png(pd: str) -> str:
 # ficava na mesma pasta; dentro da subpasta ele vira redundância.
 #
 # Esta tabela descreve um layout pré-Phase-1 (nomes em Portuguese); nenhum
-# `projects/` real está nesse estado, então ela não é testada contra dados
+# `projects/` real está nesse state, então ela não é testada contra data
 # de verdade — só contra fixtures que a recriam.
 _MIGRATION = [
     ("source.mp4", video),
@@ -166,7 +166,7 @@ def migrate(pd: str) -> list:
     """Move um project da estrutura antiga (tudo solto) para a nova.
 
     Idempotente: roda no início de todo comando e não faz nada quando o project
-    já está organizado. Devolve a lista de (origem, destino) do que moveu.
+    já está organizado. Devolve a lista de (origin, destination) do que moveu.
 
     Quando o arquivo existe nas DUAS posições, a nova vence — é o que os
     comandos vêm escrevendo desde a migração. A antiga NÃO é apagada: vira
@@ -174,7 +174,7 @@ def migrate(pd: str) -> list:
     raiz de propósito, e apagar o trabalho dele em silêncio seria pior que
     deixar um arquivo sobrando.
 
-    Move item a item, sem estado intermediário: interrupção no meio deixa o
+    Move item a item, sem state intermediário: interrupção no meio deixa o
     project parcialmente migrado, e rodar de novo termina o serviço.
     """
     import shutil
@@ -183,71 +183,71 @@ def migrate(pd: str) -> list:
         return []
 
     _check_dirs(pd)
-    movidos = []
+    moved = []
 
-    for antigo, destino_de in _MIGRATION:
-        origem = os.path.join(pd, antigo)
-        if not os.path.exists(origem):
+    for old, dest_fn in _MIGRATION:
+        origin = os.path.join(pd, old)
+        if not os.path.exists(origin):
             continue
-        destino = destino_de(pd)
-        if os.path.exists(destino):
-            bak = origem + ".bak"
+        destination = dest_fn(pd)
+        if os.path.exists(destination):
+            bak = origin + ".bak"
             if os.path.exists(bak):
                 os.remove(bak)
-            os.rename(origem, bak)
-            nota = "(duplicata)"
+            os.rename(origin, bak)
+            note = "(duplicata)"
             # Sinaliza quando o descartado é maior que o ativo: pode ser um
             # arquivo pela metade na posição nova (escrita interrompida) que
             # passaria a valer sem ninguém notar. O tamanho não decide nada —
-            # JSON menor é normal —, mas o gestor precisa ver para conferir.
+            # JSON smaller é normal —, mas o gestor precisa ver para conferir.
             try:
-                if os.path.getsize(bak) > os.path.getsize(destino):
-                    nota = "(duplicata — o .bak é MAIOR, confira qual vale)"
+                if os.path.getsize(bak) > os.path.getsize(destination):
+                    note = "(duplicata — o .bak é MAIOR, confira qual vale)"
             except OSError:
                 pass
-            movidos.append((antigo, os.path.basename(bak) + " " + nota))
+            moved.append((old, os.path.basename(bak) + " " + note))
             continue
-        ensure_dir(destino)
-        shutil.move(origem, destino)
-        movidos.append((antigo, os.path.relpath(destino, pd)))
+        ensure_dir(destination)
+        shutil.move(origin, destination)
+        moved.append((old, os.path.relpath(destination, pd)))
 
     for name in _PUBLISH_DIRS:
-        origem = os.path.join(pd, name)
-        if not os.path.isdir(origem):
+        origin = os.path.join(pd, name)
+        if not os.path.isdir(origin):
             continue
-        destino = os.path.join(pd, PUBLISH, name)
+        destination = os.path.join(pd, PUBLISH, name)
 
-        if not os.path.isdir(destino):
+        if not os.path.isdir(destination):
             os.makedirs(os.path.join(pd, PUBLISH), exist_ok=True)
-            shutil.move(origem, destino)
-            movidos.append((name + "/", os.path.relpath(destino, pd) + "/"))
+            shutil.move(origin, destination)
+            moved.append((name + "/", os.path.relpath(destination, pd) + "/"))
             continue
 
         # As duas existem: traz o que só está na antiga e some com ela. Pular
         # deixaria clip já renderizado fora da estrutura documentada, sem
         # aviso — e ele sumiria na próxima limpeza da pasta do episódio.
-        for arquivo in sorted(os.listdir(origem)):
-            alvo = os.path.join(destino, arquivo)
-            atual = os.path.join(origem, arquivo)
-            if os.path.exists(alvo):
+        for file in sorted(os.listdir(origin)):
+            target = os.path.join(destination, file)
+            current = os.path.join(origin, file)
+            if os.path.exists(target):
                 # O da posição nova vale; o antigo vira .bak ao lado dele, pela
-                # mesma razão dos arquivos soltos: não destruir em silêncio.
-                bak = alvo + ".bak"
+                # mesma razão dos files soltos: não destruir em silêncio.
+                bak = target + ".bak"
                 if os.path.exists(bak):
                     os.remove(bak)
-                shutil.move(atual, bak)
-                movidos.append((f"{name}/{arquivo}",
+                shutil.move(current, bak)
+                moved.append((f"{name}/{file}",
                                 os.path.relpath(bak, pd) + " (duplicata)"))
                 continue
-            shutil.move(atual, alvo)
-            movidos.append((f"{name}/{arquivo}", os.path.relpath(alvo, pd)))
-        if not os.listdir(origem):
-            os.rmdir(origem)
+            shutil.move(current, target)
+            moved.append((f"{name}/{file}", os.path.relpath(target, pd)))
+        if not os.listdir(origin):
+            os.rmdir(origin)
 
     for name in _JUNK:
         path = os.path.join(pd, name)
         if os.path.exists(path):
             os.remove(path)
-            movidos.append((name, "(removido)"))
+            moved.append((name, "(removido)"))
 
-    return movidos
+    return moved

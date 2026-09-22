@@ -1,10 +1,10 @@
 """Registro do que já foi published — a trava contra post duplicado.
 
 A unidade do registro é (platform, slug): um clip publica em YouTube E
-Reels, e se só uma das duas passou, o retry do dia seguinte publica só a que
+Reels, e se só uma das duas passou, o retry do day seguinte publica só a que
 faltou: pendência por item republicaria a que já foi.
 
-Cada sucesso grava NA HORA, atomicamente. Registrar só no fim do lote deixa
+Cada sucesso grava NA HORA, atomicamente. Registrar só no end do lote deixa
 uma janela: processo morto no meio e a próxima execução duplica o que já
 tinha saído — post duplicado não tem correção depois de published.
 """
@@ -23,7 +23,7 @@ def load(pd: str) -> dict:
 
     JSON inválido nunca é tratado como "nada published ainda": isso
     republicaria o histórico inteiro. `projects/` é git-ignored, então não há
-    backup no git — a mensagem manda conferir os perfis das plataformas antes
+    backup no git — a mensagem manda conferir os perfis das platforms antes
     de recriar o arquivo.
     """
     path = layout.published(pd)

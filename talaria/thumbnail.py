@@ -21,11 +21,11 @@ def suggest_frames(moments: list, n: int = 5) -> list:
 
     Devolve o meio de cada clip, que evita as bordas (entrada e saída de fala).
     """
-    meios = sorted((m["start"] + m["end"]) / 2 for m in moments or [])
-    if len(meios) <= n:
-        return [round(t, 1) for t in meios]
-    passo = len(meios) / n
-    return [round(meios[int(i * passo)], 1) for i in range(n)]
+    midpoints = sorted((m["start"] + m["end"]) / 2 for m in moments or [])
+    if len(midpoints) <= n:
+        return [round(t, 1) for t in midpoints]
+    step = len(midpoints) / n
+    return [round(midpoints[int(i * step)], 1) for i in range(n)]
 
 
 def extract_frame(video_path: str, at_seconds: float, out_path: str):
@@ -54,7 +54,7 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
                     credits="", subtitle=""):
     """Monta a thumbnail. Textos totalmente parametrizados.
 
-    badge:        faixa laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
+    badge:        span laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
     headline_l1:  1ª linha grande (branca)
     headline_l2:  2ª linha grande (laranja)
     credits:    canto superior direito (ex.: names dos guests)
@@ -75,7 +75,7 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
 
     d = ImageDraw.Draw(img)
 
-    # badge (faixa laranja)
+    # badge (span laranja)
     if badge:
         ftag = _font(30)
         tb = d.textbbox((0, 0), badge, font=ftag)

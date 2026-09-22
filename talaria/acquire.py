@@ -69,15 +69,15 @@ def fetch_youtube_captions(url: str, project_dir: str, lang="pt") -> str | None:
     vid = youtube_id(url)
     if not vid:
         return None
-    pasta = layout.source_dir(project_dir)
-    os.makedirs(pasta, exist_ok=True)
-    out_tpl = os.path.join(pasta, "yt_%(id)s.%(ext)s")
+    folder = layout.source_dir(project_dir)
+    os.makedirs(folder, exist_ok=True)
+    out_tpl = os.path.join(folder, "yt_%(id)s.%(ext)s")
     print(f"[acquire] tentando legenda automática ({lang}) do YouTube...")
     _ytdlp([
         "--skip-download", "--write-auto-subs", "--sub-langs", lang,
         "--sub-format", "vtt", "-o", out_tpl, url,
     ], capture=True)
-    vtt = os.path.join(pasta, f"yt_{vid}.{lang}.vtt")
+    vtt = os.path.join(folder, f"yt_{vid}.{lang}.vtt")
     if os.path.exists(vtt) and os.path.getsize(vtt) > 0:
         print(f"[acquire] legenda encontrada -> {vtt}")
         return vtt

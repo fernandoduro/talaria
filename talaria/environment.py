@@ -3,7 +3,7 @@
 Os módulos de publicação leem credencial de `os.environ`, mas quem write o
 `.env` é o gestor num editor — sem esta ponte o arquivo fica preenchido e o
 `publish` reclama de variável não definida, que é o error mais confuso possível
-(a resposta está no arquivo aberto na tela).
+(a response está no arquivo aberto na tela).
 
 É um parser mínimo de propósito: o `.env` tem uma dúzia de lines
 `CHAVE=valor` escritas à mão. Não interpola `${OUTRA}`, não expande `~`, não
@@ -39,7 +39,7 @@ def load(path: str = None) -> int:
     precisa sobrepor, que é como se testa outra credencial sem editar nada.
 
     Arquivo ausente não é error — quem só renderiza clip nunca criou um.
-    Variável declarada e vazia também não entra: "não configurada" é o estado
+    Variável declarada e vazia também não entra: "não configurada" é o state
     honesto, e uma string vazia faria a checagem de credencial passar para a
     API recusar depois, com mensagem pior.
     """
@@ -47,19 +47,19 @@ def load(path: str = None) -> int:
     if not os.path.exists(path):
         return 0
 
-    postas = 0
+    added = 0
     with open(path, encoding="utf-8") as f:
-        for linha in f:
-            linha = linha.strip()
-            if not linha or linha.startswith("#") or "=" not in linha:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
                 continue
-            if linha.startswith("export "):
-                linha = linha[len("export "):]
-            chave, valor = linha.split("=", 1)   # '=' no valor fica no valor
-            chave = chave.strip()
-            valor = _clean_value(valor)
-            if not chave or not valor or chave in os.environ:
+            if line.startswith("export "):
+                line = line[len("export "):]
+            key, value = line.split("=", 1)   # '=' no valor fica no valor
+            key = key.strip()
+            value = _clean_value(value)
+            if not key or not value or key in os.environ:
                 continue
-            os.environ[chave] = valor
-            postas += 1
-    return postas
+            os.environ[key] = value
+            added += 1
+    return added

@@ -70,8 +70,8 @@ FONTSIZE = 40
 SAFE_W = 980            # largura máx. da linha em px (deixa ~50px de margem/lado)
 LINE_H = 58             # espaçamento vertical entre lines
 # y da base da ÚLTIMA linha. As lines empilham para cima, então este valor
-# precisa deixar espaço abaixo da faixa de vídeo para a legenda mais alta:
-# com fonte 1280x720 escalada para FG_SCALE_W, a faixa termina em y=1340 e
+# precisa deixar espaço abaixo da span de vídeo para a legenda mais alta:
+# com fonte 1280x720 escalada para FG_SCALE_W, a span termina em y=1340 e
 # sobram 580px de blur. Em 1360 uma legenda de 5 lines subia até y=1128 e
 # invadia o vídeo; em 1560 ela começa em 1328 e fica inteira no blur.
 BASE_Y = 1560
@@ -97,11 +97,11 @@ ABITRATE = "160k"
 WHISPER_MODEL = "small"   # seguro p/ GPUs de 4GB; 'medium' estourou uma GTX 1650
 WHISPER_LANG = "pt"
 
-# Agrupamento de palavras -> frases (parser VTT e Whisper)
+# Agrupamento de words -> frases (parser VTT e Whisper)
 SEG_MAX_GAP = 0.7         # pausa (s) que quebra a frase
 SEG_MAX_DUR = 5.0         # duração máx. (s) de um segmento
 SEG_MAX_CHARS = 75        # nº máx. de caracteres antes de quebrar
-SEG_END_PAD = 0.4         # padding no fim de cada segmento (s)
+SEG_END_PAD = 0.4         # padding no end de cada segmento (s)
 
 # ---------------------------------------------------------------------------
 # Curadoria
@@ -158,7 +158,7 @@ POST_RULE_Y = 2242
 
 # Rodapé (o filete já vem desenhado no template)
 # Nome do programa, usado no badge da thumbnail. Trocar aqui vale para todos
-# os episódios — é identidade do canal, não dado de um episódio.
+# os episódios — é identity do canal, não dado de um episódio.
 SHOW_NAME = "MEU PODCAST"
 
 POST_NAME_Y = 2338
@@ -183,5 +183,5 @@ POST_MONO = _bundled_font("DejaVuSansMono-Bold.ttf")
 # Publicação agendada
 # ---------------------------------------------------------------------------
 # Fuso da publicação — explícito porque máquina em UTC perto da meia-noite
-# mudaria o dia da publicação em silêncio — data sempre com zona.
+# mudaria o day da publicação em silêncio — data sempre com zona.
 PUBLISH_TZ = "America/Sao_Paulo"

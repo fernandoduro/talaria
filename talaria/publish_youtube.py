@@ -32,25 +32,25 @@ def privacy() -> str:
     `YT_PRIVACY=unlised` publicaria aberto justo quando se pediu o contrário,
     e vídeo público não se despublica sem já ter sido visto.
     """
-    valor = (os.environ.get("YT_PRIVACY") or "").strip().lower()
-    if not valor:
+    value = (os.environ.get("YT_PRIVACY") or "").strip().lower()
+    if not value:
         return DEFAULT_PRIVACY
-    if valor not in PRIVACY_VALUES:
+    if value not in PRIVACY_VALUES:
         raise ValueError(
-            f"YT_PRIVACY={valor!r} não é válido — use "
+            f"YT_PRIVACY={value!r} não é válido — use "
             f"{', '.join(PRIVACY_VALUES)}."
         )
-    return valor
+    return value
 
 
 def _credentials() -> Credentials:
     path = os.environ.get("YT_CLIENT_SECRET_PATH", "")
     refresh = os.environ.get("YT_REFRESH_TOKEN", "")
-    faltam = [n for n, v in (("YT_CLIENT_SECRET_PATH", path),
+    missing = [n for n, v in (("YT_CLIENT_SECRET_PATH", path),
                              ("YT_REFRESH_TOKEN", refresh)) if not v]
-    if faltam:
+    if missing:
         raise RuntimeError(
-            f"{', '.join(faltam)} não definido no ambiente (.env). Rode "
+            f"{', '.join(missing)} não definido no ambiente (.env). Rode "
             f"'python scripts/youtube_auth.py <client_secret.json>' uma vez "
             f"para gerar o refresh token."
         )
@@ -64,17 +64,17 @@ def _credentials() -> Credentials:
 def upload(video_path: str, title: str, description: str) -> dict:
     """Sobe o vídeo (resumable) e devolve id e URL do Short."""
     service = build("youtube", "v3", credentials=_credentials())
-    corpo = {
+    body = {
         "snippet": {"title": title, "description": description,
                     "categoryId": CATEGORY_ID},
         "status": {"privacyStatus": privacy(),
                    "selfDeclaredMadeForKids": False},
     }
     media = MediaFileUpload(video_path, mimetype="video/mp4", resumable=True)
-    req = service.videos().insert(part="snippet,status", body=corpo,
+    req = service.videos().insert(part="snippet,status", body=body,
                                   media_body=media)
-    resposta = None
-    while resposta is None:
-        _, resposta = req.next_chunk()
-    vid = resposta["id"]
+    response = None
+    while response is None:
+        _, response = req.next_chunk()
+    vid = response["id"]
     return {"id": vid, "url": f"https://www.youtube.com/shorts/{vid}"}

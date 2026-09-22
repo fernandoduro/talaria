@@ -27,9 +27,9 @@ def wrap(text: str) -> list:
 
 
 def validate_card(text: str) -> dict:
-    """O texto fits num card? Mede na fonte, não conta caracteres.
+    """O texto fits num card? Mede na fonte, não account caracteres.
 
-    Não encolhe a fonte para forçar o encaixe: fonte menor quebra a hierarquia
+    Não encolhe a fonte para forçar o encaixe: fonte smaller quebra a hierarquia
     visual e denuncia texto espremido. Card que estoura é problema editorial —
     encurtar a frase ou virar mais um card do carrossel.
     """
@@ -43,24 +43,24 @@ def validate_card(text: str) -> dict:
     # assim mesmo, porque não há onde quebrar. Passaria na contagem de lines
     # e sairia cortada na lateral da imagem, sem aviso.
     fnt = _quote_font()
-    for linha in lines:
-        largura = fnt.getlength(linha)
-        if largura > config.POST_TEXT_W:
+    for line in lines:
+        width = fnt.getlength(line)
+        if width > config.POST_TEXT_W:
             return {
                 "fits": False,
                 "lines": len(lines),
-                "reason": (f"'{linha.strip()}' não cabe na largura do card "
-                           f"({round(largura)}px de {config.POST_TEXT_W}) "
+                "reason": (f"'{line.strip()}' não cabe na largura do card "
+                           f"({round(width)}px de {config.POST_TEXT_W}) "
                            f"— palavra longa demais, sem onde quebrar"),
             }
 
     n = len(lines)
     if n > config.POST_QUOTE_MAX_LINES:
-        excesso = n - config.POST_QUOTE_MAX_LINES
+        excess = n - config.POST_QUOTE_MAX_LINES
         return {
             "fits": False,
             "lines": n,
-            "reason": (f"{n} linhas, {excesso} a mais que o limite de "
+            "reason": (f"{n} linhas, {excess} a mais que o limite de "
                        f"{config.POST_QUOTE_MAX_LINES} — encurte a frase ou "
                        f"quebre em outro card"),
         }
@@ -90,16 +90,16 @@ def episode_author(project_dir: str, who: str = "") -> dict:
 
     c = guests[0]
     if who:
-        alvo = who.strip().casefold()
-        achado = [x for x in guests
-                  if (x.get("name") or "").strip().casefold() == alvo]
-        if not achado:
+        target = who.strip().casefold()
+        matches = [x for x in guests
+                  if (x.get("name") or "").strip().casefold() == target]
+        if not matches:
             names = ", ".join(x.get("name", "") for x in guests) or "(nenhum)"
             raise ValueError(
                 f"'{who}' não é convidado deste episódio — o episode.json "
                 f"tem: {names}"
             )
-        c = achado[0]
+        c = matches[0]
 
     return {"name": c.get("name", ""), "role": c.get("role", ""),
             "company": ep.get("company", "")}
@@ -144,9 +144,9 @@ def render_card(text: str, author: dict, out_path: str, template: str = None):
     # partem da mesma altura, então o texto não pula a cada deslize do
     # carrossel.
     fcit = _quote_font()
-    for i, linha in enumerate(wrap(text)):
+    for i, line in enumerate(wrap(text)):
         y = config.POST_QUOTE_Y + i * config.POST_QUOTE_STEP
-        d.text((config.POST_MARGIN_X, y), linha, font=fcit,
+        d.text((config.POST_MARGIN_X, y), line, font=fcit,
                fill=config.POST_QUOTE_COLOR)
 
     # Rodapé (o filete já vem desenhado no template)
@@ -155,8 +155,8 @@ def render_card(text: str, author: dict, out_path: str, template: str = None):
            font=name_font, fill=config.POST_NAME_COLOR)
 
     role_font = _truetype(config.POST_MONO, config.POST_ROLE_SIZE)
-    rodape = " · ".join(p for p in (author.get("role"), author.get("company")) if p)
-    d.text((config.POST_MARGIN_X, config.POST_ROLE_Y), rodape,
+    footer = " · ".join(p for p in (author.get("role"), author.get("company")) if p)
+    d.text((config.POST_MARGIN_X, config.POST_ROLE_Y), footer,
            font=role_font, fill=config.POST_ROLE_COLOR)
 
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
@@ -177,9 +177,9 @@ def file_slug(slug: str) -> str:
     project e publicá-lo. Os dois precisam da MESMA regra — duas cópias
     divergem na primeira mudança e a divergência só aparece publicada.
     """
-    limpo = re.sub(r"[^\w.-]", "_", (slug or "").strip(), flags=re.UNICODE)
-    limpo = limpo.strip("._-")
-    return limpo or "post"
+    cleaned = re.sub(r"[^\w.-]", "_", (slug or "").strip(), flags=re.UNICODE)
+    cleaned = cleaned.strip("._-")
+    return cleaned or "post"
 
 
 def load(project_dir: str) -> list:
@@ -195,7 +195,7 @@ def load(project_dir: str) -> list:
 
 
 def generate(project_dir: str) -> list:
-    """Renderiza todos os posts do posts.json. Devolve os caminhos gerados.
+    """Renderiza todos os posts do posts.json. Devolve os paths generated.
 
     Valida TODOS os cards antes de escrever qualquer arquivo: material pela
     metade numa pasta de publicação é pior que error na hora — o gestor pode
@@ -209,7 +209,7 @@ def generate(project_dir: str) -> list:
     names = [ep.get("company", "")] + [c.get("name", "")
                                        for c in (ep.get("guests") or [])]
     # 1ª passada: limpa e validate tudo.
-    planejado = []
+    planned = []
     for p in posts:
         slug = p.get("slug") or "post"
         cards = p.get("cards") or []
@@ -219,47 +219,47 @@ def generate(project_dir: str) -> list:
         # Quem assina: o `who` do post (episódio com dois guests) ou, por
         # omissão, o primeiro. Resolvido aqui na 1ª passada para que um name
         # errado aborte antes de escrever qualquer arquivo.
-        autor = episode_author(project_dir, who=p.get("who", ""))
+        author = episode_author(project_dir, who=p.get("who", ""))
 
         # A legenda é validada AQUI, não na hora de gravar o .txt: o contrato
         # desta função é abortar antes de escrever qualquer arquivo, e um kind
         # errado descoberto depois já teria deixado os PNGs na pasta.
         caption.validate("caption", p.get("caption"), f"post {slug}")
-        for i, bruto in enumerate(cards, start=1):
-            if not isinstance(bruto, str):
+        for i, raw in enumerate(cards, start=1):
+            if not isinstance(raw, str):
                 raise ValueError(
                     f"post '{slug}' card {i}: esperava texto, recebeu "
-                    f"{type(bruto).__name__} — cada item de 'cards' é a "
+                    f"{type(raw).__name__} — cada item de 'cards' é a "
                     f"citação daquele card"
                 )
-            texto = clean_quote(bruto, names)
-            v = validate_card(texto)
+            text = clean_quote(raw, names)
+            v = validate_card(text)
             if not v["fits"]:
-                onde = f"{slug} card {i}" if len(cards) > 1 else slug
-                raise ValueError(f"'{onde}': {v['reason']}")
-            arq = file_slug(slug)
-            name = (f"post_{arq}.png" if len(cards) == 1
-                    else f"post_{arq}_{i}.png")
-            planejado.append((name, texto, autor))
+                where = f"{slug} card {i}" if len(cards) > 1 else slug
+                raise ValueError(f"'{where}': {v['reason']}")
+            fname = file_slug(slug)
+            name = (f"post_{fname}.png" if len(cards) == 1
+                    else f"post_{fname}_{i}.png")
+            planned.append((name, text, author))
 
     # 2ª passada: write.
-    saida = layout.posts_png(project_dir)
-    os.makedirs(saida, exist_ok=True)
-    gerados = []
-    for name, texto, quem_assina in planejado:
-        gerados.append(render_card(texto, quem_assina,
-                                   os.path.join(saida, name)))
+    output_dir = layout.posts_png(project_dir)
+    os.makedirs(output_dir, exist_ok=True)
+    generated = []
+    for name, text, signer in planned:
+        generated.append(render_card(text, signer,
+                                   os.path.join(output_dir, name)))
         print(f"[post] {name}")
 
     # Um caption por POST, não por card: um carrossel é uma publicação só, com
-    # uma legenda só. Por isso a lista vem de `posts` e não de `planejado`.
-    write_captions(saida,
+    # uma legenda só. Por isso a lista vem de `posts` e não de `planned`.
+    write_captions(output_dir,
                      [(p.get("slug") or "post", p.get("caption", "")) for p in posts],
                      (texts.load(project_dir) or {}).get("hashtags", ""))
-    return gerados
+    return generated
 
 
-def write_captions(saida: str, captions: list, hashtags: str) -> list:
+def write_captions(output_dir: str, captions: list, hashtags: str) -> list:
     """Grava o `.txt` de publicação de cada post na pasta de saída.
 
     `captions` é [(slug, caption)] — um item por POST. O name do arquivo usa o
@@ -269,12 +269,12 @@ def write_captions(saida: str, captions: list, hashtags: str) -> list:
     O slug passa pelo mesmo saneamento do PNG: sem isso um `../` no JSON
     escreveria o `.txt` fora da pasta de publicação.
     """
-    escritos = []
+    written = []
     for slug, text in captions:
         caption.validate("caption", text, f"post {slug}")
         if not (text or "").strip():
             print(f"[caption] !! {slug}: sem legenda — o .txt sai só com as "
                   f"hashtags. Preencha em decisions/posts.json.")
-        base = os.path.join(saida, f"post_{file_slug(slug)}.png")
-        escritos.append(caption.write(base, caption.compose(text, hashtags)))
-    return escritos
+        base = os.path.join(output_dir, f"post_{file_slug(slug)}.png")
+        written.append(caption.write(base, caption.compose(text, hashtags)))
+    return written

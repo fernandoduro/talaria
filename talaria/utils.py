@@ -87,26 +87,26 @@ def _expand_contractions(t: str) -> str:
 
     Preserva a maiúscula inicial: "Tá bom" -> "Está bom".
     """
-    # Protege as locuções antes de mexer nas contrações; devolve no fim.
-    reservas = []
+    # Protege as locuções antes de mexer nas contrações; devolve no end.
+    reserved = []
 
     def _guarda(m):
-        reservas.append(m.group(0))
-        return f"\x00{len(reservas) - 1}\x00"
+        reserved.append(m.group(0))
+        return f"\x00{len(reserved) - 1}\x00"
 
     t = RE_PRO_LATIM.sub(_guarda, t)
 
-    for pat, alvo in _CONTRACTIONS:
-        if alvo is None:      # na lista só para documentar a exclusão
+    for pat, target in _CONTRACTIONS:
+        if target is None:      # na lista só para documentar a exclusão
             continue
 
-        def _sub(m, alvo=alvo):
+        def _sub(m, target=target):
             orig = m.group(0)
-            return alvo.capitalize() if orig[0].isupper() else alvo
+            return target.capitalize() if orig[0].isupper() else target
 
         t = re.sub(rf"\b{pat}\b", _sub, t, flags=re.IGNORECASE)
 
-    for i, orig in enumerate(reservas):
+    for i, orig in enumerate(reserved):
         t = t.replace(f"\x00{i}\x00", orig)
     return t
 
@@ -130,26 +130,26 @@ _PHONETIC_EQUIVALENTS = [
 def _phonetic_pattern(name: str) -> str:
     """Regex que casa o name e suas variantes de transcrição.
 
-    Só as letras internas viram classe de caractere; consoante fora da tabela
+    Só as letras internas viram char_class de caractere; consoante fora da tabela
     entra literal, para o padrão não ficar frouxo a ponto de casar palavra
     comum ("zarpa" não pode virar "Zarvik").
     """
-    partes = []
+    parts = []
     for ch in name.lower():
-        for letra, classe in _PHONETIC_EQUIVALENTS:
-            if ch == letra:
-                partes.append(classe)
+        for letter, char_class in _PHONETIC_EQUIVALENTS:
+            if ch == letter:
+                parts.append(char_class)
                 break
         else:
-            partes.append(re.escape(ch))
+            parts.append(re.escape(ch))
     # 'l' extra no meio ("Zlarvik" para "Zarvik") é error comum de transcrição.
-    return partes[0] + "l?" + "".join(partes[1:])
+    return parts[0] + "l?" + "".join(parts[1:])
 
 
 # Nomes de company que também são palavra do português. Reescrever a caixa
 # deles estraga a frase, então ficam de fora da correção. Lista curta e
 # explícita: adivinhar "é palavra comum?" sem dicionário erra mais do que
-# acerta, e um name faltando aqui só perde a capitalização automática.
+# acerta, e um name missing aqui só perde a capitalização automática.
 _COMMON_WORDS = {
     "matriz", "acho", "praia", "ponte", "campo", "norte", "sul", "vida",
     "casa", "porto", "rede", "ideia", "meta", "alma", "onda", "raiz",
@@ -182,12 +182,12 @@ def fix_proper_nouns(txt: str, names: list) -> str:
             # Grafia já correta (ou só diferindo por caixa): não mexe.
             return name if m.group(0).lower() != name.lower() else m.group(0)
 
-        achados = pat.findall(txt)
+        matches = pat.findall(txt)
         # Nenhuma variante errada: só o próprio name, talvez em caixa baixa.
         # Aí a única coisa a fazer é acertar a caixa — e mesmo isso fica de
         # fora quando o name é palavra do idioma ("a matriz de risco"), que a
         # transcrição escreveu certo e virar "a Matriz" estragaria.
-        if achados and all(a.lower() == name.lower() for a in achados):
+        if matches and all(a.lower() == name.lower() for a in matches):
             if not _is_common_word(name):
                 txt = re.sub(rf"\b{re.escape(name)}\b", name, txt,
                              flags=re.IGNORECASE)
@@ -217,7 +217,7 @@ def clean_caption(txt: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Agrupamento de palavras (t, palavra) -> segmentos {start, end, text}
+# Agrupamento de words (t, palavra) -> segmentos {start, end, text}
 # ---------------------------------------------------------------------------
 def group_words_into_segments(words):
     """Agrupa uma lista de (tempo, palavra) em segmentos de frase.

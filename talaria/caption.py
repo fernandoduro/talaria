@@ -74,7 +74,7 @@ def episode_line(url: str | None) -> str:
 
 
 def compose(description: str | None, hashtags: str | None,
-          url_episodio: str | None = None) -> str:
+          episode_url: str | None = None) -> str:
     """Junta descrição, chamada do episódio e hashtags num caption pronto.
 
     Qualquer um dos blocos pode faltar e o resultado continua utilizável: sem
@@ -82,7 +82,7 @@ def compose(description: str | None, hashtags: str | None,
     O que não pode é sobrar linha em branco solta numa das pontas, porque o
     texto vai direto para o campo de publicação.
 
-    `url_episodio` é opcional de propósito: só a descrição do YouTube a
+    `episode_url` é opcional de propósito: só a descrição do YouTube a
     recebe. No Instagram a URL não é clicável e ainda empurra o leitor para
     fora do app, então a legenda do Reels sai sem ela — é o mesmo `.txt` de
     antes.
@@ -90,9 +90,9 @@ def compose(description: str | None, hashtags: str | None,
     `None` chega quando a chave não existe no JSON — trata como vazio em vez de
     estourar, que é o caso comum de clip antigo, anterior a este campo.
     """
-    partes = [(description or "").strip(), episode_line(url_episodio),
+    parts = [(description or "").strip(), episode_line(episode_url),
               (hashtags or "").strip()]
-    return SEPARATOR.join(p for p in partes if p)
+    return SEPARATOR.join(p for p in parts if p)
 
 
 def compose_episode(title: str | None, description: str | None,
@@ -106,8 +106,8 @@ def compose_episode(title: str | None, description: str | None,
     A descrição já vem com os próprios blocos e separadores; é inserida como
     está, sem reflow.
     """
-    partes = [(p or "").strip() for p in (title, description, hashtags)]
-    return SEPARATOR.join(p for p in partes if p)
+    parts = [(p or "").strip() for p in (title, description, hashtags)]
+    return SEPARATOR.join(p for p in parts if p)
 
 
 def txt_path(piece_path: str) -> str:
@@ -116,8 +116,8 @@ def txt_path(piece_path: str) -> str:
     Recebe o path da peça já resolvido pelo `layout` em vez de montar um
     novo, para não reintroduzir path por literal fora do `layout.py`.
     """
-    raiz, _ = os.path.splitext(piece_path)
-    return raiz + ".txt"
+    stem, _ = os.path.splitext(piece_path)
+    return stem + ".txt"
 
 
 def write(piece_path: str, text: str) -> str:
@@ -127,8 +127,8 @@ def write(piece_path: str, text: str) -> str:
     acumular versão antiga ao lado (o mesmo contrato do `.mp4`, que também é
     reescrito no lugar).
     """
-    destino = txt_path(piece_path)
-    os.makedirs(os.path.dirname(os.path.abspath(destino)), exist_ok=True)
-    with open(destino, "w", encoding="utf-8") as f:
+    destination = txt_path(piece_path)
+    os.makedirs(os.path.dirname(os.path.abspath(destination)), exist_ok=True)
+    with open(destination, "w", encoding="utf-8") as f:
         f.write(text)
-    return destino
+    return destination

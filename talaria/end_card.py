@@ -41,17 +41,17 @@ def compose_card() -> Image.Image:
     fonte = ImageFont.truetype(config.FONT, _HANDLE_SIZE)
     d = ImageDraw.Draw(frame)
     bbox = d.textbbox((0, 0), config.CARD_HANDLE, font=fonte)
-    arroba_h = bbox[3] - bbox[1]
+    handle_h = bbox[3] - bbox[1]
 
     # Bloco logo + espaço + @ centralizado como uma unidade, não cada peça
     # centralizada isoladamente — senão a distância entre as duas varia com o
     # tamanho da fonte do sistema.
-    espaco = 40
-    bloco_h = logo_h + espaco + arroba_h
-    topo = (config.FRAME_H - bloco_h) // 2
+    space = 40
+    block_h = logo_h + space + handle_h
+    top = (config.FRAME_H - block_h) // 2
 
-    frame.paste(logo_r, ((config.FRAME_W - logo_w) // 2, topo), logo_r)
-    d.text(((config.FRAME_W - (bbox[2] - bbox[0])) // 2, topo + logo_h + espaco),
+    frame.paste(logo_r, ((config.FRAME_W - logo_w) // 2, top), logo_r)
+    d.text(((config.FRAME_W - (bbox[2] - bbox[0])) // 2, top + logo_h + space),
            config.CARD_HANDLE, font=fonte, fill=config.CARD_HANDLE_COLOR)
 
     return frame
@@ -64,22 +64,22 @@ def cached_card(project_dir: str) -> str:
     gravado, regenera. Trocar o arquivo do logo (redesign) já basta — não é
     preciso apagar nada à mão.
     """
-    destino = layout.ensure_dir(layout.end_card_mp4(project_dir))
-    se_existe = os.path.exists(destino)
-    if se_existe and os.path.getmtime(destino) >= os.path.getmtime(config.LOGO_PATH):
-        return destino
+    destination = layout.ensure_dir(layout.end_card_mp4(project_dir))
+    exists = os.path.exists(destination)
+    if exists and os.path.getmtime(destination) >= os.path.getmtime(config.LOGO_PATH):
+        return destination
 
     # Escreve num arquivo temporário próprio deste processo e só troca pelo
     # name final com os.replace (atômico no mesmo filesystem) — mesmo padrão
     # do published.json. Sem isso, dois `render` concorrentes no mesmo
     # episódio (comum: um terminal por clip) escreveriam no mesmo
-    # `frame_path`/`destino` e um corromperia o card do outro no meio do
+    # `frame_path`/`destination` e um corromperia o card do outro no meio do
     # ffmpeg, sem nenhum error visível.
     # ffmpeg decide o formato de saída pela extensão — precisa terminar em
     # .mp4/.png, não pode ser um sufixo qualquer depois delas.
-    raiz = destino[:-4] if destino.endswith(".mp4") else destino
-    tmp_destino = f"{raiz}.{os.getpid()}.tmp.mp4"
-    frame_path = f"{raiz}.{os.getpid()}.tmp.png"
+    stem = destination[:-4] if destination.endswith(".mp4") else destination
+    tmp_dest = f"{stem}.{os.getpid()}.tmp.mp4"
+    frame_path = f"{stem}.{os.getpid()}.tmp.png"
     compose_card().save(frame_path)
     try:
         cmd = [
@@ -91,16 +91,16 @@ def cached_card(project_dir: str) -> str:
             "-c:v", config.VCODEC, "-preset", config.PRESET, "-crf", config.CRF,
             "-pix_fmt", config.PIX_FMT,
             "-c:a", config.ACODEC, "-b:a", config.ABITRATE,
-            "-shortest", tmp_destino,
+            "-shortest", tmp_dest,
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError(f"ffmpeg falhou ao gerar o card:\n{r.stderr[-1500:]}")
-        os.replace(tmp_destino, destino)
+        os.replace(tmp_dest, destination)
     finally:
         if os.path.exists(frame_path):
             os.remove(frame_path)
-        if os.path.exists(tmp_destino):
-            os.remove(tmp_destino)
+        if os.path.exists(tmp_dest):
+            os.remove(tmp_dest)
 
-    return destino
+    return destination

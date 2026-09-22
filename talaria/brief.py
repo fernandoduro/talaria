@@ -22,8 +22,8 @@ def readable_transcript(project_dir: str) -> str:
         segs = json.load(f)["segments"]
     lines = []
     for s in segs:
-        marca = ">> " if s.get("turn") else ""
-        lines.append(f"[{utils.mmss(s['start'])}] {marca}{s['text']}")
+        marker = ">> " if s.get("turn") else ""
+        lines.append(f"[{utils.mmss(s['start'])}] {marker}{s['text']}")
     return "\n".join(lines)
 
 
@@ -58,28 +58,28 @@ def fill_template(template: str, transcript: str, metadata: str,
             .replace("{{CORTES}}", clips))
 
 
-def readable_curation(estado: dict) -> str:
+def readable_curation(state: dict) -> str:
     """Estado da curation em texto, injetado no prompt de cortes."""
-    approved = estado.get("approved", [])
-    rejected = estado.get("rejected", [])
+    approved = state.get("approved", [])
+    rejected = state.get("rejected", [])
 
     if not approved and not rejected:
         return ("PRIMEIRA RODADA — nenhum corte avaliado ainda.\n"
                 "Proponha 10 trechos, ordenados do mais forte para o mais fraco.")
 
     lines = [
-        f"Rodada: {estado.get('rounds', 0)}",
-        f"Meta: {estado['target']} cortes",
+        f"Rodada: {state.get('rounds', 0)}",
+        f"Meta: {state['target']} cortes",
         f"Aprovados: {len(approved)}",
-        f"VAGAS RESTANTES: {cur.slots_left(estado)} — proponha exatamente este número.",
+        f"VAGAS RESTANTES: {cur.slots_left(state)} — proponha exatamente este número.",
         "",
         "COMPOSIÇÃO POR TIPO:",
     ]
-    for kind, n in cur.composition(estado).items():
+    for kind, n in cur.composition(state).items():
         lines.append(f"  {kind}: {n}")
-    ausentes = cur.missing_kinds(estado)
-    if ausentes:
-        lines.append(f"  TIPOS AUSENTES (priorize): {', '.join(ausentes)}")
+    missing = cur.missing_kinds(state)
+    if missing:
+        lines.append(f"  TIPOS AUSENTES (priorize): {', '.join(missing)}")
 
     lines.append("")
     lines.append("FAIXAS QUEIMADAS — não proponha nada que se sobreponha a elas:")
@@ -90,7 +90,7 @@ def readable_curation(estado: dict) -> str:
         lines.append(f"  [{utils.mmss(r['start'])}-{utils.mmss(r['end'])}] "
                       f"REJEITADO ({r.get('reason', '')}): {r.get('summary', '')}")
 
-    ms = cur.reasons(estado)
+    ms = cur.reasons(state)
     if ms:
         lines.append("")
         lines.append("MOTIVOS DE REJEIÇÃO ACUMULADOS — aplique como filtro:")
@@ -114,18 +114,18 @@ def build(project_dir: str, kind: str) -> str:
     if kind not in ("materials", "clips"):
         raise ValueError("tipo deve ser 'materials' ou 'clips'")
     template = _read_prompt(f"{kind}.md")
-    estado_txt = ""
+    state_txt = ""
     if kind == "clips":
-        estado_txt = readable_curation(cur.load(project_dir))
-    conteudo = fill_template(
+        state_txt = readable_curation(cur.load(project_dir))
+    content = fill_template(
         template,
         transcript=readable_transcript(project_dir),
         metadata=readable_metadata(project_dir),
-        curation=estado_txt,
+        curation=state_txt,
     )
     out = layout.ensure_dir(layout.brief(project_dir, kind))
     with open(out, "w", encoding="utf-8") as f:
-        f.write(conteudo)
+        f.write(content)
     return out
 
 
@@ -150,38 +150,38 @@ def clip_speech(project_dir: str, clip: dict) -> str:
     with open(path, encoding="utf-8") as f:
         segs = json.load(f)["segments"]
 
-    partes = []
+    parts = []
     for s in segs:
-        ini, fim = s["start"], s["end"]
-        if fim <= clip["start"] or ini >= clip["end"]:
+        start, end = s["start"], s["end"]
+        if end <= clip["start"] or start >= clip["end"]:
             continue
         txt = (s.get("text") or "").strip()
         if not txt:
             continue
-        if ini < clip["start"] or fim > clip["end"]:
-            dur = fim - ini
+        if start < clip["start"] or end > clip["end"]:
+            dur = end - start
             if dur > 0:
                 txt = _trim_text(
                     txt,
-                    (max(ini, clip["start"]) - ini) / dur,
-                    (min(fim, clip["end"]) - ini) / dur,
+                    (max(start, clip["start"]) - start) / dur,
+                    (min(end, clip["end"]) - start) / dur,
                 )
         if txt:
-            partes.append(txt)
-    return " ".join(partes).strip()
+            parts.append(txt)
+    return " ".join(parts).strip()
 
 
 def readable_clips(project_dir: str, clips: list) -> str:
     """Bloco com a fala de cada clip selecionado, para a sessão de curation."""
-    partes = []
+    parts = []
     for c in clips:
-        partes.append(
+        parts.append(
             f"### {c['slug']}  [{utils.mmss(c['start'])}–{utils.mmss(c['end'])}]\n\n"
             f"- Tipo: {c.get('kind', '')}\n"
             f"- Texto de tela do vídeo: {c.get('screen_text', '')}\n\n"
             f"Fala literal:\n\n{clip_speech(project_dir, c)}\n"
         )
-    return "\n".join(partes)
+    return "\n".join(parts)
 
 
 def build_posts(project_dir: str, clips: list) -> str:
@@ -192,17 +192,17 @@ def build_posts(project_dir: str, clips: list) -> str:
     episódio todo convidaria a escolher fala que nunca virou vídeo.
     """
     from . import config
-    limite = (
+    limit = (
         f"Máximo de {config.POST_QUOTE_MAX_LINES} linhas por card, cerca de "
         f"100 caracteres. A citação de referência tem 96.\n"
     )
-    conteudo = fill_template(
+    content = fill_template(
         _read_prompt("posts.md"),
         transcript="",
-        metadata=readable_metadata(project_dir) + "\n" + limite,
+        metadata=readable_metadata(project_dir) + "\n" + limit,
         clips=readable_clips(project_dir, clips),
     )
     out = layout.ensure_dir(layout.brief(project_dir, "posts"))
     with open(out, "w", encoding="utf-8") as f:
-        f.write(conteudo)
+        f.write(content)
     return out

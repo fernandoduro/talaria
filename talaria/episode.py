@@ -78,8 +78,8 @@ def youtube_url(project_dir: str) -> str:
             ep = json.load(f) or {}
     except (json.JSONDecodeError, OSError):
         return ""
-    valor = ep.get("youtube_url")
-    return valor.strip() if isinstance(valor, str) else ""
+    value = ep.get("youtube_url")
+    return value.strip() if isinstance(value, str) else ""
 
 
 def load(project_dir: str) -> dict:
@@ -91,29 +91,29 @@ def load(project_dir: str) -> dict:
         )
     with open(path, encoding="utf-8") as f:
         ep = json.load(f)
-    faltando = [c for c in REQUIRED_FIELDS if c not in ep]
-    if faltando:
-        raise ValueError(f"episode.json incompleto — falta: {', '.join(faltando)}")
+    missing = [c for c in REQUIRED_FIELDS if c not in ep]
+    if missing:
+        raise ValueError(f"episode.json incompleto — falta: {', '.join(missing)}")
 
     # `guests` fica fora da checagem de vazio de propósito: o prompt de materiais
     # prevê "episódio sem convidado externo, só com os apresentadores", então
     # lista vazia é preenchimento legítimo, não campo esquecido.
-    vazios = [c for c in REQUIRED_NONEMPTY_FIELDS
+    empty = [c for c in REQUIRED_NONEMPTY_FIELDS
               if ep[c] == "" or ep[c] == [] or ep[c] == 0]
-    if vazios:
+    if empty:
         raise ValueError(
-            f"episode.json não preenchido — campos em branco: {', '.join(vazios)}"
+            f"episode.json não preenchido — campos em branco: {', '.join(empty)}"
         )
 
     _validate_company_or_topic(ep)
 
-    for campo in ("season", "episode"):
+    for field in ("season", "episode"):
         try:
-            ep[campo] = int(ep[campo])
+            ep[field] = int(ep[field])
         except (TypeError, ValueError):
             raise ValueError(
-                f"episode.json: '{campo}' deve ser número inteiro, "
-                f"recebido {ep[campo]!r}"
+                f"episode.json: '{field}' deve ser número inteiro, "
+                f"recebido {ep[field]!r}"
             ) from None
     return ep
 

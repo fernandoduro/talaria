@@ -1,4 +1,4 @@
-"""Agenda de publicação: que peça sai em que dia.
+"""Agenda de publicação: que peça sai em que day.
 
 O calendário é decisão editorial — o gestor write decisions/schedule.json
 como write posts.json. Este módulo validate contra as fontes (moments.json,
@@ -35,7 +35,7 @@ def platforms_of(item: dict) -> tuple:
 
 
 def date_of(item: dict) -> dt.date:
-    """A data do item como date. fromisoformat validate formato E dia real."""
+    """A data do item como date. fromisoformat validate formato E day real."""
     return dt.date.fromisoformat(item["date"])
 
 
@@ -71,11 +71,11 @@ def load(pd: str) -> list:
     for i, item in enumerate(items, start=1):
         slug = item.get("slug") or ""
         kind = item.get("kind") or ""
-        onde = f"item {i} da agenda ('{slug or '?'}')"
+        where = f"item {i} da agenda ('{slug or '?'}')"
         if kind not in PLATFORMS:
-            raise ValueError(f"{onde}: tipo {kind!r} — use 'clip' ou 'post'")
+            raise ValueError(f"{where}: tipo {kind!r} — use 'clip' ou 'post'")
         if not slug:
-            raise ValueError(f"{onde}: sem slug")
+            raise ValueError(f"{where}: sem slug")
         # O slug vira name de arquivo dentro de publish/. Barra ou `..` o
         # tiram da pasta do episódio, e aí o publish encontra um mp4 de fora
         # do project, passa na pré-checagem e publica a peça errada — com o
@@ -83,7 +83,7 @@ def load(pd: str) -> list:
         # à mão no curation.json e ninguém o validate antes daqui.
         if "/" in slug or "\\" in slug or slug.strip(". ") != slug:
             raise ValueError(
-                f"{onde}: slug não pode ter barra nem começar/terminar com "
+                f"{where}: slug não pode ter barra nem começar/terminar com "
                 f"ponto — ele vira nome de arquivo em publish/, e assim "
                 f"apontaria para fora da pasta do episódio"
             )
@@ -93,7 +93,7 @@ def load(pd: str) -> list:
         # Publicar/registrar já separam os dois por platform.
         if (kind, slug) in seen:
             raise ValueError(
-                f"{onde}: {kind} aparece duas vezes — para mudar a data, "
+                f"{where}: {kind} aparece duas vezes — para mudar a data, "
                 f"edite o item existente em vez de repetir"
             )
         seen.add((kind, slug))
@@ -101,7 +101,7 @@ def load(pd: str) -> list:
             date_of(item)
         except (TypeError, ValueError):
             raise ValueError(
-                f"{onde}: data {item.get('date')!r} inválida — use "
+                f"{where}: data {item.get('date')!r} inválida — use "
                 f"YYYY-MM-DD de um dia que existe"
             )
         if kind == "clip":
@@ -109,7 +109,7 @@ def load(pd: str) -> list:
                 clips = {m.get("slug") for m in moments(pd)}
             if slug not in clips:
                 raise ValueError(
-                    f"{onde}: não está em {layout.moments(pd)} — "
+                    f"{where}: não está em {layout.moments(pd)} — "
                     f"cortes disponíveis: {', '.join(sorted(clips))}"
                 )
         else:
@@ -117,7 +117,7 @@ def load(pd: str) -> list:
                 posts = {p.get("slug"): p for p in post_instagram.load(pd)}
             if slug not in posts:
                 raise ValueError(
-                    f"{onde}: não está em {layout.posts(pd)} — "
+                    f"{where}: não está em {layout.posts(pd)} — "
                     f"posts disponíveis: {', '.join(sorted(posts))}"
                 )
             cards = posts[slug].get("cards") or []
@@ -130,9 +130,9 @@ def load(pd: str) -> list:
     return items
 
 
-def pending(pd: str, dia: dt.date = None, only: list = None,
-             plataformas: list = None) -> list:
-    """Pares (item, platform) devidos até `dia` e ainda não publicados.
+def pending(pd: str, day: dt.date = None, only: list = None,
+             platforms: list = None) -> list:
+    """Pares (item, platform) devidos até `day` e ainda não publicados.
 
     A unidade é (slug, platform), não o item: um clip publica em YouTube E
     Reels, e se só uma passou, o retry publica só a que faltou — pendência
@@ -145,43 +145,43 @@ def pending(pd: str, dia: dt.date = None, only: list = None,
     `only=None` é "sem filtro"; `only=[]` é "filtre para nada" e devolve
     vazio. A distinção é `is not None` de propósito: o chamador que compose a
     lista a partir de uma flag vazia pediria a agenda inteira sem querer, e
-    publicaria o dia todo achando que tinha restringido a um slug.
+    publicaria o day todo achando que tinha restringido a um slug.
 
-    `plataformas` restringe a quais plataformas sair. Serve para publish
+    `platforms` restringe a quais platforms sair. Serve para publish
     quando só uma está configurada: um clip cobra credencial do YouTube E do
     Instagram, então sem isso ele fica inteiro parado. O que não sai continua
     pending — a trava é por (slug, platform), então o resto vai depois.
 
-    Atrasado (data < dia, não published) continua pending: esquecer de rodar
+    Atrasado (data < day, não published) continua pending: esquecer de rodar
     ontem não pode perder a publicação.
     """
-    dia = dia or today()
-    if plataformas is not None:
-        conhecidas = {p for pls in PLATFORMS.values() for p in pls}
-        estranhas = sorted(set(plataformas) - conhecidas)
-        if estranhas:
+    day = day or today()
+    if platforms is not None:
+        known = {p for pls in PLATFORMS.values() for p in pls}
+        unknown_platforms = sorted(set(platforms) - known)
+        if unknown_platforms:
             raise ValueError(
-                f"plataforma desconhecida: {', '.join(estranhas)} — "
-                f"use {', '.join(sorted(conhecidas))}"
+                f"plataforma desconhecida: {', '.join(unknown_platforms)} — "
+                f"use {', '.join(sorted(known))}"
             )
     items = load(pd)
     if only is not None:
-        desconhecidos = sorted(set(only) - {i["slug"] for i in items})
-        if desconhecidos:
+        unknown_slugs = sorted(set(only) - {i["slug"] for i in items})
+        if unknown_slugs:
             raise ValueError(
-                f"--only: {', '.join(desconhecidos)} não está(ão) na agenda "
+                f"--only: {', '.join(unknown_slugs)} não está(ão) na agenda "
                 f"({layout.schedule(pd)})"
             )
         items = [i for i in items if i["slug"] in set(only)]
     else:
-        items = [i for i in items if date_of(i) <= dia]
+        items = [i for i in items if date_of(i) <= day]
 
     reg = published.load(pd)
-    pares = []
+    pairs = []
     for item in items:
         for pl in platforms_of(item):
-            if plataformas is not None and pl not in plataformas:
+            if platforms is not None and pl not in platforms:
                 continue
             if not published.is_published(reg, pl, item["slug"]):
-                pares.append((item, pl))
-    return pares
+                pairs.append((item, pl))
+    return pairs

@@ -1,11 +1,11 @@
-"""Orquestrador da publicação: o que a agenda manda pro dia, nas plataformas.
+"""Orquestrador da publicação: o que a agenda manda pro day, nas platforms.
 
 Pré-checagem completa ANTES do primeiro upload — o mesmo contrato do
 post_instagram.generate(), pelo mesmo reason: descobrir no item 3 que faltou
-renderizar, com os itens 1-2 já no ar, é o estado que este módulo proíbe.
+renderizar, com os itens 1-2 já no ar, é o state que este módulo proíbe.
 
 Cada sucesso é registrado NA HORA em published.json; falha numa
-platform não trava as outras — o summary final conta o que foi e o que não.
+platform não trava as outras — o summary final account o que foi e o que não.
 """
 from __future__ import annotations
 
@@ -15,13 +15,13 @@ import re
 from . import (schedule, caption, layout, post_instagram, published,
                publish_instagram, publish_youtube)
 
-# Limites das plataformas: validados aqui, antes de chamar a API.
+# Limites das platforms: validados aqui, antes de chamar a API.
 YT_TITLE_MAX = 100
 YT_DESCRIPTION_MAX = 5000
 IG_CAPTION_MAX = 2200
 
 # Credenciais exigidas por platform — a pré-checagem só cobra as das
-# plataformas que o dia realmente usa.
+# platforms que o day realmente usa.
 _CREDENTIALS = {
     "youtube_shorts": ("YT_CLIENT_SECRET_PATH", "YT_REFRESH_TOKEN"),
     "instagram_reels": ("IG_PAGE_TOKEN", "IG_BUSINESS_ACCOUNT_ID",
@@ -57,99 +57,99 @@ def _moments_by_slug(pd: str) -> dict:
 
 def _post_pngs(pd: str, slug: str) -> list:
     """Os PNGs de um post, na ordem do carrossel (numérica, não alfabética)."""
-    arq = post_instagram.file_slug(slug)
-    pasta = layout.posts_png(pd)
-    unico = os.path.join(pasta, f"post_{arq}.png")
-    if os.path.exists(unico):
-        return [unico]
-    if not os.path.isdir(pasta):
+    fname = post_instagram.file_slug(slug)
+    folder = layout.posts_png(pd)
+    single = os.path.join(folder, f"post_{fname}.png")
+    if os.path.exists(single):
+        return [single]
+    if not os.path.isdir(folder):
         return []
-    padrao = re.compile(rf"^post_{re.escape(arq)}_(\d+)\.png$")
-    numerados = []
-    for name in os.listdir(pasta):
-        m = padrao.match(name)
+    pattern = re.compile(rf"^post_{re.escape(fname)}_(\d+)\.png$")
+    numbered = []
+    for name in os.listdir(folder):
+        m = pattern.match(name)
         if m:
-            numerados.append((int(m.group(1)), name))
-    numerados.sort()
-    return [os.path.join(pasta, n) for _, n in numerados]
+            numbered.append((int(m.group(1)), name))
+    numbered.sort()
+    return [os.path.join(folder, n) for _, n in numbered]
 
 
 def _post_txt(pd: str, slug: str) -> str:
-    arq = post_instagram.file_slug(slug)
-    return os.path.join(layout.posts_png(pd), f"post_{arq}.txt")
+    fname = post_instagram.file_slug(slug)
+    return os.path.join(layout.posts_png(pd), f"post_{fname}.txt")
 
 
-def precheck(pd: str, pares: list) -> list:
-    """Erros que impediriam publish QUALQUER item do dia. Lista vazia = ok.
+def precheck(pd: str, pairs: list) -> list:
+    """Erros que impediriam publish QUALQUER item do day. Lista vazia = ok.
 
-    Roda antes do primeiro upload: arquivo faltando, título ausente/longo,
+    Roda antes do primeiro upload: arquivo missing, título ausente/longo,
     legenda acima do limite, credencial não definida. A mensagem sempre diz
     qual comando ou arquivo resolve.
     """
-    erros = []
-    has_clip = any(item["kind"] == "clip" for item, _ in pares)
+    errors = []
+    has_clip = any(item["kind"] == "clip" for item, _ in pairs)
     moments = _moments_by_slug(pd) if has_clip else {}
 
-    for item, pl in pares:
+    for item, pl in pairs:
         slug = item["slug"]
         if item["kind"] == "clip":
             video = _mp4(pd, pl, slug)
             if not os.path.exists(video):
-                erros.append(f"{slug} ({pl}): {video} não existe — "
+                errors.append(f"{slug} ({pl}): {video} não existe — "
                              f"rode 'render' antes")
                 continue
             txt = caption.txt_path(video)
             if not os.path.exists(txt):
-                erros.append(f"{slug} ({pl}): {txt} não existe — "
+                errors.append(f"{slug} ({pl}): {txt} não existe — "
                              f"regere o corte com 'render'")
                 continue
-            texto = _read(txt)
+            text = _read(txt)
             if pl == "youtube_shorts":
                 title = (moments.get(slug) or {}).get("title") or ""
                 if not title.strip():
-                    erros.append(
+                    errors.append(
                         f"{slug}: sem 'title' no moments.json — o YouTube "
                         f"exige título; preencha o campo no curation.json e "
                         f"rode 'curate --export'")
                 elif len(title) > YT_TITLE_MAX:
-                    erros.append(f"{slug}: titulo com {len(title)} chars — "
+                    errors.append(f"{slug}: titulo com {len(title)} chars — "
                                  f"o YouTube aceita {YT_TITLE_MAX}")
-                if len(texto) > YT_DESCRIPTION_MAX:
-                    erros.append(f"{slug}: descrição com {len(texto)} chars — "
+                if len(text) > YT_DESCRIPTION_MAX:
+                    errors.append(f"{slug}: descrição com {len(text)} chars — "
                                  f"o YouTube aceita {YT_DESCRIPTION_MAX}")
-            elif len(texto) > IG_CAPTION_MAX:
-                erros.append(f"{slug} ({pl}): legenda com {len(texto)} chars "
+            elif len(text) > IG_CAPTION_MAX:
+                errors.append(f"{slug} ({pl}): legenda com {len(text)} chars "
                              f"— o Instagram aceita {IG_CAPTION_MAX}")
         else:
             pngs = _post_pngs(pd, slug)
             if not pngs:
-                erros.append(f"{slug} (instagram_posts): nenhum PNG em "
+                errors.append(f"{slug} (instagram_posts): nenhum PNG em "
                              f"{layout.posts_png(pd)} — rode 'post --generate' "
                              f"antes")
                 continue
             txt = _post_txt(pd, slug)
             if not os.path.exists(txt):
-                erros.append(f"{slug} (instagram_posts): {txt} não existe — "
+                errors.append(f"{slug} (instagram_posts): {txt} não existe — "
                              f"regere com 'post --generate'")
             elif len(_read(txt)) > IG_CAPTION_MAX:
-                erros.append(f"{slug} (instagram_posts): legenda acima de "
+                errors.append(f"{slug} (instagram_posts): legenda acima de "
                              f"{IG_CAPTION_MAX} chars")
 
     envs = set()
-    for _, pl in pares:
+    for _, pl in pairs:
         envs.update(_CREDENTIALS[pl])
     for name in sorted(envs):
         if not os.environ.get(name):
-            erros.append(f"variável {name} não definida no ambiente (.env)")
+            errors.append(f"variável {name} não definida no ambiente (.env)")
 
     # Privacidade errada só apareceria depois do upload, com o vídeo já no ar
     # sob a privacy que não se pediu.
-    if any(pl == "youtube_shorts" for _, pl in pares):
+    if any(pl == "youtube_shorts" for _, pl in pairs):
         try:
             publish_youtube.privacy()
         except ValueError as e:
-            erros.append(str(e))
-    return erros
+            errors.append(str(e))
+    return errors
 
 
 def _publish_pair(pd: str, item: dict, pl: str, moments: dict) -> dict:
@@ -169,9 +169,9 @@ def _publish_pair(pd: str, item: dict, pl: str, moments: dict) -> dict:
     return {"id": r["id"], "url": r.get("permalink", "")}
 
 
-def execute(pd: str, only: list = None, dia=None,
-             plataformas: list = None) -> list:
-    """Publica os pares pendentes do dia. Devolve um resultado por par.
+def execute(pd: str, only: list = None, day=None,
+             platforms: list = None) -> list:
+    """Publica os pairs pendentes do day. Devolve um resultado por par.
 
     Pré-checagem reprovada aborta TUDO antes do primeiro upload. Depois dela,
     cada par é independente: falha num não trava os outros (a exceção vira
@@ -190,26 +190,26 @@ def execute(pd: str, only: list = None, dia=None,
                                de novo. O `id` vem no resultado para o gestor
                                acrescentar ao published.json à mão.
     """
-    pares = schedule.pending(pd, dia=dia, only=only,
-                                plataformas=plataformas)
-    if not pares:
+    pairs = schedule.pending(pd, day=day, only=only,
+                                platforms=platforms)
+    if not pairs:
         return []
 
-    erros = precheck(pd, pares)
-    if erros:
+    errors = precheck(pd, pairs)
+    if errors:
         raise ValueError("pré-checagem reprovou — nada foi publicado:\n- "
-                         + "\n- ".join(erros))
+                         + "\n- ".join(errors))
 
-    has_clip = any(item["kind"] == "clip" for item, _ in pares)
+    has_clip = any(item["kind"] == "clip" for item, _ in pairs)
     moments = _moments_by_slug(pd) if has_clip else {}
-    resultados = []
-    for item, pl in pares:
+    results = []
+    for item, pl in pairs:
         slug = item["slug"]
         base = {"slug": slug, "platform": pl, "date": item["date"]}
         try:
             r = _publish_pair(pd, item, pl, moments)
         except Exception as e:  # noqa: BLE001 — falha de UM par não trava o resto
-            resultados.append({**base, "ok": False, "error": str(e)})
+            results.append({**base, "ok": False, "error": str(e)})
             print(f"[publish] !! {pl}: {slug}: {e}")
             continue
 
@@ -221,7 +221,7 @@ def execute(pd: str, only: list = None, dia=None,
         try:
             published.record(pd, pl, slug, r["id"], url)
         except Exception as e:  # noqa: BLE001
-            resultados.append({**base, "ok": True, "url": url, "id": r["id"],
+            results.append({**base, "ok": True, "url": url, "id": r["id"],
                                "record_failed": True, "error": str(e)})
             print(f"[publish] !! {pl}: {slug} FOI PUBLICADO ({url or r['id']}) "
                   f"mas não entrou no published.json: {e}")
@@ -229,6 +229,6 @@ def execute(pd: str, only: list = None, dia=None,
                   f"este id à mão — ou o {pl} publica a peça duas vezes.")
             continue
 
-        resultados.append({**base, "ok": True, "url": url})
+        results.append({**base, "ok": True, "url": url})
         print(f"[publish] ok {pl}: {slug} -> {url or r['id']}")
-    return resultados
+    return results

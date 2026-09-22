@@ -58,7 +58,7 @@ def from_whisper(video_path, project_dir, model=None):
     seg_iter, _info = wm.transcribe(
         video_path, language=config.WHISPER_LANG, word_timestamps=True,
     )
-    # reagrupa por palavras p/ manter o mesmo estilo de segmento do VTT
+    # reagrupa por words p/ manter o mesmo estilo de segmento do VTT
     words = []
     for s in seg_iter:
         if s.words:

@@ -69,8 +69,8 @@ def remove(url: str) -> None:
     """
     try:
         bucket = _bucket()
-        partes = urlparse(url)
-        key = unquote(partes.path.lstrip("/"))
+        parts = urlparse(url)
+        key = unquote(parts.path.lstrip("/"))
         # Onde o bucket aparece depende do estilo da URL: a AWS usa
         # virtual-hosted (`bucket.host/key`) e o R2/MinIO usam path-style
         # (`host/bucket/key`). Quem decide é o HOST, não o texto do path —
@@ -78,7 +78,7 @@ def remove(url: str) -> None:
         # ("tmp-publish"), cortando o prefixo real da key. Nos dois casos o
         # delete miraria objeto inexistente e falharia calado, deixando a
         # mídia acessível pela URL até expirar.
-        if not partes.hostname.startswith(bucket + "."):
+        if not parts.hostname.startswith(bucket + "."):
             if key.startswith(bucket + "/"):
                 key = key[len(bucket) + 1:]
         _client().delete_object(Bucket=bucket, Key=key)

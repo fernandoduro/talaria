@@ -35,7 +35,7 @@ def save(project_dir: str, data: dict) -> str:
 def thumb_args(project_dir: str) -> dict:
     """Argumentos da thumbnail, derivados do episódio e sobrescritos por texts.json."""
     ep = episode.load(project_dir)
-    cod = episode.code(ep)
+    code = episode.code(ep)
     guests = ep.get("guests") or []
     credits = " & ".join(c.get("name", "") for c in guests if c.get("name"))
 
@@ -45,9 +45,9 @@ def thumb_args(project_dir: str) -> dict:
     l1 = ep.get("company", "") or (topics[0] if topics else "")
 
     args = {
-        "badge": f"{config.SHOW_NAME} • {cod}",
+        "badge": f"{config.SHOW_NAME} • {code}",
         "l1": l1,
-        "l2": cod,
+        "l2": code,
         "credits": credits,
         "subtitle": f"{ep.get('city','')}/{ep.get('uf','')}",
     }
