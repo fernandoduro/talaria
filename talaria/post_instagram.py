@@ -20,7 +20,7 @@ def _quote_font():
     return ImageFont.truetype(config.POST_FONT, config.POST_QUOTE_SIZE)
 
 
-def quebra(texto: str) -> list:
+def wrap(texto: str) -> list:
     """Linhas da citação, medidas na fonte real do post."""
     return render.wrap_by_pixels(texto, fnt=_quote_font(),
                                  largura=config.POST_TEXT_W)
@@ -37,7 +37,7 @@ def validate_card(texto: str) -> dict:
     if not texto:
         return {"fits": False, "lines": 0, "reason": "citação vazia"}
 
-    lines = quebra(texto)
+    lines = wrap(texto)
 
     # Palavra sozinha maior que a largura útil: a quebra a coloca na linha
     # assim mesmo, porque não há onde quebrar. Passaria na contagem de lines
@@ -86,7 +86,7 @@ def episode_author(project_dir: str, who: str = "") -> dict:
     guests = ep.get("guests") or []
     if not guests:
         return {"name": ep.get("company", ""), "role": "",
-                "company": ep.get("cidade", "")}
+                "company": ep.get("city", "")}
 
     c = guests[0]
     if who:
@@ -144,7 +144,7 @@ def render_card(texto: str, autor: dict, out_path: str, template: str = None):
     # partem da mesma altura, então o texto não pula a cada deslize do
     # carrossel.
     fcit = _quote_font()
-    for i, linha in enumerate(quebra(texto)):
+    for i, linha in enumerate(wrap(texto)):
         y = config.POST_QUOTE_Y + i * config.POST_QUOTE_STEP
         d.text((config.POST_MARGIN_X, y), linha, font=fcit,
                fill=config.POST_QUOTE_COLOR)

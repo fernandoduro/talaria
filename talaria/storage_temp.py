@@ -44,7 +44,7 @@ def _client():
                         config=Config(signature_version="s3v4"))
 
 
-def sobe(path: str) -> str:
+def put(path: str) -> str:
     """Sobe o arquivo e devolve a URL assinada que o Instagram vai buscar.
 
     O uuid no name evita colisão entre publicações simultâneas do mesmo slug

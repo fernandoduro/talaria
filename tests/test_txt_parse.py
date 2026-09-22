@@ -108,7 +108,7 @@ class TestResolucaoDeFalante(unittest.TestCase):
     def test_todo_segmento_tem_speaker(self):
         for s in self.segs:
             self.assertIn("speaker", s, msg=str(s))
-            self.assertIn(s["speaker"], ("host", "convidado"), msg=str(s))
+            self.assertIn(s["speaker"], ("host", "guest"), msg=str(s))
 
     def test_primeiro_segmento_e_host(self):
         self.assertEqual(self.segs[0]["speaker"], "host")
@@ -137,7 +137,7 @@ class TestResolucaoDeFalante(unittest.TestCase):
         segs = txt_parse.regroup_into_sentences(blocks)
         segs = txt_parse.resolve_speakers(segs)
         self.assertEqual([s["speaker"] for s in segs],
-                         ["host", "convidado", "convidado", "host"])
+                         ["host", "guest", "guest", "host"])
 
     def test_lista_vazia_nao_quebra(self):
         self.assertEqual(txt_parse.resolve_speakers([]), [])
@@ -149,7 +149,7 @@ class TestResolucaoDeFalante(unittest.TestCase):
             _block(5.0, 10.0, "Resposta do convidado.", turn=True),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
-        self.assertEqual([s["speaker"] for s in segs], ["host", "convidado"])
+        self.assertEqual([s["speaker"] for s in segs], ["host", "guest"])
 
     def test_backchannel_do_host_desloca_atribuicao(self):
         """RISCO CONHECIDO, não corrigido — documenta o comportamento atual.
@@ -174,7 +174,7 @@ class TestResolucaoDeFalante(unittest.TestCase):
         # número ímpar de trocas espúrias, a resposta do convidado sai rotulada
         # como host daí em diante e subestima a fração no clip.
         self.assertEqual([s["speaker"] for s in segs],
-                         ["host", "convidado", "host", "host", "host"])
+                         ["host", "guest", "host", "host", "host"])
 
 
 if __name__ == "__main__":

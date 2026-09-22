@@ -23,8 +23,8 @@ def _project(pd, title="Titulo do Short"):
                               "legenda": "leg"}]}, f)
     with open(layout.ensure_dir(layout.schedule(pd)), "w", encoding="utf-8") as f:
         json.dump({"schedule": [
-            {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
-            {"data": "2026-08-24", "kind": "post", "slug": "cit_x"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-24", "kind": "post", "slug": "cit_x"},
         ]}, f)
     # peças renderizadas + captions
     for pasta, name in (("youtube_shorts", "corte1_short"),

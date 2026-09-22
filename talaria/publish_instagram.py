@@ -113,7 +113,7 @@ def _publish_container(container_id: str, token: str, conta: str) -> dict:
 def publish_reel(video_path: str, legenda: str) -> dict:
     """Sobe o vídeo, cria o container REELS, espera processar e publica."""
     token, conta = _credentials()
-    url = storage_temp.sobe(video_path)
+    url = storage_temp.put(video_path)
     try:
         corpo = _call("post", f"{conta}/media", media_type="REELS",
                        video_url=url, caption=legenda or "",
@@ -149,7 +149,7 @@ def publish_post(png_paths: list, legenda: str) -> dict:
         # o name no fim, então falha no meio deixaria o `finally` vendo []
         # e os temporários já subidos ficariam órfãos no bucket.
         for p in png_paths:
-            urls.append(storage_temp.sobe(p))
+            urls.append(storage_temp.put(p))
         if len(urls) == 1:
             corpo = _call("post", f"{conta}/media", image_url=urls[0],
                            caption=legenda or "", access_token=token)

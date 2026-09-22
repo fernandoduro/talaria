@@ -117,7 +117,7 @@ def regroup_into_sentences(blocks: list) -> list:
 
 # Rótulos de falante gravados em cada segmento.
 HOST = "host"
-GUEST = "convidado"
+GUEST = "guest"
 
 
 def resolve_speakers(segs: list) -> list:

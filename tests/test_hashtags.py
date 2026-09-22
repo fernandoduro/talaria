@@ -26,25 +26,25 @@ class TestSlug(unittest.TestCase):
 
 class TestBuild(unittest.TestCase):
     def test_inclui_as_tres_fixas(self):
-        tags = hashtags.build(cidade="Ribeirão Açaí", company="Zarvik")
+        tags = hashtags.build(city="Ribeirão Açaí", company="Zarvik")
         for fixa in hashtags.CHANNEL_TAGS:
             self.assertIn(fixa, tags)
 
     def test_inclui_cidade_e_empresa(self):
-        tags = hashtags.build(cidade="Ribeirão Açaí", company="Zarvik")
+        tags = hashtags.build(city="Ribeirão Açaí", company="Zarvik")
         self.assertIn("#RibeiraoAcai", tags)
         self.assertIn("#Zarvik", tags)
 
     def test_sem_empresa_usa_fallback(self):
-        tags = hashtags.build(cidade="Pedra Nova", company="", fallback_tema="Inovação")
+        tags = hashtags.build(city="Pedra Nova", company="", fallback_tema="Inovação")
         self.assertIn("#Inovacao", tags)
 
     def test_sem_duplicatas(self):
-        tags = hashtags.build(cidade="Empreendedorismo", company="Zarvik")
+        tags = hashtags.build(city="Empreendedorismo", company="Zarvik")
         self.assertEqual(len(tags), len(set(tags)))
 
     def test_retorna_string_formatada(self):
-        s = hashtags.format_line(cidade="Pedra Nova", company="Zarvik")
+        s = hashtags.format_line(city="Pedra Nova", company="Zarvik")
         self.assertTrue(s.startswith("#"))
         self.assertIn(" ", s)
 

@@ -36,7 +36,7 @@ def platforms_of(item: dict) -> tuple:
 
 def date_of(item: dict) -> dt.date:
     """A data do item como date. fromisoformat validate formato E dia real."""
-    return dt.date.fromisoformat(item["data"])
+    return dt.date.fromisoformat(item["date"])
 
 
 def moments(pd: str) -> list:
@@ -57,7 +57,7 @@ def load(pd: str) -> list:
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"{path} não existe. Escreva a agenda de publicação: "
-            f'{{"schedule": [{{"data": "YYYY-MM-DD", "kind": "clip|post", '
+            f'{{"schedule": [{{"date": "YYYY-MM-DD", "kind": "clip|post", '
             f'"slug": "..."}}]}}'
         )
     with open(path, encoding="utf-8") as f:
@@ -101,7 +101,7 @@ def load(pd: str) -> list:
             date_of(item)
         except (TypeError, ValueError):
             raise ValueError(
-                f"{onde}: data {item.get('data')!r} inválida — use "
+                f"{onde}: data {item.get('date')!r} inválida — use "
                 f"YYYY-MM-DD de um dia que existe"
             )
         if kind == "clip":

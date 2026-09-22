@@ -13,7 +13,7 @@ class TestBrief(unittest.TestCase):
         with open(layout.ensure_dir(layout.episode(self.d)), "w", encoding="utf-8") as f:
             json.dump({
                 "season": 2, "episode": 7, "company": "Zarvik",
-                "cidade": "Ribeirão Açaí", "uf": "SP",
+                "city": "Ribeirão Açaí", "uf": "SP",
                 "guests": [{"name": "Teresa", "role": "sócio",
                                 "linkedin": "https://linkedin.com/in/x"}],
                 "topics": ["biotech", "B2B para B2C"],
@@ -84,7 +84,7 @@ class TestBriefPosts(unittest.TestCase):
         with open(layout.ensure_dir(layout.episode(self.d)), "w", encoding="utf-8") as f:
             json.dump({
                 "season": 2, "episode": 8, "company": "Zarvik",
-                "cidade": "Ribeirão Açaí", "uf": "SP", "topics": [],
+                "city": "Ribeirão Açaí", "uf": "SP", "topics": [],
                 "guests": [{"name": "Marina Siqueira", "role": "Sócio"}],
             }, f, ensure_ascii=False)
         with open(layout.ensure_dir(layout.transcript(self.d)), "w", encoding="utf-8") as f:

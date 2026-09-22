@@ -48,7 +48,7 @@ class TestHostDoToken(unittest.TestCase):
     @mock.patch("talaria.publish_instagram.storage_temp")
     @mock.patch("talaria.publish_instagram.requests")
     def test_publica_no_host_certo_do_token(self, req, storage):
-        storage.sobe.return_value = "https://assinada/p.png"
+        storage.put.return_value = "https://assinada/p.png"
         req.post.side_effect = [_response({"id": "c1"}), _response({"id": "m1"})]
         req.get.side_effect = [
             _response({"status_code": "FINISHED"}),
@@ -64,7 +64,7 @@ class TestHostDoToken(unittest.TestCase):
 @mock.patch("talaria.publish_instagram.requests")
 class TestPublicaReel(unittest.TestCase):
     def test_container_poll_publish_e_limpa(self, req, storage):
-        storage.sobe.return_value = "https://assinada/v.mp4"
+        storage.put.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [
             _response({"id": "cont1"}),          # cria container
             _response({"id": "media9"}),         # media_publish
@@ -80,7 +80,7 @@ class TestPublicaReel(unittest.TestCase):
 
     def test_status_error_vira_falha_com_o_status_na_mensagem(self, req, storage):
         # ERROR/EXPIRED são finais — sem isso o poll roda pra sempre.
-        storage.sobe.return_value = "https://assinada/v.mp4"
+        storage.put.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [_response({"id": "cont1"})]
         req.get.side_effect = [_response({"status_code": "ERROR"})]
         with self.assertRaises(RuntimeError) as ctx:
@@ -89,7 +89,7 @@ class TestPublicaReel(unittest.TestCase):
         storage.remove.assert_called_once()  # limpa também na falha
 
     def test_timeout_do_poll_desiste_com_mensagem(self, req, storage):
-        storage.sobe.return_value = "https://assinada/v.mp4"
+        storage.put.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [_response({"id": "cont1"})]
         req.get.return_value = _response({"status_code": "IN_PROGRESS"})
         relogio = iter([0, 100, 200, 400])  # estoura os 300s no 4º tique
@@ -103,7 +103,7 @@ class TestPublicaReel(unittest.TestCase):
         # Proxy/balanceador na frente do Graph devolve HTML no 502. Deixar o
         # r.json() estourar troca "Graph API: 502" por um JSONDecodeError que
         # não diz o que aconteceu — justo na hora do incidente.
-        storage.sobe.return_value = "https://assinada/v.mp4"
+        storage.put.return_value = "https://assinada/v.mp4"
         ruim = mock.Mock()
         ruim.status_code = 502
         ruim.content = b"<html>Bad Gateway</html>"
@@ -115,7 +115,7 @@ class TestPublicaReel(unittest.TestCase):
         self.assertIn("Bad Gateway", str(ctx.exception))
 
     def test_erro_da_api_carrega_a_mensagem_da_api(self, req, storage):
-        storage.sobe.return_value = "https://assinada/v.mp4"
+        storage.put.return_value = "https://assinada/v.mp4"
         req.post.side_effect = [
             _response({"error": {"message": "Invalid OAuth token"}}, 400)]
         with self.assertRaises(RuntimeError) as ctx:
@@ -128,7 +128,7 @@ class TestPublicaReel(unittest.TestCase):
 @mock.patch("talaria.publish_instagram.requests")
 class TestPublicaPost(unittest.TestCase):
     def test_imagem_unica_sem_carrossel(self, req, storage):
-        storage.sobe.return_value = "https://assinada/p.png"
+        storage.put.return_value = "https://assinada/p.png"
         req.post.side_effect = [
             _response({"id": "cont1"}),
             _response({"id": "media1"}),
@@ -148,7 +148,7 @@ class TestPublicaPost(unittest.TestCase):
         # O container de IMAGEM também processa assíncrono. Publicar com ele
         # ainda IN_PROGRESS devolve "Media ID is not available" — foi o que
         # derrubou o post, porque esta função presumia upload síncrono.
-        storage.sobe.return_value = "https://assinada/p.png"
+        storage.put.return_value = "https://assinada/p.png"
         req.post.side_effect = [
             _response({"id": "cont1"}),
             _response({"id": "media1"}),
@@ -169,7 +169,7 @@ class TestPublicaPost(unittest.TestCase):
     def test_imagem_com_container_em_erro_nao_publica(self, req, storage):
         # Container que termina em ERROR é falha explícita, não tentativa de
         # publish assim mesmo.
-        storage.sobe.return_value = "https://assinada/p.png"
+        storage.put.return_value = "https://assinada/p.png"
         req.post.side_effect = [_response({"id": "cont1"})]
         req.get.side_effect = [_response({"status_code": "ERROR"})]
         with self.assertRaises(RuntimeError) as ctx:
@@ -181,7 +181,7 @@ class TestPublicaPost(unittest.TestCase):
         # Falha no 3º de 5: os 2 primeiros já estão no bucket e precisam sair.
         # Uma list comprehension só liga o name no fim, então o `finally`
         # veria [] e deixaria os temporários órfãos lá.
-        storage.sobe.side_effect = ["https://a/1.png", "https://a/2.png",
+        storage.put.side_effect = ["https://a/1.png", "https://a/2.png",
                                     Exception("upload caiu")]
         with self.assertRaises(Exception):
             publish_instagram.publish_post(
@@ -191,7 +191,7 @@ class TestPublicaPost(unittest.TestCase):
             ["https://a/1.png", "https://a/2.png"])
 
     def test_carrossel_cria_filhos_e_pai(self, req, storage):
-        storage.sobe.side_effect = ["https://a/1.png", "https://a/2.png"]
+        storage.put.side_effect = ["https://a/1.png", "https://a/2.png"]
         req.post.side_effect = [
             _response({"id": "f1"}), _response({"id": "f2"}),  # filhos
             _response({"id": "pai"}),                          # carrossel

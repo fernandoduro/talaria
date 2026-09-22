@@ -42,7 +42,7 @@ def readable_metadata(project_dir: str) -> str:
         f"- Código: {episode.code(ep)}\n"
         f"- Convidado(s) e cargo: {nomes}\n"
         f"- Empresa ou instituição: {ep['company']}\n"
-        f"- Cidade/UF da gravação: {ep['cidade']}/{ep['uf']}\n"
+        f"- Cidade/UF da gravação: {ep['city']}/{ep['uf']}\n"
         f"- LinkedIn do(s) convidado(s): {links}\n"
         f"- Temas da conversa: {topics}\n"
     )

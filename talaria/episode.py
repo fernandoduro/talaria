@@ -10,7 +10,7 @@ import os
 
 from . import layout
 
-REQUIRED_FIELDS = ["season", "episode", "company", "cidade", "uf", "guests"]
+REQUIRED_FIELDS = ["season", "episode", "company", "city", "uf", "guests"]
 
 # Subconjunto que também precisa ter valor. `guests` pode ser lista vazia:
 # episódio só com os apresentadores é caso real.
@@ -28,7 +28,7 @@ def template() -> dict:
         "season": 0,
         "episode": 0,
         "company": "",
-        "cidade": "",
+        "city": "",
         "uf": "SP",
         "guests": [{"name": "", "role": "", "linkedin": ""}],
         "topics": [],  # opcional — fallback de hashtag quando não há company

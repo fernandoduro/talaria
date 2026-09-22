@@ -11,7 +11,7 @@ class TestSobe(unittest.TestCase):
     def test_sobe_no_prefixo_e_devolve_url_assinada(self, boto3_mock):
         s3 = boto3_mock.client.return_value
         s3.generate_presigned_url.return_value = "https://assinada"
-        url = storage_temp.sobe("/tmp/video.mp4")
+        url = storage_temp.put("/tmp/video.mp4")
         self.assertEqual(url, "https://assinada")
         bucket, key = s3.upload_file.call_args[0][1:3]
         self.assertEqual(bucket, "meu-bucket")
@@ -27,14 +27,14 @@ class TestSobe(unittest.TestCase):
     def test_endpoint_customizado_permite_r2_e_compativeis(self, boto3_mock):
         # Sem endpoint configurável o boto3 só fala com a AWS. R2/MinIO usam
         # a mesma API — mudar de provedor não pode exigir mudar código.
-        storage_temp.sobe("/tmp/video.mp4")
+        storage_temp.put("/tmp/video.mp4")
         self.assertEqual(boto3_mock.client.call_args.kwargs.get("endpoint_url"),
                          "https://r2.exemplo")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b"}, clear=True)
     @mock.patch("talaria.storage_temp.boto3")
     def test_sem_endpoint_usa_o_padrao_da_aws(self, boto3_mock):
-        storage_temp.sobe("/tmp/video.mp4")
+        storage_temp.put("/tmp/video.mp4")
         self.assertIsNone(boto3_mock.client.call_args.kwargs.get("endpoint_url"))
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b"})
@@ -43,14 +43,14 @@ class TestSobe(unittest.TestCase):
         # O boto3 pode cair em SigV2, que o R2 recusa com 401 na URL assinada
         # — e aí o Instagram não baixa a mídia. O error só apareceria na
         # publicação, como "container falhou", sem dizer que era a assinatura.
-        storage_temp.sobe("/tmp/video.mp4")
+        storage_temp.put("/tmp/video.mp4")
         cfg = boto3_mock.client.call_args.kwargs.get("config")
         self.assertEqual(getattr(cfg, "signature_version", None), "s3v4")
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_sem_bucket_no_ambiente_aborta_com_o_nome_da_variavel(self):
         with self.assertRaises(RuntimeError) as ctx:
-            storage_temp.sobe("/tmp/video.mp4")
+            storage_temp.put("/tmp/video.mp4")
         self.assertIn("S3_PUBLISH_BUCKET", str(ctx.exception))
 
 

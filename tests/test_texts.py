@@ -14,7 +14,7 @@ class TestTextos(unittest.TestCase):
         with open(os.path.join(self.d, "episode.json"), "w", encoding="utf-8") as f:
             json.dump({
                 "season": 2, "episode": 7, "company": "Zarvik",
-                "cidade": "Ribeirão Açaí", "uf": "SP",
+                "city": "Ribeirão Açaí", "uf": "SP",
                 "guests": [{"name": "Teresa", "role": "sócio", "linkedin": ""}],
             }, f)
 
@@ -49,7 +49,7 @@ class TestTextos(unittest.TestCase):
         with open(os.path.join(d, "episode.json"), "w", encoding="utf-8") as f:
             json.dump({
                 "season": 3, "episode": 1, "company": "",
-                "cidade": "Pedra Nova", "uf": "SP", "guests": [],
+                "city": "Pedra Nova", "uf": "SP", "guests": [],
                 "topics": ["ecossistema local de startups", "outro"],
             }, f)
         args = texts.thumb_args(d)

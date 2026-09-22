@@ -49,7 +49,7 @@ def thumb_args(project_dir: str) -> dict:
         "l1": l1,
         "l2": cod,
         "credits": credits,
-        "subtitle": f"{ep.get('cidade','')}/{ep.get('uf','')}",
+        "subtitle": f"{ep.get('city','')}/{ep.get('uf','')}",
     }
     args.update(load(project_dir).get("thumb", {}))
     return args

@@ -320,9 +320,9 @@ def cmd_publish(args):
 
     today = schedule.today().isoformat()
     for r in resultados:
-        if r["data"] < today:
+        if r["date"] < today:
             # Mostra a data ORIGINAL: o gestor precisa ver que atrasou.
-            print(f"[publish]    ({r['slug']} estava agendado para {r['data']})")
+            print(f"[publish]    ({r['slug']} estava agendado para {r['date']})")
     for pl in ("youtube_shorts", "instagram_reels", "instagram_posts"):
         do_pl = [r for r in resultados if r["platform"] == pl]
         if not do_pl:
@@ -377,7 +377,7 @@ def cmd_schedule(args):
             status = "pendente hoje"
         else:
             status = "futuro"
-        print(f"  {item['data']}  {item['kind']:<5}  "
+        print(f"  {item['date']}  {item['kind']:<5}  "
               f"{item['slug']:<32}  {status}")
 
 

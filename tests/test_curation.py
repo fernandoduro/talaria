@@ -216,7 +216,7 @@ class TestAtribuicaoConfiavel(unittest.TestCase):
         segs = [
             {"start": 0.0, "end": 30.0, "speaker": "host",
              "text": "Conta pra gente sobre sua trajetória?"},
-            {"start": 30.0, "end": 90.0, "speaker": "convidado",
+            {"start": 30.0, "end": 90.0, "speaker": "guest",
              "text": "A gente começou com nossa primeira empresa."},
         ]
         self.assertTrue(curation.attribution_trustworthy(segs))
@@ -247,7 +247,7 @@ class TestAberturaDoHost(unittest.TestCase):
             {"start": 0.0, "end": 40.0, "text": "Pergunta longa do host?",
              "turn": False, "speaker": "host"},
             {"start": 40.0, "end": 110.0, "text": "Resposta do convidado.",
-             "turn": True, "speaker": "convidado"},
+             "turn": True, "speaker": "guest"},
         ]
 
     def test_alerta_quando_host_abre_demais(self):
@@ -297,7 +297,7 @@ class TestProtagonismo(unittest.TestCase):
             {"start": 0.0, "end": 10.0, "text": "Pergunta?", "turn": False,
              "speaker": "host"},
             {"start": 10.0, "end": 90.0, "text": "Resposta longa.", "turn": True,
-             "speaker": "convidado"},
+             "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
         self.assertGreater(frac, 0.8)
@@ -307,7 +307,7 @@ class TestProtagonismo(unittest.TestCase):
             {"start": 0.0, "end": 80.0, "text": "Fala longa do host.", "turn": False,
              "speaker": "host"},
             {"start": 80.0, "end": 90.0, "text": "Sim.", "turn": True,
-             "speaker": "convidado"},
+             "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
         self.assertLess(frac, 0.3)
@@ -325,11 +325,11 @@ class TestProtagonismo(unittest.TestCase):
             {"start": 0.0, "end": 20.0, "text": "Pergunta do host?", "turn": False,
              "speaker": "host"},
             {"start": 20.0, "end": 60.0, "text": "Comeco da resposta.", "turn": True,
-             "speaker": "convidado"},
+             "speaker": "guest"},
             {"start": 60.0, "end": 110.0, "text": "Meio da resposta.", "turn": False,
-             "speaker": "convidado"},
+             "speaker": "guest"},
             {"start": 110.0, "end": 160.0, "text": "Fim da resposta.", "turn": False,
-             "speaker": "convidado"},
+             "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((60.0, 150.0), segs)
         self.assertEqual(frac, 1.0)
@@ -339,7 +339,7 @@ class TestProtagonismo(unittest.TestCase):
             {"start": 0.0, "end": 70.0, "text": "Contexto longo do host.",
              "turn": False, "speaker": "host"},
             {"start": 70.0, "end": 90.0, "text": "Comeco da resposta.", "turn": True,
-             "speaker": "convidado"},
+             "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
         self.assertLess(frac, curation.config.GUEST_SPEECH_MIN)
@@ -368,7 +368,7 @@ class TestProtagonismo(unittest.TestCase):
              "speaker": "host"},
             {"start": 30.0, "end": 60.0, "text": "Sem marcacao.", "turn": False},
             {"start": 60.0, "end": 90.0, "text": "Convidado.", "turn": False,
-             "speaker": "convidado"},
+             "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
         self.assertAlmostEqual(frac, 0.5)

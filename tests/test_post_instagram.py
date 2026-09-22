@@ -109,7 +109,7 @@ def _fake_project(d):
     """Cria um project mínimo com episode.json preenchido."""
     ep = {
         "season": 2, "episode": 8, "company": "Zarvik",
-        "cidade": "Ribeirão Açaí", "uf": "SP",
+        "city": "Ribeirão Açaí", "uf": "SP",
         "guests": [{"name": "Marina Siqueira", "role": "Sócio",
                         "linkedin": "https://exemplo"}],
         "topics": [],
@@ -318,7 +318,7 @@ class TestLegendaValidaAntesDeEscrever(unittest.TestCase):
         self.d = tempfile.mkdtemp()
         ep = layout.ensure_dir(layout.episode(self.d))
         with open(ep, "w", encoding="utf-8") as f:
-            json.dump({"season": 2, "episode": 1, "cidade": "Pedra Nova",
+            json.dump({"season": 2, "episode": 1, "city": "Pedra Nova",
                        "uf": "SP", "company": "Acme", "guests":
                        [{"name": "Fulano de Tal", "role": "CEO"}]}, f)
 

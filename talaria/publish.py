@@ -205,7 +205,7 @@ def execute(pd: str, only: list = None, dia=None,
     resultados = []
     for item, pl in pares:
         slug = item["slug"]
-        base = {"slug": slug, "platform": pl, "data": item["data"]}
+        base = {"slug": slug, "platform": pl, "date": item["date"]}
         try:
             r = _publish_pair(pd, item, pl, moments)
         except Exception as e:  # noqa: BLE001 — falha de UM par não trava o resto

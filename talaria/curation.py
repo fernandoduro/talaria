@@ -152,7 +152,7 @@ def guest_speech_fraction(faixa: tuple, segs: list) -> float:
         if dur <= 0:
             continue
         total += dur
-        if speaker == "convidado":
+        if speaker == "guest":
             convidado += dur
     if not total:
         return 1.0        # inaferível: não alerta

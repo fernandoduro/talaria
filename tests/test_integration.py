@@ -68,7 +68,7 @@ class TestFluxoCompleto(unittest.TestCase):
     def test_thumb_args_do_episodio(self):
         episode.save(self.pd, {
             "season": 2, "episode": 7, "company": "Zarvik",
-            "cidade": "Ribeirão Açaí", "uf": "SP",
+            "city": "Ribeirão Açaí", "uf": "SP",
             "guests": [{"name": "Teresa", "role": "sócio", "linkedin": ""}],
         })
         args = texts.thumb_args(self.pd)
@@ -109,7 +109,7 @@ class TestFluxoCompleto(unittest.TestCase):
             os.makedirs(proj)
             with open(layout.ensure_dir(layout.episode(proj)), "w", encoding="utf-8") as f:
                 json.dump({"season": 2, "episode": 8, "company": "Zarvik",
-                           "cidade": "Ribeirão Açaí", "uf": "SP", "topics": [],
+                           "city": "Ribeirão Açaí", "uf": "SP", "topics": [],
                            "guests": [{"name": "Marina Siqueira",
                                            "role": "Sócio"}]}, f, ensure_ascii=False)
             with open(layout.ensure_dir(layout.posts(proj)), "w", encoding="utf-8") as f:

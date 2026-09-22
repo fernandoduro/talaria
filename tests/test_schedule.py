@@ -31,8 +31,8 @@ class TestCarrega(unittest.TestCase):
 
     def test_agenda_valida_passa(self):
         _prepare(self.pd, MOMENTS, POSTS, [
-            {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
-            {"data": "2026-08-25", "kind": "post", "slug": "citacao_x"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-25", "kind": "post", "slug": "citacao_x"},
         ])
         agenda = schedule.load(self.pd)
         self.assertEqual(len(agenda), 2)
@@ -44,14 +44,14 @@ class TestCarrega(unittest.TestCase):
     def test_slug_de_corte_inexistente_aborta(self):
         # Publicar o clip errado por slug digitado errado não tem correção.
         _prepare(self.pd, MOMENTS, POSTS,
-                 [{"data": "2026-08-24", "kind": "clip", "slug": "corte99"}])
+                 [{"date": "2026-08-24", "kind": "clip", "slug": "corte99"}])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
         self.assertIn("corte99", str(ctx.exception))
 
     def test_slug_de_post_inexistente_aborta(self):
         _prepare(self.pd, MOMENTS, POSTS,
-                 [{"data": "2026-08-24", "kind": "post", "slug": "nao_existe"}])
+                 [{"date": "2026-08-24", "kind": "post", "slug": "nao_existe"}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
@@ -59,22 +59,22 @@ class TestCarrega(unittest.TestCase):
         # Valida a data REAL, não só o formato — 30 de fevereiro passa
         # num regex e publicaria nunca.
         _prepare(self.pd, MOMENTS, POSTS,
-                 [{"data": "2026-02-30", "kind": "clip", "slug": "corte1"}])
+                 [{"date": "2026-02-30", "kind": "clip", "slug": "corte1"}])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
         self.assertIn("2026-02-30", str(ctx.exception))
 
     def test_formato_de_data_errado_aborta(self):
         _prepare(self.pd, MOMENTS, POSTS,
-                 [{"data": "24/08/2026", "kind": "clip", "slug": "corte1"}])
+                 [{"date": "24/08/2026", "kind": "clip", "slug": "corte1"}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
     def test_slug_duplicado_aborta(self):
         # Reagendamento é editar a data do item, não repetir o slug.
         _prepare(self.pd, MOMENTS, POSTS, [
-            {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
-            {"data": "2026-08-26", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-26", "kind": "clip", "slug": "corte1"},
         ])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
@@ -85,21 +85,21 @@ class TestCarrega(unittest.TestCase):
         # não é repetição — são peças distintas, em plataformas distintas.
         posts = [{"slug": "corte1", "cards": ["frase"], "legenda": "leg"}]
         _prepare(self.pd, MOMENTS, posts, [
-            {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
-            {"data": "2026-08-25", "kind": "post", "slug": "corte1"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-25", "kind": "post", "slug": "corte1"},
         ])
         self.assertEqual(len(schedule.load(self.pd)), 2)
 
     def test_dois_itens_no_mesmo_dia_permitido(self):
         _prepare(self.pd, MOMENTS, POSTS, [
-            {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
-            {"data": "2026-08-24", "kind": "post", "slug": "citacao_x"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-24", "kind": "post", "slug": "citacao_x"},
         ])
         self.assertEqual(len(schedule.load(self.pd)), 2)
 
     def test_tipo_desconhecido_aborta(self):
         _prepare(self.pd, MOMENTS, POSTS,
-                 [{"data": "2026-08-24", "kind": "reels", "slug": "corte1"}])
+                 [{"date": "2026-08-24", "kind": "reels", "slug": "corte1"}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
@@ -112,7 +112,7 @@ class TestCarrega(unittest.TestCase):
         _prepare(self.pd,
                  [{"slug": mau, "start": 1.0, "end": 70.0, "title": "T"}],
                  POSTS,
-                 [{"data": "2026-08-24", "kind": "clip", "slug": mau}])
+                 [{"date": "2026-08-24", "kind": "clip", "slug": mau}])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
         self.assertIn("barra", str(ctx.exception))
@@ -122,7 +122,7 @@ class TestCarrega(unittest.TestCase):
         _prepare(self.pd,
                  [{"slug": mau, "start": 1.0, "end": 70.0, "title": "T"}],
                  POSTS,
-                 [{"data": "2026-08-24", "kind": "clip", "slug": mau}])
+                 [{"date": "2026-08-24", "kind": "clip", "slug": mau}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
@@ -133,14 +133,14 @@ class TestCarrega(unittest.TestCase):
         _prepare(self.pd,
                  [{"slug": ok, "start": 1.0, "end": 70.0, "title": "T"}],
                  POSTS,
-                 [{"data": "2026-08-24", "kind": "clip", "slug": ok}])
+                 [{"date": "2026-08-24", "kind": "clip", "slug": ok}])
         self.assertEqual(len(schedule.load(self.pd)), 1)
 
     def test_carrossel_acima_de_10_aborta(self):
         # Limite da Graph API é 10 imagens; a solução é editorial.
         posts = [{"slug": "longo", "cards": ["c"] * 11, "legenda": "x"}]
         _prepare(self.pd, MOMENTS, posts,
-                 [{"data": "2026-08-24", "kind": "post", "slug": "longo"}])
+                 [{"date": "2026-08-24", "kind": "post", "slug": "longo"}])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
         self.assertIn("quebre", str(ctx.exception))
@@ -150,8 +150,8 @@ class TestPendente(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
         _prepare(self.pd, MOMENTS, POSTS, [
-            {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
-            {"data": "2026-08-25", "kind": "post", "slug": "citacao_x"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-25", "kind": "post", "slug": "citacao_x"},
         ])
 
     def test_corte_pendente_vale_por_duas_plataformas(self):
