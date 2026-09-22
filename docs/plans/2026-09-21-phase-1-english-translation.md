@@ -633,7 +633,7 @@ rather than for the absence of a marker."
 
 ---
 
-### Task 7: Translate comments and docstrings
+### Task 7: Translate comments, docstrings and test method names
 
 **Files:**
 - Modify: all 27 modules, 23 test modules, `run.py`, `scripts/youtube_auth.py`
@@ -658,6 +658,18 @@ git show adc1623:talaria/<module>.py | sed -n '<line>,<line+3>p'
 - [ ] **Step 1: Translate, file by file**
 
 Work module by module so each commit is reviewable. Carry the meaning, not the word order — these comments record real empirical findings and the findings must survive. `talaria/config.py`'s `BASE_Y` derivation, `talaria/audio.py`'s dB figures, `talaria/render.py`'s explanation of why `-c copy` is not used: all load-bearing.
+
+- [ ] **Step 1b: Rename the Portuguese test method names**
+
+`docs/plans/phase-1-inputs/test-name-snapshot.txt` lists all 388, snapshotted after Task 3. The large majority are Portuguese. They were excluded from the identifier inventory by mistake — see that file's header — and neither acceptance criterion can see them: zero contain an accent, and none is a function word.
+
+A test name is a sentence stating what the test proves, so translate the meaning rather than substituting words. Do it per module, in the same commit as that module's comments, so each commit stays reviewable.
+
+Two cases need judgement rather than translation:
+- `test_nao_expande_pro_em_locucao` names the Latin-phrase guard that Task 5 deletes. If Task 5 has already removed it, there is nothing to rename; if not, leave it and say so.
+- Where a name describes Portuguese-specific behaviour that Tasks 5 or 6 replaced, the English name should describe the NEW behaviour, not translate the old description.
+
+Renaming is safe — no test is referenced by name as a string, no decorator is keyed on one, `subTest` takes keyword arguments. The suite count must stay 388 unless a task deleted a test and said so.
 
 - [ ] **Step 2: Do not let translation inflate the prose**
 
