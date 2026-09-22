@@ -519,8 +519,8 @@ _is_common_word	1	english
 fix_proper_nouns	1	english	
 clean_caption	1	english	
 group_words_into_segments	1	english	
-reservas	1	renamed	-> reserved (global); utils.py reserved-regex-chars local
-_guarda	1	renamed	-> _reserve (global); utils.py _expand_contractions' RE_PRO_LATIM sub callback, production code; guarda = guards/keeps
+reservas	1	deleted_by_task_5	Superseded by deletion, not renamed: this local lived in the Latin-phrase guard machinery that Task 5 removed when it rewrote clean_caption for English. Both old and new names are absent.
+_guarda	1	deleted_by_task_5	Superseded by deletion, not renamed: this was RE_PRO_LATIM's sub callback, removed with the Latin-phrase guard in Task 5. Both old and new names are absent.
 letra	1	renamed	-> letter (global); utils.py phonetic-equivalents loop var
 classe	1	renamed	-> char_class (global); utils.py phonetic-equivalents loop var
 achados	1	renamed	-> matches (global); utils.py regex findall results
@@ -640,7 +640,7 @@ TestMmss	1	english
 TestCorrigeNomes	1	renamed	-> TestFixProperNouns (global); class name, matches fix_proper_nouns()
 TestCleanCaption	1	english	
 tag	1	english	
-errado	1	renamed	-> wrong (global); test-local
+errado	1	deleted_by_task_5	Superseded by deletion, not renamed: test-local in one of the eight Portuguese caption tests Task 5 deleted. Both old and new names are absent.
 _SPEC	1	english	
 youtube_auth	1	english	
 TestValidaClientSecret	1	renamed	-> TestValidateClientSecret (global); class name, matches validate_client_secret()
