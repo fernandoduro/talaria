@@ -1,4 +1,4 @@
-"""Testes da montagem dos pacotes de leitura."""
+"""Tests for assembling the reading packets."""
 import json
 import os
 import tempfile
@@ -24,47 +24,47 @@ class TestBrief(unittest.TestCase):
                 {"start": 15.0, "end": 80.0, "text": "Segunda fala.", "turn": True},
             ]}, f)
 
-    def test_transcricao_formatada_tem_timestamps(self):
+    def test_formatted_transcript_has_timestamps(self):
         txt = brief.readable_transcript(self.d)
         self.assertIn("00:10", txt)
         self.assertIn("Primeira fala.", txt)
 
-    def test_metadados_formatados(self):
+    def test_formatted_metadata(self):
         m = brief.readable_metadata(self.d)
         self.assertIn("Zarvik", m)
         self.assertIn("T2E07", m)
         self.assertIn("Ribeirão Açaí", m)
         self.assertIn("Teresa", m)
 
-    def test_substitui_placeholder_de_transcricao(self):
+    def test_replaces_the_transcript_placeholder(self):
         tpl = "PROMPT AQUI\n\n{{TRANSCRICAO}}\n"
         out = brief.fill_template(tpl, transcript="XPTO", metadata="")
         self.assertIn("XPTO", out)
         self.assertNotIn("{{TRANSCRICAO}}", out)
 
-    def test_substitui_placeholder_de_metadados(self):
+    def test_replaces_the_metadata_placeholder(self):
         tpl = "PROMPT\n{{METADADOS}}\n"
         out = brief.fill_template(tpl, transcript="", metadata="DADOS")
         self.assertIn("DADOS", out)
         self.assertNotIn("{{METADADOS}}", out)
 
-    def test_substitui_placeholder_de_curadoria(self):
+    def test_replaces_the_curation_placeholder(self):
         tpl = "PROMPT\n{{CURADORIA}}\n"
         out = brief.fill_template(tpl, transcript="", metadata="", curation="ESTADO")
         self.assertIn("ESTADO", out)
         self.assertNotIn("{{CURADORIA}}", out)
 
-    def test_placeholder_ausente_nao_quebra(self):
+    def test_absent_placeholder_does_not_break(self):
         out = brief.fill_template("sem placeholder", transcript="X", metadata="Y")
         self.assertEqual(out, "sem placeholder")
 
-    def test_estado_legivel_primeira_rodada(self):
+    def test_readable_state_first_round(self):
         state = {"target": 5, "approved": [], "rejected": [], "rounds": 0}
         txt = brief.readable_curation(state)
         self.assertIn("PRIMEIRA RODADA", txt)
         self.assertIn("10", txt)
 
-    def test_estado_legivel_com_rejeitados(self):
+    def test_readable_state_with_rejections(self):
         state = {"target": 5, "rounds": 1,
                   "approved": [{"slug": "a", "start": 100.0, "end": 170.0,
                                  "kind": "story"}],
@@ -72,12 +72,12 @@ class TestBrief(unittest.TestCase):
                                   "reason": "gancho fraco", "summary": "trecho X"}]}
         txt = brief.readable_curation(state)
         self.assertIn("gancho fraco", txt)
-        self.assertIn("4", txt)          # slots_left restantes
-        self.assertIn("05:00", txt)      # span queimada em mm:ss
+        self.assertIn("4", txt)          # slots_left remaining
+        self.assertIn("05:00", txt)      # burned span in mm:ss
 
 
 class TestBriefPosts(unittest.TestCase):
-    """Pacote de leitura da escolha de citações (comando `post --cortes`)."""
+    """Reading packet for choosing quotes (the `post --clips` command)."""
 
     def setUp(self):
         self.d = tempfile.mkdtemp()
@@ -97,7 +97,7 @@ class TestBriefPosts(unittest.TestCase):
                       "kind": "thesis", "screen_text": "O mar azul",
                       "post_caption": "...", "trecho": "..."}
 
-    def test_traz_a_fala_dentro_do_corte(self):
+    def test_brings_the_speech_inside_the_clip(self):
         out = brief.build_posts(self.d, [self.clip])
         with open(out, encoding="utf-8") as f:
             text = f.read()
@@ -105,39 +105,39 @@ class TestBriefPosts(unittest.TestCase):
         self.assertIn("A oportunidade estava do lado.", text)
         self.assertIn("E a gente não viu.", text)
 
-    def test_traz_a_fala_do_segmento_que_atravessa_a_fronteira(self):
-        """Segmento cortado ao meio pela fronteira ainda é fala do clip.
+    def test_brings_speech_from_the_segment_crossing_the_boundary(self):
+        """A segment split by the boundary is still speech from the clip.
 
-        Exigir contenção total escondia a ÚLTIMA frase de todo clip —
-        justamente onde costuma estar a frase de impacto. O vídeo mostra essa
-        fala (render._segments_in_cut apara o text), então o pacote de leitura
-        precisa mostrá-la também.
+        Requiring full containment hid the LAST sentence of every clip —
+        exactly where the punchline usually sits. The video shows that speech
+        (render._segments_in_cut trims the text), so the reading packet has to
+        show it too.
         """
         clip = {"slug": "c", "start": 10.0, "end": 16.0, "kind": "thesis",
                  "screen_text": "", "post_caption": "", "trecho": ""}
         text = brief.clip_speech(self.d, clip)
         self.assertIn("A oportunidade estava do lado.", text)
-        # O 2º segmento (14–18s) é aparado pela fronteira em 16s: entra a
-        # metade que o clip alcança, não o bloco inteiro nem nada.
+        # The 2nd segment (14-18s) is trimmed by the boundary at 16s: the half
+        # the clip reaches goes in, not the whole block and not nothing.
         self.assertIn("E a", text)
         self.assertNotIn("não viu", text)
 
-    def test_nao_traz_fala_de_fora_do_corte(self):
+    def test_does_not_bring_speech_from_outside_the_clip(self):
         out = brief.build_posts(self.d, [self.clip])
         with open(out, encoding="utf-8") as f:
             text = f.read()
         self.assertNotIn("Fala de outro trecho.", text)
 
-    def test_traz_metadados_e_limite_de_encaixe(self):
+    def test_brings_metadata_and_the_fit_limit(self):
         out = brief.build_posts(self.d, [self.clip])
         with open(out, encoding="utf-8") as f:
             text = f.read()
         self.assertIn("Marina Siqueira", text)
         self.assertIn("100 caracteres", text)
-        # os placeholders do prompt têm que ter sido substituídos
+        # the prompt placeholders have to have been replaced
         self.assertNotIn("{{", text)
 
-    def test_grava_em_brief_posts_md(self):
+    def test_writes_to_brief_posts_md(self):
         out = brief.build_posts(self.d, [self.clip])
         self.assertEqual(out, layout.brief(self.d, "posts"))
         self.assertTrue(os.path.exists(out))

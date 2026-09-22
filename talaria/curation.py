@@ -1,10 +1,10 @@
-"""Estado da curation iterativa — rounds até fechar a target de cortes approved.
+"""Iterative curation state — rounds until the approved-clip target is met.
 
-Regras de state:
-- trecho rejeitado fica queimado permanentemente, não volta em nenhuma rodada;
-- exclusão por SOBREPOSIÇÃO DE TEMPO, não por texto — um clip 10s adiante de
-  um rejeitado é essencialmente o mesmo trecho;
-- ajuste de tempo não é rejeição, é aprovação com correção.
+State rules:
+- a rejected stretch stays burned permanently, it never returns in any round;
+- exclusion is by TIME OVERLAP, not by text — a clip 10s past a rejected one
+  is essentially the same stretch;
+- a time adjustment is not a rejection, it is approval with a correction.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ from . import config, layout
 
 FILE_NAME = "curation.json"
 
-# Fração de sobreposição a partir da qual duas spans são "o mesmo trecho".
+# Overlap fraction from which two spans count as "the same stretch".
 OVERLAP_THRESHOLD = 0.30
 
 
@@ -25,10 +25,10 @@ def new_state(target: int = 5) -> dict:
 
 
 def overlaps(a: tuple, b: tuple, threshold: float = OVERLAP_THRESHOLD) -> bool:
-    """True se as spans (start, end) se sobrepõem acima do threshold.
+    """True if the (start, end) spans overlap above the threshold.
 
-    O threshold é relativo à MENOR das duas spans — assim um clip curto contido
-    num rejeitado longo account como sobreposição.
+    The threshold is relative to the SMALLER of the two spans — that way a short
+    clip contained in a long rejected one counts as an overlap.
     """
     start = max(a[0], b[0])
     end = min(a[1], b[1])
@@ -42,7 +42,7 @@ def overlaps(a: tuple, b: tuple, threshold: float = OVERLAP_THRESHOLD) -> bool:
 
 
 def burned_spans(state: dict) -> list:
-    """Todas as spans (start, end) indisponíveis para novas propostas."""
+    """Every (start, end) span unavailable to new proposals."""
     spans = []
     for group in ("approved", "rejected"):
         for item in state.get(group, []):
@@ -87,30 +87,30 @@ RE_HEDGED_NUMBER = re.compile(
 
 
 def has_hedged_number(text: str) -> bool:
-    """True se o texto contém número dito com aproximação ou dúvida."""
+    """True if the text carries a number stated with hedging or doubt."""
     return bool(RE_HEDGED_NUMBER.search(text or ""))
 
 
 def _valid_boundary(t: float, segs: list, tol: float = 0.5) -> bool:
-    """True se t coincide com o início ou o end de algum segmento."""
+    """True if t coincides with the start or end of some segment."""
     for s in segs:
         if abs(s["start"] - t) <= tol or abs(s["end"] - t) <= tol:
             return True
     return False
 
 
-# Pontuação que encerra frase. Reticências contam: a fala fica suspensa, mas
-# não cortada no meio de uma palavra.
+# Punctuation that closes a sentence. An ellipsis counts: the speech is left
+# hanging, but not cut off mid-word.
 RE_SENTENCE_END = re.compile(r"[.!?…]\s*$|\.\.\.\s*$")
 
 
 def _ends_sentence(t: float, segs: list, tol: float = 0.5) -> bool:
-    """True se t cai no end de um segmento cujo texto encerra uma frase.
+    """True if t lands at the end of a segment whose text closes a sentence.
 
-    A transcrição do YouTube quebra bloco por TEMPO, não por pontuação — um
-    bloco pode acabar no meio da frase e emendar no seguinte. Casar só com o
-    limite do bloco (_valid_boundary) aceitava clip terminando em palavra
-    solta; aqui a pontuação do texto é que decide.
+    The YouTube transcript breaks blocks by TIME, not by punctuation — a block
+    can end mid-sentence and run on into the next. Matching only the block
+    boundary (_valid_boundary) accepted a clip ending on a stray word; here the
+    text's punctuation decides.
     """
     for s in segs:
         if abs(s["end"] - t) <= tol:
@@ -119,27 +119,27 @@ def _ends_sentence(t: float, segs: list, tol: float = 0.5) -> bool:
 
 
 def segments_in_clip(span: tuple, segs: list) -> list:
-    """Segmentos que intersectam a span (start, end) do clip."""
+    """Segments intersecting the clip's (start, end) span."""
     start, end = span
     return [s for s in segs if s["end"] > start and s["start"] < end]
 
 
 def guest_speech_fraction(span: tuple, segs: list) -> float:
-    """Fração do tempo do clip em que o convidado fala.
+    """Fraction of the clip's time in which the guest speaks.
 
-    Lê o campo `speaker`, resolvido globalmente no parse (txt_parse.
-    resolve_speakers). NÃO deduz o falante alternando um booleano inside da
-    fatia: o marcador '>>' diz QUE trocou de interlocutor, não QUEM fala, e um
-    clip que começa no meio de uma response não tem nenhum '>>' inside dele —
-    a alternância local devolvia 0.0 justamente para os cortes 100% convidado.
+    Reads the `speaker` field, resolved globally at parse time
+    (txt_parse.resolve_speakers). It does NOT deduce the speaker by flipping a
+    boolean inside the slice: the '>>' marker says THAT the speaker changed, not
+    WHO speaks, and a clip starting mid-answer has no '>>' inside it at all —
+    local alternation returned 0.0 for precisely the 100%-guest clips.
 
-    Segmentos sem `speaker` (origin vtt/Whisper, que não tem marcador de troca,
-    ou dado gravado antes desta correção) são ignorados no cálculo. Se NENHUM
-    segmento do clip tiver `speaker`, o protagonismo é inaferível e a função
-    devolve 1.0 — o valor que não dispara o alerta em clip_warnings(). Devolver
-    0.0 acusaria de "convidado fala 0%" todo clip vindo do Whisper, o mesmo
-    alerta falso que esta correção existe para eliminar; quando não dá para
-    medir, o julgamento fica com o prompt de cortes e o gestor.
+    Segments without `speaker` (vtt/Whisper origin, which has no turn marker, or
+    data written before this fix) are left out of the calculation. If NO segment
+    of the clip has `speaker`, the split is unmeasurable and the function returns
+    1.0 — the value that does not trigger the alert in clip_warnings(). Returning
+    0.0 would accuse every Whisper clip of "guest speaks 0%", the same false
+    alert this fix exists to remove; when it cannot be measured, the judgement
+    stays with the clips prompt and the manager.
     """
     inside = segments_in_clip(span, segs)
     if not inside:
@@ -156,20 +156,20 @@ def guest_speech_fraction(span: tuple, segs: list) -> float:
         if speaker == "guest":
             guest_dur += dur
     if not total:
-        return 1.0        # inaferível: não alerta
+        return 1.0        # unmeasurable: no alert
     return guest_dur / total
 
 
 def sentence_ends(segs: list, start: float, lo: float, hi: float) -> list:
-    """Fins de frase entre `lo` e `hi` que dão clip de duração válida.
+    """Sentence ends between `lo` and `hi` that give a valid clip duration.
 
-    Devolve [(instante, duration, contexto)] ordenado por instante. Serve para
-    escolher onde terminar um clip sem cortar a fala no meio — o trabalho que
-    nesta sessão foi feito à mão, procurando pontuação no texto.
+    Returns [(instant, duration, context)] ordered by instant. It serves to pick
+    where to end a clip without cutting speech mid-sentence — the work that was
+    done by hand in this session, hunting for punctuation in the text.
 
-    O instante é interpolado pela posição do caractere inside do bloco: a
-    transcrição não traz tempo por palavra. Confira com `audio.valley_before()`
-    antes de fechar, porque a interpolação erra algumas dezenas de ms.
+    The instant is interpolated from the character position inside the block:
+    the transcript carries no per-word time. Check with `audio.valley_before()`
+    before settling, because the interpolation is off by tens of milliseconds.
     """
     out = []
     for s in segs:
@@ -191,10 +191,10 @@ def sentence_ends(segs: list, start: float, lo: float, hi: float) -> list:
 
 
 def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
-    """Valida uma proposta de clip. Retorna (ok, [mensagens]).
+    """Validates a clip proposal. Returns (ok, [messages]).
 
-    Checa o que é verificável em código; o julgamento editorial fica com o
-    prompt de cortes e o gestor.
+    Checks what code can verify; the editorial judgement stays with the clips
+    prompt and the manager.
     """
     msgs = []
     start, end = span
@@ -205,16 +205,16 @@ def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
     elif dur > config.CLIP_MAX_S:
         msgs.append(f"duração {dur:.0f}s acima do máximo de {config.CLIP_MAX_S}s")
 
-    # O clip não pode começar NEM terminar no meio de uma frase.
-    # O end já foi só alerta, na suposição de que a cauda seria "aparada no
-    # render" — o render corta no tempo exato, então nada era aparado e o
-    # vídeo saía com a última frase pela metade.
+    # The clip must not start NOR end mid-sentence.
+    # The end was once only a warning, on the assumption the tail would be
+    # "trimmed at render" — the render cuts at the exact time, so nothing was
+    # trimmed and the video shipped with the last sentence half finished.
     if segs and not _valid_boundary(start, segs):
         msgs.append(f"início {start:.1f}s não cai em fronteira de frase")
 
-    # Só exige pontuação final quando o end coincide com o end de um bloco.
-    # Fim no MEIO de um bloco é caso legítimo (o gestor apara a cauda onde a
-    # frase acaba, mesmo que o bloco siga) e não deve ser bloqueado aqui.
+    # Closing punctuation is only required when the end coincides with a block
+    # end. An end in the MIDDLE of a block is legitimate (the manager trims the
+    # tail where the sentence ends, even if the block runs on) and is allowed.
     if segs and _valid_boundary(end, segs) and not _ends_sentence(end, segs):
         msgs.append(f"fim {end:.1f}s não fecha frase (corta a fala no meio)")
 
@@ -224,9 +224,9 @@ def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
     return (not msgs), msgs
 
 
-# Marcas de quem fala da PRÓPRIA company em 1ª pessoa. Se o segmento marcado
-# como "host" está cheio delas, quem fala ali é o convidado e a atribuição
-# escorregou.
+# Markers of someone speaking about their OWN company in the first person. If a
+# segment labelled "host" is full of them, the speaker there is the guest and
+# the attribution has slipped.
 RE_FIRST_PERSON = re.compile(
     r"\b(we|our|us|my company|my co-?founder|I joined|I started)\b",
     re.IGNORECASE,
@@ -247,12 +247,12 @@ SUSPECT_ATTRIBUTION_THRESHOLD = 0.30
 
 
 def attribution_trustworthy(segs: list) -> bool:
-    """False quando o campo `speaker` parece trocado no episódio inteiro.
+    """False when the `speaker` field looks swapped across the whole episode.
 
-    O parser resolve o falante uma vez, sobre o episódio todo; um backchannel
-    curto do host pode desalinhar tudo dali em diante (trechos 100% do
-    convidado saíram como "host"). Alertas que leem `speaker` mentiriam, e
-    alerta que mente treina o operador a ignorar a saída — melhor calar.
+    The parser resolves the speaker once, over the whole episode; one short host
+    backchannel can misalign everything after it (stretches that were 100% guest
+    came out as "host"). Alerts reading `speaker` would lie, and a lying alert
+    trains the operator to ignore the output — better to stay quiet.
     """
     host_total = first_person = 0.0
     for s in segs or []:
@@ -267,16 +267,16 @@ def attribution_trustworthy(segs: list) -> bool:
     return (first_person / host_total) < SUSPECT_ATTRIBUTION_THRESHOLD
 
 
-# Segundos de host na abertura a partir dos quais o clip vira pergunta com
-# response em vez de response. Um clip abria com 47s de pergunta.
+# Seconds of host at the opening beyond which the clip becomes a question with
+# an answer rather than an answer. One clip opened with 47s of question.
 HOST_OPENING_MAX_S = 8.0
 
 
 def host_opening(span: tuple, segs: list) -> float:
-    """Quantos segundos de fala do host abrem o clip, antes do convidado.
+    """How many seconds of host speech open the clip, before the guest.
 
-    Zero quando o clip já abre no convidado ou quando não dá para saber quem
-    fala (`speaker` ausente) — o alerta não deve disparar no escuro.
+    Zero when the clip already opens on the guest or when there is no way to
+    know who speaks (`speaker` absent) — the alert must not fire in the dark.
     """
     inside = segments_in_clip(span, segs)
     total = 0.0
@@ -291,16 +291,16 @@ def host_opening(span: tuple, segs: list) -> float:
 
 
 def clip_warnings(span: tuple, segs: list) -> list:
-    """Avisos que não invalidam o clip, mas exigem conferência."""
+    """Warnings that do not invalidate the clip, but need a check."""
     alerts = []
     inside = segments_in_clip(span, segs)
     for s in inside:
         if has_hedged_number(s["text"]):
             alerts.append(f"número aproximado em {s['start']:.0f}s: \"{s['text'][:60]}\"")
-    # Os dois alerts abaixo leem `speaker`; sem atribuição confiável eles
-    # acusariam clip bom. Avisa uma vez que a checagem não rodou.
+    # The two alerts below read `speaker`; without trustworthy attribution they
+    # would flag a good clip. Warned once that the check did not run.
     if not attribution_trustworthy(segs):
-        return alerts       # avisado uma vez por episódio, em cmd_curate
+        return alerts       # warned once per episode, in cmd_curate
 
     frac = guest_speech_fraction(span, segs)
     if frac < config.GUEST_SPEECH_MIN:
@@ -315,29 +315,29 @@ def clip_warnings(span: tuple, segs: list) -> list:
     return alerts
 
 
-# Tipos de clip, em ordem de preferência.
+# Clip kinds, in order of preference.
 KINDS = ["story", "thesis", "advice", "personal"]
 
 
 def approve(state: dict, clip: dict) -> dict:
-    """Registra um clip aprovado. Ajuste de tempo não é rejeição.
+    """Records an approved clip. A time adjustment is not a rejection.
 
-    Recusa clip que se sobreponha a outro JÁ APROVADO: dois vídeos com o mesmo
-    trecho competem entre si na distribuição. Dois approved dividiam 74s
-    porque nada checava isso aqui — `validate_clip` olha span queimada, que
-    inclui approved, mas quem chama `approve()` direto escapava da checagem.
+    Refuses a clip overlapping one ALREADY APPROVED: two videos carrying the
+    same stretch compete with each other in distribution. Two approved clips
+    shared 74s because nothing checked it here — `validate_clip` looks at burned
+    spans, which include approved ones, but a direct `approve()` call escaped it.
 
-    Reaprovar o MESMO slug é ajuste de tempo, não duplicata: substitui.
+    Re-approving the SAME slug is a time adjustment, not a duplicate: it replaces.
     """
     span = (float(clip["start"]), float(clip["end"]))
     for i, ja in enumerate(state["approved"]):
         if ja.get("slug") == clip.get("slug"):
-            state["approved"][i] = clip      # ajuste de tempo
+            state["approved"][i] = clip      # time adjustment
             return state
-        # Limiar zero: entre APROVADOS qualquer sobreposição já significa
-        # trecho de vídeo repetido em dois cortes. O OVERLAP_THRESHOLD de 30%
-        # existe para decidir se uma proposta é "o mesmo trecho" de algo
-        # queimado — pergunta diferente, tolerância diferente.
+        # Zero threshold: between APPROVED clips any overlap already means a
+        # stretch of video repeated in two clips. The 30% OVERLAP_THRESHOLD
+        # exists to decide whether a proposal is "the same stretch" as something
+        # burned — a different question, a different tolerance.
         if overlaps(span, (float(ja["start"]), float(ja["end"])), threshold=0.0):
             raise ValueError(
                 f"corte {clip.get('slug')} sobrepõe o aprovado "
@@ -350,7 +350,7 @@ def approve(state: dict, clip: dict) -> dict:
 
 
 def reject(state: dict, clip: dict, reason: str) -> dict:
-    """Queima o trecho permanentemente, com o reason em texto livre."""
+    """Burns the stretch permanently, with the reason as free text."""
     state["rejected"].append({
         "start": float(clip["start"]),
         "end": float(clip["end"]),
@@ -361,7 +361,7 @@ def reject(state: dict, clip: dict, reason: str) -> dict:
 
 
 def composition(state: dict) -> dict:
-    """Quantos cortes approved de cada kind (diversidade)."""
+    """How many approved clips of each kind (diversity)."""
     comp = {t: 0 for t in KINDS}
     for c in state["approved"]:
         t = c.get("kind")
@@ -371,12 +371,12 @@ def composition(state: dict) -> dict:
 
 
 def missing_kinds(state: dict) -> list:
-    """Tipos sem nenhum clip aprovado — alimenta o aviso de diversidade."""
+    """Kinds with no approved clip — feeds the diversity warning."""
     return [t for t, n in composition(state).items() if n == 0]
 
 
 def reasons(state: dict) -> list:
-    """Motivos de rejeição sem repetição — contexto para a próxima rodada."""
+    """Rejection reasons without repetition — context for the next round."""
     seen, out = set(), []
     for r in state.get("rejected", []):
         m = (r.get("reason") or "").strip()
@@ -387,15 +387,15 @@ def reasons(state: dict) -> list:
 
 
 def is_closed(state: dict) -> bool:
-    """True quando a target de cortes approved foi atingida."""
+    """True once the approved-clip target has been met."""
     return len(state.get("approved", [])) >= state["target"]
 
 
 def to_moments(state: dict) -> list:
-    """Converte os approved no moments.json que o render consome.
+    """Converts the approved clips into the moments.json the render consumes.
 
-    O render usa só slug/start/end; os demais campos são conteúdo de produção
-    que precisa sobreviver até a publicação.
+    The render uses only slug/start/end; the other fields are production content
+    that has to survive as far as publication.
     """
     if not state.get("approved"):
         raise ValueError("nenhum corte aprovado — nada a exportar")
@@ -403,7 +403,7 @@ def to_moments(state: dict) -> list:
 
 
 def save_moments(project_dir: str, state: dict) -> str:
-    """Grava moments.json no diretório do project e devolve o path."""
+    """Writes moments.json into the project directory and returns the path."""
     moments = to_moments(state)
     path = layout.ensure_dir(layout.moments(project_dir))
     with open(path, "w", encoding="utf-8") as f:

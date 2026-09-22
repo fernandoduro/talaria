@@ -1,7 +1,7 @@
-"""Monta os pacotes de leitura que um modelo de linguagem consome em sessão.
+"""Builds the reading packets a language model consumes in a session.
 
-Junta prompt versionado + metadados do episódio + transcrição num arquivo
-único, substituindo a colagem manual a cada episódio.
+Joins the versioned prompt + episode metadata + transcript into a single file,
+replacing the manual copy-paste done for every episode.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ PROMPTS_DIR = os.path.join(ROOT, "prompts")
 
 
 def readable_transcript(project_dir: str) -> str:
-    """Transcrição com [mm:ss] por segmento, para localizar cortes."""
+    """Transcript with [mm:ss] per segment, for locating clips."""
     path = layout.transcript(project_dir)
     with open(path, encoding="utf-8") as f:
         segs = json.load(f)["segments"]
@@ -28,7 +28,7 @@ def readable_transcript(project_dir: str) -> str:
 
 
 def readable_metadata(project_dir: str) -> str:
-    """Bloco de metadados do prompt, preenchido a partir do episode.json."""
+    """The prompt's metadata block, filled in from episode.json."""
     ep = episode.load(project_dir)
     guests = ep.get("guests") or []
     names = "; ".join(
@@ -50,7 +50,7 @@ def readable_metadata(project_dir: str) -> str:
 
 def fill_template(template: str, transcript: str, metadata: str,
               curation: str = "", clips: str = "") -> str:
-    """Substitui os placeholders do prompt pelo conteúdo do episódio."""
+    """Replaces the prompt placeholders with the episode content."""
     return (template
             .replace("{{TRANSCRICAO}}", transcript)
             .replace("{{METADADOS}}", metadata)
@@ -59,7 +59,7 @@ def fill_template(template: str, transcript: str, metadata: str,
 
 
 def readable_curation(state: dict) -> str:
-    """Estado da curation em texto, injetado no prompt de cortes."""
+    """Curation state as text, injected into the clips prompt."""
     approved = state.get("approved", [])
     rejected = state.get("rejected", [])
 
@@ -101,7 +101,7 @@ def readable_curation(state: dict) -> str:
 
 
 def _read_prompt(name: str) -> str:
-    """Lê um prompt versionado do diretório prompts/."""
+    """Reads a versioned prompt from the prompts/ directory."""
     path = os.path.join(PROMPTS_DIR, name)
     if not os.path.exists(path):
         raise FileNotFoundError(f"prompt não encontrado: {path}")
@@ -110,7 +110,7 @@ def _read_prompt(name: str) -> str:
 
 
 def build(project_dir: str, kind: str) -> str:
-    """kind: 'materials' ou 'clips'. Retorna o path do arquivo gerado."""
+    """kind: 'materials' or 'clips'. Returns the path of the file written."""
     if kind not in ("materials", "clips"):
         raise ValueError("tipo deve ser 'materials' ou 'clips'")
     template = _read_prompt(f"{kind}.md")
@@ -130,19 +130,19 @@ def build(project_dir: str, kind: str) -> str:
 
 
 def clip_speech(project_dir: str, clip: dict) -> str:
-    """A fala literal do clip, para escolher a citação.
+    """The clip's literal speech, for choosing the quote.
 
-    Inclui todo segmento que SOBREPÕE a janela, aparando o texto na fronteira —
-    a mesma regra do `render._segments_in_cut`, para que o pacote mostre a fala
-    que virou vídeo.
+    Includes every segment that OVERLAPS the window, trimming the text at the
+    boundary — the same rule as `render._segments_in_cut`, so the packet shows
+    the speech that became video.
 
-    Exigir contenção total escondia a última frase de todo clip, porque
-    a transcrição tem blocos de ~8s e a fronteira quase nunca coincide com eles.
-    Era justamente onde costuma estar a frase de impacto: num clip o pacote
-    terminava em "chegou lá na fábrica, você não" enquanto o vídeo seguia.
+    Requiring full containment hid the last sentence of every clip, because the
+    transcript has ~8s blocks and the boundary almost never coincides with them.
+    That is exactly where the punchline usually sits: in one clip the packet
+    ended at "chegou lá na fábrica, você não" while the video went on.
 
-    O texto vem CRU (sem `clean_caption`): a escolha do recorte é feita sobre o
-    que a pessoa falou. A limpeza entra depois, no `post --generate`.
+    The text comes RAW (no `clean_caption`): the excerpt is chosen over what the
+    person actually said. Cleanup comes later, in `post --generate`.
     """
     from .render import _trim_text
 
@@ -172,7 +172,7 @@ def clip_speech(project_dir: str, clip: dict) -> str:
 
 
 def readable_clips(project_dir: str, clips: list) -> str:
-    """Bloco com a fala de cada clip selecionado, para a sessão de curation."""
+    """Block with each selected clip's speech, for the curation session."""
     parts = []
     for c in clips:
         parts.append(
@@ -185,11 +185,11 @@ def readable_clips(project_dir: str, clips: list) -> str:
 
 
 def build_posts(project_dir: str, clips: list) -> str:
-    """Escreve brief_posts.md com o prompt e a fala dos cortes escolhidos.
+    """Writes brief_posts.md with the prompt and the chosen clips' speech.
 
-    Função separada de `build()` porque o pacote de posts não recebe a
-    transcrição inteira: a citação sai de cortes já approved, e mandar o
-    episódio todo convidaria a escolher fala que nunca virou vídeo.
+    Separate from `build()` because the posts packet does not get the whole
+    transcript: the quote comes from already-approved clips, and sending the
+    entire episode would invite picking speech that never became video.
     """
     from . import config
     limit = (
