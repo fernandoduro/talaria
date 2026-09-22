@@ -85,9 +85,9 @@ RE_HEDGED_NUMBER = re.compile(
 )
 
 
-def has_hedged_number(texto: str) -> bool:
+def has_hedged_number(text: str) -> bool:
     """True se o texto contém número dito com aproximação ou dúvida."""
-    return bool(RE_HEDGED_NUMBER.search(texto or ""))
+    return bool(RE_HEDGED_NUMBER.search(text or ""))
 
 
 def _valid_boundary(t: float, segs: list, tol: float = 0.5) -> bool:

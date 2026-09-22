@@ -29,22 +29,22 @@ def _text_width_px(s: str, fnt=None) -> float:
     return (fnt or _PILFONT).getlength(s)
 
 
-def wrap_by_pixels(txt: str, fnt=None, largura: float | None = None) -> list[str]:
+def wrap_by_pixels(txt: str, fnt=None, width: float | None = None) -> list[str]:
     """Quebra o texto por LARGURA REAL EM PIXELS (não por nº de caracteres).
 
     Garante que nenhuma linha ultrapasse a largura. Usa quantas lines precisar
     — melhor 3 lines curtas que texto cortado nas laterais.
 
     Sem argumentos, quebra a legenda queimada do vídeo (fonte e SAFE_W do
-    config). Com `fnt`/`largura`, serve também o post de citação, que tem fonte
+    config). Com `fnt`/`width`, serve também o post de citação, que tem fonte
     e área diferentes.
     """
-    largura = config.SAFE_W if largura is None else largura
+    width = config.SAFE_W if width is None else width
     words = txt.split()
     lines, cur = [], ""
     for w in words:
         cand = (cur + " " + w).strip() if cur else w
-        if _text_width_px(cand, fnt) <= largura:
+        if _text_width_px(cand, fnt) <= width:
             cur = cand
         else:
             if cur:
@@ -63,12 +63,12 @@ def _esc_drawtext(s: str) -> str:
     return s
 
 
-def _drawtext_chain(segments, start, end, nomes=None) -> str:
+def _drawtext_chain(segments, start, end, names=None) -> str:
     """Constrói a cadeia de filtros drawtext para as legendas de um clip."""
     parts = []
     # Mesma fonte de verdade do backend overlay: sem isto o drawtext perdia o
     # aparo de texto e mostrava fala que o clip não reproduz.
-    for rs, re_, txt in _segments_in_cut(segments, start, end, nomes):
+    for rs, re_, txt in _segments_in_cut(segments, start, end, names):
         lines = wrap_by_pixels(txt)
         n = len(lines)
         for li, line in enumerate(lines):
@@ -86,9 +86,9 @@ def _drawtext_chain(segments, start, end, nomes=None) -> str:
     return ",".join(parts) if parts else "null"
 
 
-def _filtergraph(segments, start, end, nomes=None) -> str:
+def _filtergraph(segments, start, end, names=None) -> str:
     """9:16 com fundo blur + legendas via drawtext."""
-    draw = _drawtext_chain(segments, start, end, nomes)
+    draw = _drawtext_chain(segments, start, end, names)
     return (
         "[0:v]split=2[bg][fg];"
         f"[bg]scale={config.FRAME_W}:{config.FRAME_H}:force_original_aspect_ratio=increase,"
@@ -127,7 +127,7 @@ def _base_graph() -> str:
                              S=config.BG_BLUR_SIGMA, FW=config.FG_SCALE_W)
 
 
-def _segments_in_cut(segments, start, end, nomes=None):
+def _segments_in_cut(segments, start, end, names=None):
     """Segmentos que aparecem no clip, com tempos relativos ao início dele.
 
     Quando o clip apara um segmento (começa ou termina no meio dele), o TEXTO
@@ -141,7 +141,7 @@ def _segments_in_cut(segments, start, end, nomes=None):
         s, e = seg["start"], seg["end"]
         if e <= start or s >= end:
             continue
-        txt = utils.fix_proper_nouns(utils.clean_caption(seg["text"]), nomes)
+        txt = utils.fix_proper_nouns(utils.clean_caption(seg["text"]), names)
         if not txt:
             continue
         vis_s, vis_e = max(s, start), min(e, end)
@@ -248,10 +248,10 @@ def _snap_to_punctuation(palavras: list, b: int) -> int:
     return b
 
 
-def _build_overlay_inputs(segments, start, end, tmpdir, nomes=None):
+def _build_overlay_inputs(segments, start, end, tmpdir, names=None):
     """Rasteriza um PNG por segmento. Retorna [(png, rel_start, rel_end)]."""
     items = []
-    for i, (rs, re_, txt) in enumerate(_segments_in_cut(segments, start, end, nomes)):
+    for i, (rs, re_, txt) in enumerate(_segments_in_cut(segments, start, end, names)):
         png = os.path.join(tmpdir, f"cap_{i:05d}.png")
         caption_png.render_caption_png(wrap_by_pixels(txt), png)
         items.append((png, rs, re_))
@@ -302,7 +302,7 @@ def append_end_card(corte_path: str, project_dir: str) -> None:
         shutil.rmtree(tmpdir, ignore_errors=True)
 
 
-def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None):
+def render_cut(video_path, segments, moment, project_dir, platforms, names=None):
     """Renderiza um clip para as plataformas escolhidas (youtube/instagram)."""
     slug = moment["slug"]
     start, end = float(moment["start"]), float(moment["end"])
@@ -330,11 +330,11 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
     try:
         if config.CAPTION_BACKEND == "drawtext":
             seek_inputs = ["-i", video_path]
-            fg = _filtergraph(segments, start, end, nomes)
+            fg = _filtergraph(segments, start, end, names)
         else:
             # Rasteriza as legendas em PNG e sobrepõe com overlay+enable.
             tmpdir = tempfile.mkdtemp(prefix=f"talaria_{slug}_")
-            items = _build_overlay_inputs(segments, start, end, tmpdir, nomes)
+            items = _build_overlay_inputs(segments, start, end, tmpdir, names)
             seek_inputs = ["-i", video_path]
             for png, _rs, _re in items:
                 seek_inputs += ["-i", png]
@@ -397,17 +397,17 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
     print(f"[render] {slug} OK")
 
 
-def _is_youtube_output(peca: str) -> bool:
+def _is_youtube_output(piece: str) -> bool:
     """True quando a peça está na pasta de saída do YouTube.
 
     A pasta é o que distingue as duas cópias: o mp4 é pixel-idêntico e o slug
     é o mesmo, só o diretório muda. Vem do `layout`, nunca de literal.
     """
-    pasta = os.path.basename(os.path.dirname(os.path.abspath(peca)))
-    return pasta == layout.YOUTUBE_SHORTS
+    folder = os.path.basename(os.path.dirname(os.path.abspath(piece)))
+    return folder == layout.YOUTUBE_SHORTS
 
 
-def write_captions(project_dir, moment, pecas):
+def write_captions(project_dir, moment, pieces):
     """Grava o caption de publicação ao lado de cada peça renderizada.
 
     A descrição é o `post_caption` que a curation escreveu para o clip; as
@@ -435,10 +435,10 @@ def write_captions(project_dir, moment, pecas):
               f"completo. Preencha quando o vídeo longo estiver no ar.")
 
     escritos = []
-    for peca in pecas:
-        texto = caption.compose(description, hashtags,
-                              url if _is_youtube_output(peca) else None)
-        escritos.append(caption.write(peca, texto))
+    for piece in pieces:
+        text = caption.compose(description, hashtags,
+                              url if _is_youtube_output(piece) else None)
+        escritos.append(caption.write(piece, text))
     return escritos
 
 
@@ -472,14 +472,14 @@ def render_all(project_dir, platforms, only=None):
     with open(layout.moments(project_dir), encoding="utf-8") as f:
         moments = json.load(f)
 
-    nomes = _proper_nouns(project_dir)
+    names = _proper_nouns(project_dir)
 
     for m in moments:
         if only and m["slug"] not in only:
             continue
-        render_cut(video_path, segments, m, project_dir, platforms, nomes=nomes)
+        render_cut(video_path, segments, m, project_dir, platforms, names=names)
 
-    # Título e descrição do episódio saem junto: who renderiza está publicando,
+    # Título e descrição do episódio saem junto: quem renderiza está publicando,
     # e é nessa hora que os dois texts são colados no YouTube.
     ep_txt = write_episode_caption(project_dir)
     if ep_txt:
@@ -497,6 +497,6 @@ def _proper_nouns(project_dir):
         ep = episode.load(project_dir)
     except (FileNotFoundError, ValueError):
         return []
-    nomes = [ep.get("company", "")]
-    nomes += [c.get("name", "") for c in ep.get("guests") or []]
-    return [n for n in nomes if n and len(n) >= 4]
+    names = [ep.get("company", "")]
+    names += [c.get("name", "") for c in ep.get("guests") or []]
+    return [n for n in names if n and len(n) >= 4]

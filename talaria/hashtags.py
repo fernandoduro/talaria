@@ -13,12 +13,12 @@ import unicodedata
 CHANNEL_TAGS = ["#MeuPodcast", "#Empreendedorismo", "#Startups"]
 
 
-def slug(texto: str) -> str:
+def slug(text: str) -> str:
     """'Ribeirão Açaí' -> 'RibeiraoAcai'. Remove acento e não-alfanumérico."""
-    if not texto:
+    if not text:
         return ""
     sem_acento = "".join(
-        c for c in unicodedata.normalize("NFD", texto)
+        c for c in unicodedata.normalize("NFD", text)
         if unicodedata.category(c) != "Mn"
     )
     palavras = re.findall(r"[A-Za-z0-9]+", sem_acento)

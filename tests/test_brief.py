@@ -38,24 +38,24 @@ class TestBrief(unittest.TestCase):
 
     def test_substitui_placeholder_de_transcricao(self):
         tpl = "PROMPT AQUI\n\n{{TRANSCRICAO}}\n"
-        out = brief.fill_template(tpl, transcript="XPTO", metadados="")
+        out = brief.fill_template(tpl, transcript="XPTO", metadata="")
         self.assertIn("XPTO", out)
         self.assertNotIn("{{TRANSCRICAO}}", out)
 
     def test_substitui_placeholder_de_metadados(self):
         tpl = "PROMPT\n{{METADADOS}}\n"
-        out = brief.fill_template(tpl, transcript="", metadados="DADOS")
+        out = brief.fill_template(tpl, transcript="", metadata="DADOS")
         self.assertIn("DADOS", out)
         self.assertNotIn("{{METADADOS}}", out)
 
     def test_substitui_placeholder_de_curadoria(self):
         tpl = "PROMPT\n{{CURADORIA}}\n"
-        out = brief.fill_template(tpl, transcript="", metadados="", curation="ESTADO")
+        out = brief.fill_template(tpl, transcript="", metadata="", curation="ESTADO")
         self.assertIn("ESTADO", out)
         self.assertNotIn("{{CURADORIA}}", out)
 
     def test_placeholder_ausente_nao_quebra(self):
-        out = brief.fill_template("sem placeholder", transcript="X", metadados="Y")
+        out = brief.fill_template("sem placeholder", transcript="X", metadata="Y")
         self.assertEqual(out, "sem placeholder")
 
     def test_estado_legivel_primeira_rodada(self):

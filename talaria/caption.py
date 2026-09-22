@@ -3,7 +3,7 @@
 Um `.txt` ao lado de cada `.mp4`/`.png`, com o mesmo name base — o gestor abre,
 copia e cola no campo de legenda do Instagram ou do YouTube.
 
-A descrição vem de who chama (`post_caption` do clip, `legenda` do post) e as
+A descrição vem de quem chama (`post_caption` do clip, `legenda` do post) e as
 hashtags do `texts.json`, que valem para o episódio inteiro. Montar isso aqui,
 e não em cada chamador, é o mesmo reason do `layout.py` ser a autoridade única
 sobre path: `render` e `post_instagram` precisam do formato idêntico, e duas
@@ -20,7 +20,7 @@ import os
 
 # Descrição e hashtags são blocos separados por linha em branco: é como o
 # Instagram e o YouTube renderizam parágrafo, e deixa a linha de hashtags
-# destacada para who revisa antes de publish.
+# destacada para quem revisa antes de publish.
 SEPARATOR = "\n\n"
 
 # O canal não usa travessão em legenda: sai com cara de texto de IA, e mesmo
@@ -29,7 +29,7 @@ SEPARATOR = "\n\n"
 EM_DASH = "\u2014"
 
 
-def validate(campo: str, valor, peca: str) -> None:
+def validate(field: str, value, piece: str) -> None:
     """Recusa descrição que não seja texto, dizendo qual peça e qual campo.
 
     Os dois campos de descrição (`post_caption` no clip, `legenda` no post)
@@ -39,18 +39,18 @@ def validate(campo: str, valor, peca: str) -> None:
 
     `None` passa: é a chave ausente, caso normal em episódio anterior ao campo.
     """
-    if valor is not None and not isinstance(valor, str):
+    if value is not None and not isinstance(value, str):
         raise ValueError(
-            f"'{peca}': '{campo}' esperava texto, recebeu "
-            f"{type(valor).__name__} — é o caption que acompanha a "
+            f"'{piece}': '{field}' esperava texto, recebeu "
+            f"{type(value).__name__} — é o caption que acompanha a "
             f"publicação, uma string só."
         )
-    if isinstance(valor, str) and EM_DASH in valor:
+    if isinstance(value, str) and EM_DASH in value:
         # AVISA em vez de abortar: o travessão é escolha de escrita, e a
         # correção é reescrever a frase — trocar o caractere por outro no
         # código deixaria a mesma construção de IA, só com outra pontuação.
         # Abortar aqui travaria um render por questão de estilo.
-        print(f"[caption] !! {peca}: '{campo}' tem travessão — o canal não "
+        print(f"[caption] !! {piece}: '{field}' tem travessão — o canal não "
               f"usa em legenda (sai com cara de texto de IA). Reescreva a "
               f"frase antes de publicar.")
 
@@ -110,25 +110,25 @@ def compose_episode(title: str | None, description: str | None,
     return SEPARATOR.join(p for p in partes if p)
 
 
-def txt_path(caminho_peca: str) -> str:
+def txt_path(piece_path: str) -> str:
     """Caminho do `.txt` irmão de uma peça, trocando a extensão.
 
     Recebe o path da peça já resolvido pelo `layout` em vez de montar um
     novo, para não reintroduzir path por literal fora do `layout.py`.
     """
-    raiz, _ = os.path.splitext(caminho_peca)
+    raiz, _ = os.path.splitext(piece_path)
     return raiz + ".txt"
 
 
-def write(caminho_peca: str, texto: str) -> str:
+def write(piece_path: str, text: str) -> str:
     """Grava o caption ao lado da peça e devolve o path escrito.
 
     Sobrescreve o que houver: regerar um clip tem que atualizar o caption, não
     acumular versão antiga ao lado (o mesmo contrato do `.mp4`, que também é
     reescrito no lugar).
     """
-    destino = txt_path(caminho_peca)
+    destino = txt_path(piece_path)
     os.makedirs(os.path.dirname(os.path.abspath(destino)), exist_ok=True)
     with open(destino, "w", encoding="utf-8") as f:
-        f.write(texto)
+        f.write(text)
     return destino

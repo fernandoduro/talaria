@@ -31,7 +31,7 @@ def readable_metadata(project_dir: str) -> str:
     """Bloco de metadados do prompt, preenchido a partir do episode.json."""
     ep = episode.load(project_dir)
     guests = ep.get("guests") or []
-    nomes = "; ".join(
+    names = "; ".join(
         f"{c.get('name','')} ({c.get('role','')})" for c in guests if c.get("name")
     )
     links = "; ".join(c.get("linkedin", "") for c in guests if c.get("linkedin"))
@@ -40,7 +40,7 @@ def readable_metadata(project_dir: str) -> str:
         f"- Temporada: {ep['season']}\n"
         f"- Número do episódio: {int(ep['episode']):02d}\n"
         f"- Código: {episode.code(ep)}\n"
-        f"- Convidado(s) e cargo: {nomes}\n"
+        f"- Convidado(s) e cargo: {names}\n"
         f"- Empresa ou instituição: {ep['company']}\n"
         f"- Cidade/UF da gravação: {ep['city']}/{ep['uf']}\n"
         f"- LinkedIn do(s) convidado(s): {links}\n"
@@ -48,12 +48,12 @@ def readable_metadata(project_dir: str) -> str:
     )
 
 
-def fill_template(template: str, transcript: str, metadados: str,
+def fill_template(template: str, transcript: str, metadata: str,
               curation: str = "", clips: str = "") -> str:
     """Substitui os placeholders do prompt pelo conteúdo do episódio."""
     return (template
             .replace("{{TRANSCRICAO}}", transcript)
-            .replace("{{METADADOS}}", metadados)
+            .replace("{{METADADOS}}", metadata)
             .replace("{{CURADORIA}}", curation)
             .replace("{{CORTES}}", clips))
 
@@ -120,7 +120,7 @@ def build(project_dir: str, kind: str) -> str:
     conteudo = fill_template(
         template,
         transcript=readable_transcript(project_dir),
-        metadados=readable_metadata(project_dir),
+        metadata=readable_metadata(project_dir),
         curation=estado_txt,
     )
     out = layout.ensure_dir(layout.brief(project_dir, kind))
@@ -199,7 +199,7 @@ def build_posts(project_dir: str, clips: list) -> str:
     conteudo = fill_template(
         _read_prompt("posts.md"),
         transcript="",
-        metadados=readable_metadata(project_dir) + "\n" + limite,
+        metadata=readable_metadata(project_dir) + "\n" + limite,
         clips=readable_clips(project_dir, clips),
     )
     out = layout.ensure_dir(layout.brief(project_dir, "posts"))

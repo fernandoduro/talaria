@@ -87,8 +87,8 @@ def precheck(pd: str, pares: list) -> list:
     qual comando ou arquivo resolve.
     """
     erros = []
-    tem_corte = any(item["kind"] == "clip" for item, _ in pares)
-    moments = _moments_by_slug(pd) if tem_corte else {}
+    has_clip = any(item["kind"] == "clip" for item, _ in pares)
+    moments = _moments_by_slug(pd) if has_clip else {}
 
     for item, pl in pares:
         slug = item["slug"]
@@ -200,8 +200,8 @@ def execute(pd: str, only: list = None, dia=None,
         raise ValueError("pré-checagem reprovou — nada foi publicado:\n- "
                          + "\n- ".join(erros))
 
-    tem_corte = any(item["kind"] == "clip" for item, _ in pares)
-    moments = _moments_by_slug(pd) if tem_corte else {}
+    has_clip = any(item["kind"] == "clip" for item, _ in pares)
+    moments = _moments_by_slug(pd) if has_clip else {}
     resultados = []
     for item, pl in pares:
         slug = item["slug"]

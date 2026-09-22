@@ -160,7 +160,7 @@ def _is_common_word(name: str) -> bool:
     return name.strip().lower() in _COMMON_WORDS
 
 
-def fix_proper_nouns(txt: str, nomes: list) -> str:
+def fix_proper_nouns(txt: str, names: list) -> str:
     """Reescreve name próprio na grafia oficial vinda do episode.json.
 
     A transcrição erra name próprio e a legenda é queimada no vídeo — sem isto
@@ -172,7 +172,7 @@ def fix_proper_nouns(txt: str, nomes: list) -> str:
     aparecer no texto — aí o padrão fonético não tem o que consertar e só faria
     estrago.
     """
-    for name in nomes or []:
+    for name in names or []:
         name = str(name).strip()
         if len(name) < 4:
             continue

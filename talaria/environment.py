@@ -19,17 +19,17 @@ DEFAULT_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__fi
                       ".env")
 
 
-def _clean_value(valor: str) -> str:
+def _clean_value(value: str) -> str:
     """Tira espaço das pontas e um par de aspas, se houver.
 
     Colar de um console traz aspas junto com frequência, e um token entre
     aspas falha na API com "credencial inválida" — error que não aponta para
     o par de aspas como causa.
     """
-    valor = valor.strip()
-    if len(valor) >= 2 and valor[0] == valor[-1] and valor[0] in "\"'":
-        valor = valor[1:-1]
-    return valor
+    value = value.strip()
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+        value = value[1:-1]
+    return value
 
 
 def load(path: str = None) -> int:

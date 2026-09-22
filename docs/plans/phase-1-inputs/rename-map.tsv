@@ -264,3 +264,24 @@ module	test_integracao	test_integration	global
 module	test_publicado	test_published	global	
 module	test_textos	test_texts	global	
 module	textos	texts	global	texts, not copy: copy is a stdlib module
+filename	_card_encerramento.mp4	_end_card.mp4	global	single on-disk literal in layout.py; found by Finding 3 fix-round grep, not enumerated in the original brief (top-level defs/constants only)
+filename	concatenado.mp4	concatenated.mp4	global	temp filename inside render.py end-card concat step; ephemeral (mkdtemp, moved over corte_path immediately) but still a Portuguese on-disk literal
+function	nomes	names	global	plural of nome (already global); parameter/local in utils.fix_proper_nouns, post_instagram.clean_quote and five render.py functions that thread the proper-nouns list through the call chain - never a false positive, no other sense
+function	texto	text	manual	fix-round-1 gap: parameters on hashtags.slug, curation.has_hedged_number, post_instagram.wrap/validate_card/clean_quote/render_card's local, caption.write and render.py's second write_captions' local - the other ~98 occurrences are the pervasive generic local/prose "texto", never enumerated and out of scope here
+function	caminho_peca	piece_path	global	parameter on caption.txt_path (formerly caminho) and caption.write; confined, no other sense
+function	tem_convidado	has_guest	global	local in episode._validate_company_or_topic; confined, no other sense
+function	tem_empresa	has_company	global	local in episode._validate_company_or_topic; confined, no other sense
+function	tem_corte	has_clip	global	local in publish.precheck and publish.execute; confined, no other sense
+function	fnome	name_font	global	local in post_instagram.render_card; confined, no other sense
+function	fcargo	role_font	global	local in post_instagram.render_card; confined, no other sense
+function	legendas	captions	manual	fix-round-1 gap: parameter on post_instagram.write_captions only; "legendas" also appears as ordinary prose (render.py docstrings/comments, config.py) meaning captions/subtitles generically - leave those, Task 8's job
+function	metadados	metadata	manual	fix-round-1 gap: parameter on brief.fill_template and its two internal callers' kwarg; also appears in brief.py's module docstring, a function docstring, and test method names - leave those, Task 8's job
+function	largura	width	manual	fix-round-1 gap: parameter on render.wrap_by_pixels and its three kwarg call sites (post_instagram.py, test_render.py x2); also appears as ordinary prose ("a largura", docstrings) elsewhere in render.py/post_instagram.py - leave those, Task 8's job
+function	valor	value	manual	fix-round-1 gap: parameters on caption.validate (2nd) and environment._clean_value; also a pervasive generic local ("chave, valor = linha.split(...)" in environment.load, and prose "um valor de outro kind") - leave those, out of scope here
+function	campo	field	manual	fix-round-1 gap: parameter on caption.validate (1st); also pervasive prose ("qual campo", "anterior ao campo") elsewhere - leave those, out of scope here
+function	peca	piece	manual	fix-round-1 gap: parameter/local on render._is_youtube_output and render.write_captions' loop variable (the render.py version, distinct from post_instagram.write_captions); also pervasive prose ("a peça", "cada peça") elsewhere and a test-local variable at test_render.py:328 - leave those, out of scope here
+function	pecas	pieces	manual	fix-round-1 gap: parameter on render.write_captions (project_dir, moment, pecas) only; a test-local variable at test_render.py:315 with the same name is out of scope
+function	pasta	folder	manual	fix-round-1 gap: local in render._is_youtube_output only; "pasta" is also one of the most common Portuguese words for "folder" and appears throughout as prose/other locals - leave those, out of scope here
+function	tamanho	size	manual	fix-round-1 gap: parameter on post_instagram._truetype (2nd) only; also pervasive prose ("tamanho da fonte", "tamanho do clip") elsewhere - leave those, out of scope here
+filename	brief_materiais.md	brief_materials.md	global	legacy _MIGRATION source key in layout.py, left half-renamed after the cortes/materiais manual pass; fix-round-1 Finding 5 - rename for internal consistency, table is untested against real data
+filename	brief_cortes.md	brief_clips.md	global	legacy _MIGRATION source key in layout.py, left half-renamed after the cortes/materiais manual pass; fix-round-1 Finding 5 - rename for internal consistency, table is untested against real data

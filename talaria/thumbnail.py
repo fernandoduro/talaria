@@ -57,7 +57,7 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
     badge:        faixa laranja superior esquerda (ex.: 'MEU PODCAST • T2E02')
     headline_l1:  1ª linha grande (branca)
     headline_l2:  2ª linha grande (laranja)
-    credits:    canto superior direito (ex.: nomes dos guests)
+    credits:    canto superior direito (ex.: names dos guests)
     subtitle:   abaixo dos créditos
     """
     W, H = config.THUMB_W, config.THUMB_H

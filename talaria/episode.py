@@ -1,4 +1,4 @@
-"""Metadados do episódio — fonte da verdade para nomes próprios e numeração.
+"""Metadados do episódio — fonte da verdade para names próprios e numeração.
 
 Não inventar: transcrição automática erra name próprio. Estes campos são
 entrada explícita do gestor, nunca inferência a partir do áudio.
@@ -45,11 +45,11 @@ def _validate_company_or_topic(ep: dict) -> None:
     Sem convidado externo não há company, e é o tema que sustenta a linha 1 da
     thumb e a hashtag — por isso ele passa a ser obrigatório exatamente aí.
     """
-    tem_convidado = bool(ep.get("guests"))
-    tem_empresa = bool(str(ep.get("company") or "").strip())
-    if tem_empresa:
+    has_guest = bool(ep.get("guests"))
+    has_company = bool(str(ep.get("company") or "").strip())
+    if has_company:
         return
-    if tem_convidado:
+    if has_guest:
         raise ValueError(
             "episode.json não preenchido — campos em branco: company "
             "(obrigatória quando há convidado externo)"
@@ -67,8 +67,8 @@ def youtube_url(project_dir: str) -> str:
 
     Não passa pelo `load` de propósito: este campo é opcional e serve a um
     caption, que não pode quebrar por episode.json ausente ou incompleto. O
-    `load` validate o episódio inteiro e ABORTA — contrato certo para who
-    precisa dos nomes próprios, errado para um bloco de texto que pode faltar.
+    `load` validate o episódio inteiro e ABORTA — contrato certo para quem
+    precisa dos names próprios, errado para um bloco de texto que pode faltar.
     """
     path = layout.episode(project_dir)
     if not os.path.exists(path):

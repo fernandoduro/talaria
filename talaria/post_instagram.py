@@ -20,24 +20,24 @@ def _quote_font():
     return ImageFont.truetype(config.POST_FONT, config.POST_QUOTE_SIZE)
 
 
-def wrap(texto: str) -> list:
+def wrap(text: str) -> list:
     """Linhas da citação, medidas na fonte real do post."""
-    return render.wrap_by_pixels(texto, fnt=_quote_font(),
-                                 largura=config.POST_TEXT_W)
+    return render.wrap_by_pixels(text, fnt=_quote_font(),
+                                 width=config.POST_TEXT_W)
 
 
-def validate_card(texto: str) -> dict:
+def validate_card(text: str) -> dict:
     """O texto fits num card? Mede na fonte, não conta caracteres.
 
     Não encolhe a fonte para forçar o encaixe: fonte menor quebra a hierarquia
     visual e denuncia texto espremido. Card que estoura é problema editorial —
     encurtar a frase ou virar mais um card do carrossel.
     """
-    texto = (texto or "").strip()
-    if not texto:
+    text = (text or "").strip()
+    if not text:
         return {"fits": False, "lines": 0, "reason": "citação vazia"}
 
-    lines = wrap(texto)
+    lines = wrap(text)
 
     # Palavra sozinha maior que a largura útil: a quebra a coloca na linha
     # assim mesmo, porque não há onde quebrar. Passaria na contagem de lines
@@ -67,8 +67,8 @@ def validate_card(texto: str) -> dict:
     return {"fits": True, "lines": n, "reason": ""}
 
 
-def _truetype(path, tamanho):
-    return ImageFont.truetype(path, tamanho)
+def _truetype(path, size):
+    return ImageFont.truetype(path, size)
 
 
 def episode_author(project_dir: str, who: str = "") -> dict:
@@ -94,10 +94,10 @@ def episode_author(project_dir: str, who: str = "") -> dict:
         achado = [x for x in guests
                   if (x.get("name") or "").strip().casefold() == alvo]
         if not achado:
-            nomes = ", ".join(x.get("name", "") for x in guests) or "(nenhum)"
+            names = ", ".join(x.get("name", "") for x in guests) or "(nenhum)"
             raise ValueError(
                 f"'{who}' não é convidado deste episódio — o episode.json "
-                f"tem: {nomes}"
+                f"tem: {names}"
             )
         c = achado[0]
 
@@ -105,7 +105,7 @@ def episode_author(project_dir: str, who: str = "") -> dict:
             "company": ep.get("company", "")}
 
 
-def clean_quote(texto: str, nomes: list) -> str:
+def clean_quote(text: str, names: list) -> str:
     """Prepara a fala transcrita para virar citação publicada.
 
     Mesmo tratamento da legenda queimada — expande contração, remove muleta,
@@ -114,13 +114,13 @@ def clean_quote(texto: str, nomes: list) -> str:
     então o limite também é mais rígido: NUNCA reescrever a frase. Citação que
     precisa ser reescrita para funcionar não é a citação certa.
     """
-    return utils.fix_proper_nouns(utils.clean_caption(texto), nomes)
+    return utils.fix_proper_nouns(utils.clean_caption(text), names)
 
 
-def render_card(texto: str, autor: dict, out_path: str, template: str = None):
+def render_card(text: str, author: dict, out_path: str, template: str = None):
     """Escreve citação e autor sobre o template e salva o PNG.
 
-    `autor` traz name, role e company — vindos do episode.json, nunca da
+    `author` traz name, role e company — vindos do episode.json, nunca da
     transcrição (a transcrição erra name próprio).
 
     Levanta ValueError se o texto não couber: a decisão de encurtar ou quebrar
@@ -133,7 +133,7 @@ def render_card(texto: str, autor: dict, out_path: str, template: str = None):
             f"o arquivo deveria estar versionado em assets/"
         )
 
-    v = validate_card(texto)
+    v = validate_card(text)
     if not v["fits"]:
         raise ValueError(f"citação não cabe no card: {v['reason']}")
 
@@ -144,20 +144,20 @@ def render_card(texto: str, autor: dict, out_path: str, template: str = None):
     # partem da mesma altura, então o texto não pula a cada deslize do
     # carrossel.
     fcit = _quote_font()
-    for i, linha in enumerate(wrap(texto)):
+    for i, linha in enumerate(wrap(text)):
         y = config.POST_QUOTE_Y + i * config.POST_QUOTE_STEP
         d.text((config.POST_MARGIN_X, y), linha, font=fcit,
                fill=config.POST_QUOTE_COLOR)
 
     # Rodapé (o filete já vem desenhado no template)
-    fnome = _truetype(config.POST_FONT, config.POST_NAME_SIZE)
-    d.text((config.POST_MARGIN_X, config.POST_NAME_Y), autor["name"],
-           font=fnome, fill=config.POST_NAME_COLOR)
+    name_font = _truetype(config.POST_FONT, config.POST_NAME_SIZE)
+    d.text((config.POST_MARGIN_X, config.POST_NAME_Y), author["name"],
+           font=name_font, fill=config.POST_NAME_COLOR)
 
-    fcargo = _truetype(config.POST_MONO, config.POST_ROLE_SIZE)
-    rodape = " · ".join(p for p in (autor.get("role"), autor.get("company")) if p)
+    role_font = _truetype(config.POST_MONO, config.POST_ROLE_SIZE)
+    rodape = " · ".join(p for p in (author.get("role"), author.get("company")) if p)
     d.text((config.POST_MARGIN_X, config.POST_ROLE_Y), rodape,
-           font=fcargo, fill=config.POST_ROLE_COLOR)
+           font=role_font, fill=config.POST_ROLE_COLOR)
 
     os.makedirs(os.path.dirname(os.path.abspath(out_path)), exist_ok=True)
     img.save(out_path, quality=95)
@@ -206,7 +206,7 @@ def generate(project_dir: str) -> list:
         raise ValueError(f"{layout.posts(project_dir)} não tem nenhum post")
 
     ep = episode.load(project_dir)
-    nomes = [ep.get("company", "")] + [c.get("name", "")
+    names = [ep.get("company", "")] + [c.get("name", "")
                                        for c in (ep.get("guests") or [])]
     # 1ª passada: limpa e validate tudo.
     planejado = []
@@ -232,7 +232,7 @@ def generate(project_dir: str) -> list:
                     f"{type(bruto).__name__} — cada item de 'cards' é a "
                     f"citação daquele card"
                 )
-            texto = clean_quote(bruto, nomes)
+            texto = clean_quote(bruto, names)
             v = validate_card(texto)
             if not v["fits"]:
                 onde = f"{slug} card {i}" if len(cards) > 1 else slug
@@ -259,10 +259,10 @@ def generate(project_dir: str) -> list:
     return gerados
 
 
-def write_captions(saida: str, legendas: list, hashtags: str) -> list:
+def write_captions(saida: str, captions: list, hashtags: str) -> list:
     """Grava o `.txt` de publicação de cada post na pasta de saída.
 
-    `legendas` é [(slug, legenda)] — um item por POST. O name do arquivo usa o
+    `captions` é [(slug, caption)] — um item por POST. O name do arquivo usa o
     slug do post (`post_<slug>.txt`), então um carrossel de N cards continua
     com um único caption, ao lado dos seus `post_<slug>_1.png`, `_2.png`...
 
@@ -270,7 +270,7 @@ def write_captions(saida: str, legendas: list, hashtags: str) -> list:
     escreveria o `.txt` fora da pasta de publicação.
     """
     escritos = []
-    for slug, text in legendas:
+    for slug, text in captions:
         caption.validate("caption", text, f"post {slug}")
         if not (text or "").strip():
             print(f"[caption] !! {slug}: sem legenda — o .txt sai só com as "
