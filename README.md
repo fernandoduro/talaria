@@ -1,131 +1,131 @@
 # Talaria
 
-Pipeline de vídeo que transforma episódios de videocast em cortes verticais
-para redes sociais.
+A video pipeline that turns videocast episodes into vertical clips for social
+media.
 
-Transforma um episódio de videocast em cortes verticais 9:16 (YouTube Shorts /
-Instagram Reels), posts de citação para o feed, thumbnail e textos de
-publicação — e publica tudo pelas APIs, numa agenda de datas.
+It takes one videocast episode and produces vertical 9:16 clips (YouTube
+Shorts / Instagram Reels), quote posts for the feed, a thumbnail and the
+publishing texts — and publishes all of it through the APIs, on a schedule of
+dates.
 
-## O que ele faz
+## What it does
 
 ```
-ingest → episodio.json → brief --materiais → brief --cortes → curar
-       → render/thumb → post → agenda → publish
+ingest → episode.json → brief --materials → brief --clips → curate
+       → render/thumb → post → schedule → publish
 ```
 
-O código prepara e executa; o julgamento editorial fica com quem opera. Os
-comandos `brief` montam pacotes de leitura (prompt + metadados + transcrição)
-para um modelo de linguagem consumir em sessão, e as decisões voltam como
-arquivos JSON na pasta do episódio.
+The code prepares and executes; the editorial judgement stays with whoever
+operates it. The `brief` commands assemble reading packets (prompt + metadata
++ transcript) for a language model to consume in a session, and the decisions
+come back as JSON files in the episode folder.
 
-## Instalação
+## Installation
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Precisa de `ffmpeg` e `ffprobe` no PATH.
+Needs `ffmpeg` and `ffprobe` on PATH.
 
-## Uso
+## Usage
 
 ```bash
-# 1) baixa o vídeo e converte a transcrição
-python run.py ingest --projeto ep1 --src "<url ou arquivo>"
+# 1) download the video and convert the transcript
+python run.py ingest --project ep1 --src "<url or file>"
 
-# 2) preencher projetos/ep1/episodio.json (template criado pelo ingest)
-#    Temporada, episódio, empresa, cidade, convidados, links.
-#    É a fonte da verdade — a transcrição erra nome próprio.
+# 2) fill in projects/ep1/episode.json (template created by ingest)
+#    Season, episode, company, city, guests, links.
+#    It is the source of truth — the transcript gets proper nouns wrong.
 
-# 3) materiais: título, descrição e texto da thumb
-python run.py brief --projeto ep1 --materiais
+# 3) materials: title, description and thumbnail text
+python run.py brief --project ep1 --materials
 
-# 4) cortes: monta o pacote de curadoria
-python run.py brief --projeto ep1 --cortes
+# 4) clips: assembles the curation packet
+python run.py brief --project ep1 --clips
 
-# 5) acompanhar o estado da curadoria entre rodadas
-python run.py curar --projeto ep1
+# 5) follow the curation state between rounds
+python run.py curate --project ep1
 
-# 6) quando fechar a meta, exportar momentos.json
-python run.py curar --projeto ep1 --exportar
+# 6) once the target is met, export moments.json
+python run.py curate --project ep1 --export
 
-# 7) renderizar e gerar a thumbnail
-python run.py render --projeto ep1
-python run.py thumb  --projeto ep1
+# 7) render and produce the thumbnail
+python run.py render --project ep1
+python run.py thumb  --project ep1
 
-# 8) posts de citação para o feed
-python run.py post --projeto ep1 --cortes 1,3
-python run.py post --projeto ep1 --gerar
+# 8) quote posts for the feed
+python run.py post --project ep1 --clips 1,3
+python run.py post --project ep1 --generate
 
-# 9) agendar e publicar
-python run.py agenda  --projeto ep1
-python run.py publish --projeto ep1
+# 9) schedule and publish
+python run.py schedule --project ep1
+python run.py publish  --project ep1
 ```
 
-## Publicação
+## Publishing
 
-A agenda é `decisoes/calendario.json`:
+The schedule is `decisions/schedule.json`:
 
 ```json
 {
-  "agenda": [
-    {"data": "2026-01-12", "tipo": "corte", "slug": "corte1_exemplo"},
-    {"data": "2026-01-13", "tipo": "post",  "slug": "corte1_exemplo"}
+  "schedule": [
+    {"date": "2026-01-12", "kind": "clip", "slug": "clip1_example"},
+    {"date": "2026-01-13", "kind": "post", "slug": "clip1_example"}
   ]
 }
 ```
 
-`tipo: "corte"` publica em YouTube Shorts e Instagram Reels; `tipo: "post"`
-vai ao feed do Instagram (imagem única ou carrossel). Item atrasado continua
-pendente, e o que já foi ao ar fica em `decisoes/publicado.json`, por peça
-**e** plataforma — um corte cujo Reels falhou retenta só o Reels, sem
-republicar o Short.
+`kind: "clip"` publishes to YouTube Shorts and Instagram Reels; `kind: "post"`
+goes to the Instagram feed (single image or carousel). An overdue item stays
+pending, and what already went live is recorded in `decisions/published.json`,
+per piece **and** platform — a clip whose Reel failed retries only the Reel,
+without republishing the Short.
 
-Antes de publicar, tudo é validado: arquivo renderizado, caption, título do
-Short (≤100 caracteres), limites de legenda e credenciais. Qualquer pendência
-aborta **antes** do primeiro upload.
+Before publishing, everything is validated: the rendered file, the caption,
+the Short's title (≤100 characters), the caption limits and the credentials.
+Any outstanding problem aborts **before** the first upload.
 
-**Credenciais:** copie `.env.example` para `.env` e preencha. O Instagram
-exige conta Business (Creator não publica pela API) e não aceita upload
-binário: ele busca a mídia numa URL pública, então o arquivo sobe para um
-bucket compatível com S3, é publicado e removido em seguida. Para o YouTube,
-rode uma vez `python scripts/youtube_auth.py <client_secret.json>`. O client
-OAuth do Google Cloud Console precisa ser do tipo **Desktop**, não Web.
+**Credentials:** copy `.env.example` to `.env` and fill it in. Instagram
+requires a Business account (Creator cannot publish through the API) and
+accepts no binary upload: it fetches the media from a public URL, so the file
+goes up to an S3-compatible bucket, is published and then removed. For
+YouTube, run `python scripts/youtube_auth.py <client_secret.json>` once. The
+OAuth client from the Google Cloud Console has to be of type **Desktop**, not
+Web.
 
-## Personalizar
+## Customising
 
-Seis coisas são identidade de canal. As quatro primeiras vêm neutras neste
-pacote; paleta e textos fixos vêm com valores de exemplo.
+Six things are channel identity. The first four come neutral in this package;
+the palette and the fixed texts come with placeholder values.
 
-| O quê | Onde |
+| What | Where |
 |---|---|
-| Prompts de curadoria e redação | `prompts/*.md` |
-| Template do post e logotipo | `assets/` |
-| Nome do programa e perfil social | `NOME_PROGRAMA` e `CARD_ARROBA` em `talaria/config.py` |
-| Fontes do render e do post | `assets/fonts/` |
-| Paleta da thumb e dos cards | `THUMB_ORANGE`, `CARD_COR_ARROBA` e os `POST_COR_*` em `talaria/config.py` |
-| Hashtags fixas e a chamada do episódio | `FIXAS` em `talaria/hashtags.py` e `PREFIXO_EPISODIO` em `talaria/caption.py` |
+| Curation and writing prompts | `prompts/*.md` |
+| Post template and logo | `assets/` |
+| Show name and social handle | `SHOW_NAME` and `CARD_HANDLE` in `talaria/config.py` |
+| Render and post fonts | `assets/fonts/` |
+| Thumbnail and card palette | `THUMB_ORANGE`, `CARD_HANDLE_COLOR` and the `POST_*_COLOR` values in `talaria/config.py` |
+| Fixed hashtags and the episode call | `CHANNEL_TAGS` in `talaria/hashtags.py` and `EPISODE_PREFIX` in `talaria/caption.py` |
 
-Os prompts são esqueletos: têm a estrutura e os placeholders que o código
-espera, mas o critério editorial precisa ser escrito por quem conhece o
-próprio canal. É a parte que mais afeta o resultado.
+The prompts are skeletons: they carry the structure and the placeholders the
+code expects, but the editorial criteria have to be written by whoever knows
+the channel. It is the part that most affects the result.
 
-## Testes
+## Tests
 
 ```bash
 python3 -m unittest discover -s tests -v
 ```
 
-São 388 testes, sem dependência de rede: as chamadas de API (YouTube,
-Instagram, S3) são mockadas. Rode dentro do venv.
+There are 391 tests, with no network dependency: the API calls (YouTube,
+Instagram, S3) are mocked. Run them inside the venv.
 
-## Notas
+## Notes
 
 - Python 3.9+.
-- `projetos/` é ignorado pelo git (vídeos não entram no repositório).
-- O ffmpeg de algumas máquinas não tem `drawtext`; nesse caso o pipeline
-  rasteriza as legendas em PNG e as sobrepõe com `overlay`, automaticamente.
-- Código e documentação estão em português nesta fase; tradução para inglês
-  está planejada — ver
-  [`docs/specs/2026-09-21-phase-0-fork-and-debrand-design.md`](docs/specs/2026-09-21-phase-0-fork-and-debrand-design.md).
+- `projects/` is git-ignored (videos do not enter the repository).
+- The ffmpeg on some machines has no `drawtext`; in that case the pipeline
+  rasterises the captions to PNG and composites them with `overlay`,
+  automatically.
