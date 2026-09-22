@@ -508,9 +508,9 @@ vtt_ts_to_sec	1	english
 RE_SOUND_TAG	1	english	
 strip_markup	1	english	
 _CONTRACTIONS	1	english	
-RE_NE_FIM	1	english	
-RE_NE_MEIO	1	english	
-RE_PRO_LATIM	1	english	
+RE_NE_FIM	1	deleted_by_task_5	Portuguese, NOT english. Deliberately not renamed: Task 5 deletes this constant when it rewrites clean_caption for English, so renaming it now is wasted work. Controller ruling, fix round 4.
+RE_NE_MEIO	1	deleted_by_task_5	Portuguese, NOT english. Deliberately not renamed: Task 5 deletes this constant when it rewrites clean_caption for English, so renaming it now is wasted work. Controller ruling, fix round 4.
+RE_PRO_LATIM	1	deleted_by_task_5	Portuguese, NOT english. Deliberately not renamed: Task 5 deletes this constant when it rewrites clean_caption for English, so renaming it now is wasted work. Controller ruling, fix round 4.
 _expand_contractions	1	english	
 _PHONETIC_EQUIVALENTS	1	english	
 _phonetic_pattern	1	english	
