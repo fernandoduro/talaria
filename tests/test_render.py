@@ -225,7 +225,7 @@ class TestWrapByPixels(unittest.TestCase):
         from talaria import config, render
         fnt = ImageFont.truetype(config.POST_FONT, config.POST_QUOTE_SIZE)
         lines = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
-                                       largura=config.POST_TEXT_W)
+                                       width=config.POST_TEXT_W)
         self.assertGreater(len(lines), 1)
         for linha in lines:
             # Palavra sozinha maior que a largura é exceção conhecida: ela vai
@@ -247,7 +247,7 @@ class TestWrapByPixels(unittest.TestCase):
         fnt = ImageFont.truetype(config.POST_FONT, config.POST_QUOTE_SIZE)
         self.assertEqual(fnt.getname(), ("Poppins", "SemiBold"))
         lines = render.wrap_by_pixels(self.CITACAO_DO_DESIGN, fnt=fnt,
-                                       largura=config.POST_TEXT_W)
+                                       width=config.POST_TEXT_W)
         self.assertEqual(lines, ["A gente descobriu que",
                                   "não precisava mudar",
                                   "de cidade para",
