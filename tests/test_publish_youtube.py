@@ -38,12 +38,12 @@ class TestUpload(unittest.TestCase):
         with mock.patch.dict("os.environ", self.env):
             insert = build_mock.return_value.videos.return_value.insert
             insert.return_value.next_chunk.return_value = (None, {"id": "V1D"})
-            r = publish_youtube.upload("/tmp/v.mp4", "Titulo", "Descricao")
+            r = publish_youtube.upload("/tmp/v.mp4", "Title", "Description")
         self.assertEqual(r, {"id": "V1D",
                              "url": "https://www.youtube.com/shorts/V1D"})
         body = insert.call_args.kwargs["body"]
-        self.assertEqual(body["snippet"]["title"], "Titulo")
-        self.assertEqual(body["snippet"]["description"], "Descricao")
+        self.assertEqual(body["snippet"]["title"], "Title")
+        self.assertEqual(body["snippet"]["description"], "Description")
         self.assertEqual(body["status"]["privacyStatus"], "public")
 
 

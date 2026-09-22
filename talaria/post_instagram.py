@@ -35,7 +35,7 @@ def validate_card(text: str) -> dict:
     """
     text = (text or "").strip()
     if not text:
-        return {"fits": False, "lines": 0, "reason": "citação vazia"}
+        return {"fits": False, "lines": 0, "reason": "empty quote"}
 
     lines = wrap(text)
 
@@ -49,9 +49,9 @@ def validate_card(text: str) -> dict:
             return {
                 "fits": False,
                 "lines": len(lines),
-                "reason": (f"'{line.strip()}' não cabe na largura do card "
-                           f"({round(width)}px de {config.POST_TEXT_W}) "
-                           f"— palavra longa demais, sem onde quebrar"),
+                "reason": (f"'{line.strip()}' does not fit the card width "
+                           f"({round(width)}px of {config.POST_TEXT_W}) "
+                           f"— word too long, nowhere to break"),
             }
 
     n = len(lines)
@@ -60,9 +60,9 @@ def validate_card(text: str) -> dict:
         return {
             "fits": False,
             "lines": n,
-            "reason": (f"{n} linhas, {excess} a mais que o limite de "
-                       f"{config.POST_QUOTE_MAX_LINES} — encurte a frase ou "
-                       f"quebre em outro card"),
+            "reason": (f"{n} lines, {excess} more than the limit of "
+                       f"{config.POST_QUOTE_MAX_LINES} — shorten the sentence "
+                       f"or break it into another card"),
         }
     return {"fits": True, "lines": n, "reason": ""}
 
@@ -95,10 +95,10 @@ def episode_author(project_dir: str, who: str = "") -> dict:
         matches = [x for x in guests
                   if (x.get("name") or "").strip().casefold() == target]
         if not matches:
-            names = ", ".join(x.get("name", "") for x in guests) or "(nenhum)"
+            names = ", ".join(x.get("name", "") for x in guests) or "(none)"
             raise ValueError(
-                f"'{who}' não é convidado deste episódio — o episode.json "
-                f"tem: {names}"
+                f"'{who}' is not a guest of this episode — episode.json "
+                f"has: {names}"
             )
         c = matches[0]
 
@@ -130,13 +130,13 @@ def render_card(text: str, author: dict, out_path: str, template: str = None):
     template = template or config.POST_TEMPLATE
     if not os.path.exists(template):
         raise FileNotFoundError(
-            f"template do post não encontrado em {template} — "
-            f"o arquivo deveria estar versionado em assets/"
+            f"post template not found at {template} — "
+            f"the file should be versioned under assets/"
         )
 
     v = validate_card(text)
     if not v["fits"]:
-        raise ValueError(f"citação não cabe no card: {v['reason']}")
+        raise ValueError(f"quote does not fit the card: {v['reason']}")
 
     img = Image.open(template).convert("RGB")
     d = ImageDraw.Draw(img)
@@ -187,8 +187,9 @@ def load(project_dir: str) -> list:
     path = layout.posts(project_dir)
     if not os.path.exists(path):
         raise FileNotFoundError(
-            f"{path} não existe. Rode 'python run.py post --project <slug> "
-            f"--clips <n,n>' e escolha as citações em sessão antes de gerar."
+            f"{path} does not exist. Run 'python run.py post --project "
+            f"<slug> --clips <n,n>' and choose the quotes in session before "
+            f"generating."
         )
     with open(path, encoding="utf-8") as f:
         return (json.load(f) or {}).get("posts") or []
@@ -203,7 +204,7 @@ def generate(project_dir: str) -> list:
     """
     posts = load(project_dir)
     if not posts:
-        raise ValueError(f"{layout.posts(project_dir)} não tem nenhum post")
+        raise ValueError(f"{layout.posts(project_dir)} has no post")
 
     ep = episode.load(project_dir)
     names = [ep.get("company", "")] + [c.get("name", "")
@@ -214,7 +215,7 @@ def generate(project_dir: str) -> list:
         slug = p.get("slug") or "post"
         cards = p.get("cards") or []
         if not cards:
-            raise ValueError(f"post '{slug}' não tem nenhum card")
+            raise ValueError(f"post '{slug}' has no card")
 
         # Who signs: the post's `who` (an episode with two guests) or, by
         # default, the first. Resolved here in the first pass so a wrong name
@@ -228,9 +229,9 @@ def generate(project_dir: str) -> list:
         for i, raw in enumerate(cards, start=1):
             if not isinstance(raw, str):
                 raise ValueError(
-                    f"post '{slug}' card {i}: esperava texto, recebeu "
-                    f"{type(raw).__name__} — cada item de 'cards' é a "
-                    f"citação daquele card"
+                    f"post '{slug}' card {i}: expected text, got "
+                    f"{type(raw).__name__} — each item of 'cards' is that "
+                    f"card's quote"
                 )
             text = clean_quote(raw, names)
             v = validate_card(text)
@@ -273,8 +274,8 @@ def write_captions(output_dir: str, captions: list, hashtags: str) -> list:
     for slug, text in captions:
         caption.validate("caption", text, f"post {slug}")
         if not (text or "").strip():
-            print(f"[caption] !! {slug}: sem legenda — o .txt sai só com as "
-                  f"hashtags. Preencha em decisions/posts.json.")
+            print(f"[caption] !! {slug}: no caption — the .txt comes out "
+                  f"with the hashtags only. Fill it in decisions/posts.json.")
         base = os.path.join(output_dir, f"post_{file_slug(slug)}.png")
         written.append(caption.write(base, caption.compose(text, hashtags)))
     return written

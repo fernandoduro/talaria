@@ -51,14 +51,14 @@ def _validate_company_or_topic(ep: dict) -> None:
         return
     if has_guest:
         raise ValueError(
-            "episode.json não preenchido — campos em branco: company "
-            "(obrigatória quando há convidado externo)"
+            "episode.json not filled in — blank fields: company "
+            "(required when there is an external guest)"
         )
     if not (ep.get("topics") or []):
         raise ValueError(
-            "episode.json: episódio sem convidado externo e sem company "
-            "precisa de ao menos um tema em 'topics' — é dele que saem a "
-            "linha 1 da thumb e a hashtag do tema"
+            "episode.json: an episode with no external guest and no company "
+            "needs at least one topic in 'topics' — it supplies thumbnail "
+            "line 1 and the topic hashtag"
         )
 
 
@@ -87,13 +87,14 @@ def load(project_dir: str) -> dict:
     path = layout.episode(project_dir)
     if not os.path.exists(path):
         raise FileNotFoundError(
-            f"{path} não existe. Rode 'python run.py ingest' para criar o template."
+            f"{path} does not exist. Run 'python run.py ingest' to create "
+            f"the template."
         )
     with open(path, encoding="utf-8") as f:
         ep = json.load(f)
     missing = [c for c in REQUIRED_FIELDS if c not in ep]
     if missing:
-        raise ValueError(f"episode.json incompleto — falta: {', '.join(missing)}")
+        raise ValueError(f"episode.json incomplete — missing: {', '.join(missing)}")
 
     # `guests` is deliberately outside the empty check: the materials prompt
     # allows for "an episode with no external guest, hosts only", so an empty
@@ -102,7 +103,7 @@ def load(project_dir: str) -> dict:
               if ep[c] == "" or ep[c] == [] or ep[c] == 0]
     if empty:
         raise ValueError(
-            f"episode.json não preenchido — campos em branco: {', '.join(empty)}"
+            f"episode.json not filled in — blank fields: {', '.join(empty)}"
         )
 
     _validate_company_or_topic(ep)
@@ -112,8 +113,8 @@ def load(project_dir: str) -> dict:
             ep[field] = int(ep[field])
         except (TypeError, ValueError):
             raise ValueError(
-                f"episode.json: '{field}' deve ser número inteiro, "
-                f"recebido {ep[field]!r}"
+                f"episode.json: '{field}' must be a whole number, "
+                f"got {ep[field]!r}"
             ) from None
     return ep
 

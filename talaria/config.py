@@ -167,7 +167,7 @@ POST_ROLE_Y = 2459
 
 # 150 and not 160: Poppins is wider than the Avenir Next Demi Bold the layout
 # was measured in, and at 160 the reference quote becomes 6 lines — the 6th
-# would cross the rule at y=2242. At 150 the fullest line has 83px to spare.
+# would cross the rule at y=2242. At 150 the fullest line has 62px to spare.
 POST_QUOTE_SIZE = 150
 POST_NAME_SIZE = 62
 POST_ROLE_SIZE = 38

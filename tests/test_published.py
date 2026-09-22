@@ -19,10 +19,10 @@ class TestLoad(unittest.TestCase):
         # Invalid JSON NEVER becomes "nothing published" — it would republish all.
         path = layout.ensure_dir(layout.published(self.pd))
         with open(path, "w", encoding="utf-8") as f:
-            f.write("{metade de um json")
+            f.write("{half of a json")
         with self.assertRaises(RuntimeError) as ctx:
             published.load(self.pd)
-        self.assertIn("corrompido", str(ctx.exception))
+        self.assertIn("is corrupt", str(ctx.exception))
 
 
 class TestRecord(unittest.TestCase):
@@ -30,18 +30,18 @@ class TestRecord(unittest.TestCase):
         self.pd = tempfile.mkdtemp()
 
     def test_writes_immediately_and_reads_back(self):
-        published.record(self.pd, "youtube_shorts", "corte1", "abc123",
+        published.record(self.pd, "youtube_shorts", "clip1", "abc123",
                            "https://youtube.com/shorts/abc123")
         reg = published.load(self.pd)
         self.assertEqual(len(reg["youtube_shorts"]), 1)
         r = reg["youtube_shorts"][0]
-        self.assertEqual(r["slug"], "corte1")
+        self.assertEqual(r["slug"], "clip1")
         self.assertEqual(r["id"], "abc123")
         self.assertIn("published_at", r)
 
     def test_accumulates_without_losing_the_earlier_ones(self):
-        published.record(self.pd, "youtube_shorts", "corte1", "a", "u1")
-        published.record(self.pd, "instagram_reels", "corte1", "b", "u2")
+        published.record(self.pd, "youtube_shorts", "clip1", "a", "u1")
+        published.record(self.pd, "instagram_reels", "clip1", "b", "u2")
         reg = published.load(self.pd)
         self.assertEqual(len(reg["youtube_shorts"]), 1)
         self.assertEqual(len(reg["instagram_reels"]), 1)
@@ -56,13 +56,13 @@ class TestRecord(unittest.TestCase):
 
 class TestAlreadyPublished(unittest.TestCase):
     def test_finds_by_platform_and_slug(self):
-        reg = {"youtube_shorts": [{"slug": "corte1", "id": "a"}]}
-        self.assertTrue(published.is_published(reg, "youtube_shorts", "corte1"))
+        reg = {"youtube_shorts": [{"slug": "clip1", "id": "a"}]}
+        self.assertTrue(published.is_published(reg, "youtube_shorts", "clip1"))
         # Same piece, different platform: does NOT count — the pending unit is
         # (slug, platform). A half-published clip retries only what was missing.
-        self.assertFalse(published.is_published(reg, "instagram_reels", "corte1"))
-        self.assertFalse(published.is_published(reg, "youtube_shorts", "corte2"))
-        self.assertFalse(published.is_published({}, "youtube_shorts", "corte1"))
+        self.assertFalse(published.is_published(reg, "instagram_reels", "clip1"))
+        self.assertFalse(published.is_published(reg, "youtube_shorts", "clip2"))
+        self.assertFalse(published.is_published({}, "youtube_shorts", "clip1"))
 
 
 if __name__ == "__main__":

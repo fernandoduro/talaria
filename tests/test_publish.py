@@ -12,35 +12,35 @@ ENV_OK = {"IG_PAGE_TOKEN": "t", "IG_BUSINESS_ACCOUNT_ID": "1",
           "YT_REFRESH_TOKEN": "r"}
 
 
-def _project(pd, title="Titulo do Short"):
+def _project(pd, title="Short title"):
     """A complete project: moments, posts, schedule and files in publish/."""
-    moments = [{"slug": "corte1", "start": 1.0, "end": 70.0,
+    moments = [{"slug": "clip1", "start": 1.0, "end": 70.0,
                  "title": title}]
     with open(layout.ensure_dir(layout.moments(pd)), "w", encoding="utf-8") as f:
         json.dump(moments, f)
     with open(layout.ensure_dir(layout.posts(pd)), "w", encoding="utf-8") as f:
         json.dump({"posts": [{"slug": "cit_x", "cards": ["a", "b"],
-                              "caption": "leg"}]}, f)
+                              "caption": "cap"}]}, f)
     with open(layout.ensure_dir(layout.schedule(pd)), "w", encoding="utf-8") as f:
         json.dump({"schedule": [
-            {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
+            {"date": "2026-08-24", "kind": "clip", "slug": "clip1"},
             {"date": "2026-08-24", "kind": "post", "slug": "cit_x"},
         ]}, f)
     # rendered pieces + captions
-    for folder, name in (("youtube_shorts", "corte1_short"),
-                        ("instagram_reels", "corte1_reel")):
+    for folder, name in (("youtube_shorts", "clip1_short"),
+                        ("instagram_reels", "clip1_reel")):
         base = os.path.join(layout.platform(pd, folder), name)
         layout.ensure_dir(base + ".mp4")
         open(base + ".mp4", "w").close()
         with open(base + ".txt", "w", encoding="utf-8") as f:
-            f.write("Legenda do corte.\n\n#Tag")
+            f.write("Clip caption.\n\n#Tag")
     folder = layout.posts_png(pd)
     os.makedirs(folder, exist_ok=True)
     for n in ("post_cit_x_1.png", "post_cit_x_2.png"):
         open(os.path.join(folder, n), "w").close()
     with open(os.path.join(folder, "post_cit_x.txt"), "w",
               encoding="utf-8") as f:
-        f.write("Legenda do post.\n\n#Tag")
+        f.write("Post caption.\n\n#Tag")
 
 
 class TestPrecheck(unittest.TestCase):
@@ -60,7 +60,7 @@ class TestPrecheck(unittest.TestCase):
         import datetime as dt
         from talaria import schedule
         os.remove(os.path.join(layout.platform(self.pd, "youtube_shorts"),
-                               "corte1_short.mp4"))
+                               "clip1_short.mp4"))
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         errors = publish.precheck(self.pd, pairs)
         self.assertTrue(any("render" in e for e in errors))
@@ -156,16 +156,16 @@ class TestExecute(unittest.TestCase):
         self.assertEqual([r["ok"] for r in results], [True, True, True])
         from talaria import published
         reg = published.load(self.pd)
-        self.assertTrue(published.is_published(reg, "youtube_shorts", "corte1"))
-        self.assertTrue(published.is_published(reg, "instagram_reels", "corte1"))
+        self.assertTrue(published.is_published(reg, "youtube_shorts", "clip1"))
+        self.assertTrue(published.is_published(reg, "instagram_reels", "clip1"))
         self.assertTrue(published.is_published(reg, "instagram_posts", "cit_x"))
         # the title came from moments.json, the description from the .txt
         args = yt.upload.call_args[0]
-        self.assertEqual(args[1], "Titulo do Short")
-        self.assertIn("Legenda do corte.", args[2])
+        self.assertEqual(args[1], "Short title")
+        self.assertIn("Clip caption.", args[2])
 
     def test_a_failure_on_one_platform_does_not_block_the_others(self, yt, ig):
-        yt.upload.side_effect = RuntimeError("quota estourada")
+        yt.upload.side_effect = RuntimeError("quota exceeded")
         ig.publish_reel.return_value = {"id": "r1", "permalink": "u"}
         ig.publish_post.return_value = {"id": "p1", "permalink": "u"}
         results = publish.execute(self.pd, day=self.day)
@@ -176,7 +176,7 @@ class TestExecute(unittest.TestCase):
         # what failed does NOT enter the record — it retries tomorrow
         from talaria import published
         reg = published.load(self.pd)
-        self.assertFalse(published.is_published(reg, "youtube_shorts", "corte1"))
+        self.assertFalse(published.is_published(reg, "youtube_shorts", "clip1"))
 
     def test_the_record_is_immediate_not_at_the_end_of_the_batch(self, yt, ig):
         # If the process dies on item 2, item 1 is already recorded.
@@ -189,15 +189,15 @@ class TestExecute(unittest.TestCase):
         def reel_explode(*a, **k):
             # at this point YouTube must ALREADY be recorded
             reg = published.load(self.pd)
-            state["yt_registrado"] = published.is_published(
-                reg, "youtube_shorts", "corte1")
+            state["yt_recorded"] = published.is_published(
+                reg, "youtube_shorts", "clip1")
             raise RuntimeError("boom")
 
         yt.upload.side_effect = upload_ok
         ig.publish_reel.side_effect = reel_explode
         ig.publish_post.return_value = {"id": "p1", "permalink": "u"}
         publish.execute(self.pd, day=self.day)
-        self.assertTrue(state["yt_registrado"])
+        self.assertTrue(state["yt_recorded"])
 
     def test_a_record_failing_after_going_live_is_not_a_retry(self, yt, ig):
         # The module's worst case: the video WENT UP and the record failed
@@ -208,14 +208,14 @@ class TestExecute(unittest.TestCase):
         ig.publish_reel.return_value = {"id": "r1", "permalink": "u"}
         ig.publish_post.return_value = {"id": "p1", "permalink": "u"}
         with mock.patch("talaria.publish.published.record",
-                        side_effect=OSError("disco cheio")):
+                        side_effect=OSError("disk full")):
             results = publish.execute(self.pd, day=self.day)
 
         yt_r = [r for r in results if r["platform"] == "youtube_shorts"][0]
         self.assertTrue(yt_r["ok"])           # it is live: not a failure
         self.assertTrue(yt_r["record_failed"])
         self.assertEqual(yt_r["id"], "v1")    # id for the manual repair
-        self.assertIn("disco cheio", yt_r["error"])
+        self.assertIn("disk full", yt_r["error"])
 
     def test_a_normal_publication_does_not_flag_record_failed(self, yt, ig):
         yt.upload.return_value = {"id": "v1", "url": "u"}
@@ -226,7 +226,7 @@ class TestExecute(unittest.TestCase):
 
     def test_a_failed_precheck_publishes_nothing(self, yt, ig):
         os.remove(os.path.join(layout.platform(self.pd, "youtube_shorts"),
-                               "corte1_short.mp4"))
+                               "clip1_short.mp4"))
         with self.assertRaises(ValueError):
             publish.execute(self.pd, day=self.day)
         yt.upload.assert_not_called()

@@ -51,10 +51,10 @@ def _credentials() -> tuple:
                              ("IG_BUSINESS_ACCOUNT_ID", account)) if not v]
     if missing:
         raise RuntimeError(
-            f"{', '.join(missing)} não definido no ambiente (.env). Token "
-            f"expirado? Gere outro no painel do app (Instagram → Configuração "
-            f"da API) e atualize IG_PAGE_TOKEN — serve tanto o token de "
-            f"página (EAAG...) quanto o do login do Instagram (IGAA...)."
+            f"{', '.join(missing)} not defined in the environment (.env). "
+            f"Token expired? Generate another in the app dashboard (Instagram "
+            f"-> API setup) and update IG_PAGE_TOKEN — both the Page token "
+            f"(EAAG...) and the Instagram login token (IGAA...) work."
         )
     return token, account
 
@@ -93,13 +93,13 @@ def _wait_for_processing(container_id: str, token: str) -> None:
             return
         if status in ("ERROR", "EXPIRED"):
             raise RuntimeError(
-                f"container {container_id}: o Instagram terminou o "
-                f"processamento com status {status}"
+                f"container {container_id}: Instagram finished processing "
+                f"with status {status}"
             )
         if time.monotonic() - start > POLL_TIMEOUT_S:
             raise RuntimeError(
-                f"container {container_id}: status {status} após "
-                f"{POLL_TIMEOUT_S}s — desisti de esperar"
+                f"container {container_id}: status {status} after "
+                f"{POLL_TIMEOUT_S}s — gave up waiting"
             )
         time.sleep(POLL_INTERVAL_S)
 

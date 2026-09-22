@@ -96,44 +96,45 @@ def precheck(pd: str, pairs: list) -> list:
         if item["kind"] == "clip":
             video = _mp4(pd, pl, slug)
             if not os.path.exists(video):
-                errors.append(f"{slug} ({pl}): {video} não existe — "
-                             f"rode 'render' antes")
+                errors.append(f"{slug} ({pl}): {video} does not exist — "
+                             f"run 'render' first")
                 continue
             txt = caption.txt_path(video)
             if not os.path.exists(txt):
-                errors.append(f"{slug} ({pl}): {txt} não existe — "
-                             f"regere o corte com 'render'")
+                errors.append(f"{slug} ({pl}): {txt} does not exist — "
+                             f"regenerate the clip with 'render'")
                 continue
             text = _read(txt)
             if pl == "youtube_shorts":
                 title = (moments.get(slug) or {}).get("title") or ""
                 if not title.strip():
                     errors.append(
-                        f"{slug}: sem 'title' no moments.json — o YouTube "
-                        f"exige título; preencha o campo no curation.json e "
-                        f"rode 'curate --export'")
+                        f"{slug}: no 'title' in moments.json — YouTube "
+                        f"requires a title; fill the field in curation.json "
+                        f"and run 'curate --export'")
                 elif len(title) > YT_TITLE_MAX:
-                    errors.append(f"{slug}: titulo com {len(title)} chars — "
-                                 f"o YouTube aceita {YT_TITLE_MAX}")
+                    errors.append(f"{slug}: title with {len(title)} chars — "
+                                 f"YouTube accepts {YT_TITLE_MAX}")
                 if len(text) > YT_DESCRIPTION_MAX:
-                    errors.append(f"{slug}: descrição com {len(text)} chars — "
-                                 f"o YouTube aceita {YT_DESCRIPTION_MAX}")
+                    errors.append(f"{slug}: description with {len(text)} "
+                                 f"chars — YouTube accepts "
+                                 f"{YT_DESCRIPTION_MAX}")
             elif len(text) > IG_CAPTION_MAX:
-                errors.append(f"{slug} ({pl}): legenda com {len(text)} chars "
-                             f"— o Instagram aceita {IG_CAPTION_MAX}")
+                errors.append(f"{slug} ({pl}): caption with {len(text)} chars "
+                             f"— Instagram accepts {IG_CAPTION_MAX}")
         else:
             pngs = _post_pngs(pd, slug)
             if not pngs:
-                errors.append(f"{slug} (instagram_posts): nenhum PNG em "
-                             f"{layout.posts_png(pd)} — rode 'post --generate' "
-                             f"antes")
+                errors.append(f"{slug} (instagram_posts): no PNG in "
+                             f"{layout.posts_png(pd)} — run 'post --generate' "
+                             f"first")
                 continue
             txt = _post_txt(pd, slug)
             if not os.path.exists(txt):
-                errors.append(f"{slug} (instagram_posts): {txt} não existe — "
-                             f"regere com 'post --generate'")
+                errors.append(f"{slug} (instagram_posts): {txt} does not "
+                             f"exist — regenerate with 'post --generate'")
             elif len(_read(txt)) > IG_CAPTION_MAX:
-                errors.append(f"{slug} (instagram_posts): legenda acima de "
+                errors.append(f"{slug} (instagram_posts): caption above "
                              f"{IG_CAPTION_MAX} chars")
 
     envs = set()
@@ -141,7 +142,8 @@ def precheck(pd: str, pairs: list) -> list:
         envs.update(_CREDENTIALS[pl])
     for name in sorted(envs):
         if not os.environ.get(name):
-            errors.append(f"variável {name} não definida no ambiente (.env)")
+            errors.append(f"variable {name} not defined in the environment "
+                         f"(.env)")
 
     # A wrong privacy value would only surface after the upload, with the video
     # already live under a privacy nobody asked for.
@@ -199,7 +201,7 @@ def execute(pd: str, only: list = None, day=None,
 
     errors = precheck(pd, pairs)
     if errors:
-        raise ValueError("pré-checagem reprovou — nada foi publicado:\n- "
+        raise ValueError("pre-check failed — nothing was published:\n- "
                          + "\n- ".join(errors))
 
     has_clip = any(item["kind"] == "clip" for item, _ in pairs)
@@ -225,10 +227,10 @@ def execute(pd: str, only: list = None, day=None,
         except Exception as e:  # noqa: BLE001
             results.append({**base, "ok": True, "url": url, "id": r["id"],
                                "record_failed": True, "error": str(e)})
-            print(f"[publish] !! {pl}: {slug} FOI PUBLICADO ({url or r['id']}) "
-                  f"mas não entrou no published.json: {e}")
-            print(f"[publish]    NÃO rode publish de novo antes de acrescentar "
-                  f"este id à mão — ou o {pl} publica a peça duas vezes.")
+            print(f"[publish] !! {pl}: {slug} WAS PUBLISHED "
+                  f"({url or r['id']}) but did not enter published.json: {e}")
+            print(f"[publish]    Do NOT run publish again before adding this "
+                  f"id by hand — or {pl} publishes the piece twice.")
             continue
 
         results.append({**base, "ok": True, "url": url})

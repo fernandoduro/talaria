@@ -33,27 +33,27 @@ class TestLoad(unittest.TestCase):
         # A variable declared but not filled in is "not configured" — entering
         # as "" would let the credential check pass and the API refuse later,
         # with a worse message.
-        self._write("VAZIA=\nCHEIA=x\n")
+        self._write("EMPTY=\nFILLED=x\n")
         environment.load(self.env)
-        self.assertNotIn("VAZIA", os.environ)
-        self.assertEqual(os.environ["CHEIA"], "x")
+        self.assertNotIn("EMPTY", os.environ)
+        self.assertEqual(os.environ["FILLED"], "x")
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_strips_quotes_and_spaces(self):
         # Pasting from a console usually brings the quotes along.
-        self._write('COM_ASPAS="abc"\nCOM_ESPACO=  def  \nSIMPLES=\'ghi\'\n')
+        self._write('WITH_QUOTES="abc"\nWITH_SPACE=  def  \nSIMPLE=\'ghi\'\n')
         environment.load(self.env)
-        self.assertEqual(os.environ["COM_ASPAS"], "abc")
-        self.assertEqual(os.environ["COM_ESPACO"], "def")
-        self.assertEqual(os.environ["SIMPLES"], "ghi")
+        self.assertEqual(os.environ["WITH_QUOTES"], "abc")
+        self.assertEqual(os.environ["WITH_SPACE"], "def")
+        self.assertEqual(os.environ["SIMPLE"], "ghi")
 
-    @mock.patch.dict("os.environ", {"JA_EXISTE": "do_shell"}, clear=True)
+    @mock.patch.dict("os.environ", {"ALREADY_SET": "from_shell"}, clear=True)
     def test_shell_environment_wins_over_file(self):
         # `IG_PAGE_TOKEN=x python run.py ...` has to override the file, which
         # is how another credential gets tested without editing anything.
-        self._write("JA_EXISTE=do_arquivo\n")
+        self._write("ALREADY_SET=from_file\n")
         environment.load(self.env)
-        self.assertEqual(os.environ["JA_EXISTE"], "do_shell")
+        self.assertEqual(os.environ["ALREADY_SET"], "from_shell")
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_value_with_equals_inside_stays_whole(self):
@@ -65,7 +65,7 @@ class TestLoad(unittest.TestCase):
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_missing_file_does_not_blow_up(self):
         # Someone who only renders clips never made a .env — not an error.
-        environment.load(os.path.join(self.d, "nao_existe"))
+        environment.load(os.path.join(self.d, "does_not_exist"))
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_accepts_leading_export(self):

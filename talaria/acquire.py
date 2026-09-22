@@ -44,26 +44,26 @@ def acquire(src: str, project_dir: str) -> str:
 
     if kind == "local":
         if not os.path.exists(src):
-            raise FileNotFoundError(f"Arquivo não encontrado: {src}")
+            raise FileNotFoundError(f"File not found: {src}")
         if os.path.abspath(src) != os.path.abspath(dest):
             shutil.copy2(src, dest)
         print(f"[acquire] local -> {dest}")
         return dest
 
     # youtube or drive: download the best mp4 available
-    print(f"[acquire] baixando ({kind}) com yt-dlp...")
+    print(f"[acquire] downloading ({kind}) with yt-dlp...")
     r = _ytdlp([
         "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
         "--merge-output-format", "mp4",
         "-o", dest, src,
     ], capture=True)
     if r.returncode != 0 or not os.path.exists(dest):
-        raise RuntimeError(f"yt-dlp falhou ao baixar:\n{r.stderr[-1500:]}")
+        raise RuntimeError(f"yt-dlp failed to download:\n{r.stderr[-1500:]}")
     print(f"[acquire] {kind} -> {dest}")
     return dest
 
 
-def fetch_youtube_captions(url: str, project_dir: str, lang="pt") -> str | None:
+def fetch_youtube_captions(url: str, project_dir: str, lang="en") -> str | None:
     """Tries to download YouTube's automatic captions (VTT). Returns the .vtt
     path, or None when there are none. Far faster than transcribing."""
     vid = youtube_id(url)
@@ -72,14 +72,14 @@ def fetch_youtube_captions(url: str, project_dir: str, lang="pt") -> str | None:
     folder = layout.source_dir(project_dir)
     os.makedirs(folder, exist_ok=True)
     out_tpl = os.path.join(folder, "yt_%(id)s.%(ext)s")
-    print(f"[acquire] tentando legenda automática ({lang}) do YouTube...")
+    print(f"[acquire] trying YouTube automatic captions ({lang})...")
     _ytdlp([
         "--skip-download", "--write-auto-subs", "--sub-langs", lang,
         "--sub-format", "vtt", "-o", out_tpl, url,
     ], capture=True)
     vtt = os.path.join(folder, f"yt_{vid}.{lang}.vtt")
     if os.path.exists(vtt) and os.path.getsize(vtt) > 0:
-        print(f"[acquire] legenda encontrada -> {vtt}")
+        print(f"[acquire] captions found -> {vtt}")
         return vtt
-    print("[acquire] sem legenda automática disponível.")
+    print("[acquire] no automatic captions available.")
     return None

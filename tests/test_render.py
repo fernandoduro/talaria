@@ -16,7 +16,7 @@ class TestValleyBefore(unittest.TestCase):
 
     In continuous speech the energy dips between words every ~100ms. Cutting at
     the first dip splits the sentence: one clip ended in an 80ms internal pause
-    and the speech vanished before "...projeto assim tão longo".
+    and the speech vanished before "...a project that long".
     """
 
     def _points(self, spec):
@@ -94,7 +94,7 @@ class TestEndMargin(unittest.TestCase):
 
     The times come from the transcript, whose resolution is 1 second — cutting
     exactly at a block boundary touches the attack of the next word. One clip
-    ended at 901.0 and let the "Poucas" that opens the next block leak (the
+    ended at 901.0 and let the "Few" that opens the next block leak (the
     pause between the two words lasts ~50ms).
     """
 
@@ -118,24 +118,26 @@ class TestSegmentsInCut(unittest.TestCase):
 
     The times were already trimmed by the clip (min/max), but the TEXT went
     whole into the PNG: a segment trimmed to 1.4s still showed the original
-    block's 150 letters. The clip closed on "vai conseguir reproduzir" while
-    the screen went on showing "Acho que isso é uma um primeiro ponto..." — a
+    block's 150 letters. The clip closed on "able to reproduce it" while
+    the screen went on showing "I think that is a a first point..." — a
     sentence the viewer never hears.
     """
 
     def setUp(self):
         self.segs = [
-            {"start": 0.0, "end": 10.0, "text": "Primeira fala inteira.", "turn": False},
-            {"start": 10.0, "end": 20.0,
-             "text": "Vai conseguir reproduzir. Acho que isso é um primeiro ponto.",
+            {"start": 0.0, "end": 10.0, "text": "First whole stretch of speech.",
              "turn": False},
-            {"start": 20.0, "end": 30.0, "text": "Depois do corte.", "turn": False},
+            {"start": 10.0, "end": 20.0,
+             "text": "You will not be able to reproduce it. I think that is "
+                     "a first point.",
+             "turn": False},
+            {"start": 20.0, "end": 30.0, "text": "After the clip.", "turn": False},
         ]
 
     def test_segment_outside_the_clip_does_not_enter(self):
         items = render._segments_in_cut(self.segs, 0.0, 20.0)
         self.assertEqual(len(items), 2)
-        self.assertNotIn("Depois do corte", " ".join(t for _, _, t in items))
+        self.assertNotIn("After the clip", " ".join(t for _, _, t in items))
 
     def test_times_are_relative_to_the_clip_start(self):
         items = render._segments_in_cut(self.segs, 10.0, 30.0)
@@ -145,34 +147,37 @@ class TestSegmentsInCut(unittest.TestCase):
         """A clip at 15.0 takes half of block 10-20: the text has to shrink."""
         items = render._segments_in_cut(self.segs, 0.0, 15.0)
         last = items[-1][2]
-        self.assertIn("Vai conseguir reproduzir", last)
-        self.assertNotIn("primeiro ponto", last)
+        self.assertIn("You will not be able to reproduce it.", last)
+        self.assertNotIn("first point", last)
 
     def test_whole_text_when_the_segment_fits_the_clip(self):
         items = render._segments_in_cut(self.segs, 0.0, 20.0)
-        self.assertIn("primeiro ponto", items[-1][2])
+        self.assertIn("first point", items[-1][2])
 
     def test_ignores_a_slice_too_short_to_read(self):
         """Leftover milliseconds at the end must not become a blinking caption.
 
         The clip ends a few ms after the next block starts (the end comes from
         the audio valley, not the transcript grid). Without a duration floor
-        that block becomes a 1-frame PNG — the clip displayed "Poucas" for
+        that block becomes a 1-frame PNG — the clip displayed "Few" for
         20ms, exactly the word the audio adjustment removed.
         """
         segs = [
-            {"start": 0.0, "end": 60.0, "text": "Fala aproveitada.", "turn": False},
-            {"start": 60.0, "end": 70.0, "text": "Poucas pessoas fazendo.", "turn": False},
+            {"start": 0.0, "end": 60.0, "text": "The speech we keep.",
+             "turn": False},
+            {"start": 60.0, "end": 70.0, "text": "Few people are doing it.",
+             "turn": False},
         ]
         items = render._segments_in_cut(segs, 0.0, 60.02)
         self.assertEqual(len(items), 1, items)
-        self.assertNotIn("Poucas", " ".join(t for _, _, t in items))
+        self.assertNotIn("Few", " ".join(t for _, _, t in items))
 
     def test_keeps_a_short_but_readable_slice(self):
         """The floor must not swallow a legitimately short caption."""
         segs = [
-            {"start": 0.0, "end": 60.0, "text": "Fala aproveitada.", "turn": False},
-            {"start": 60.0, "end": 70.0, "text": "Sim.", "turn": False},
+            {"start": 0.0, "end": 60.0, "text": "The speech we keep.",
+             "turn": False},
+            {"start": 60.0, "end": 70.0, "text": "Yes.", "turn": False},
         ]
         items = render._segments_in_cut(segs, 0.0, 61.0)
         self.assertEqual(len(items), 2, items)
@@ -181,20 +186,20 @@ class TestSegmentsInCut(unittest.TestCase):
         """A clip starting mid-block does not show what has already passed."""
         items = render._segments_in_cut(self.segs, 15.0, 30.0)
         first = items[0][2]
-        self.assertNotIn("Vai conseguir reproduzir", first)
+        self.assertNotIn("You will not be able to reproduce it.", first)
 
     def test_trim_extends_to_nearby_punctuation(self):
         """A slice stopping 1-2 words before the full stop should reach it.
 
-        Truncating before it leaves the caption hanging ("muito mais do") when
-        the audio completed the sentence ("muito mais do mesmo."). Real case.
+        Truncating before it leaves the caption hanging ("more of the") when
+        the audio completed the sentence ("more of the same."). Real case.
         """
-        txt = "muito mais do mesmo. para cápsula, comprimido."
-        self.assertEqual(render._trim_text(txt, 0.0, 0.25), "muito mais do mesmo.")
+        txt = "more of the same. now capsule, then tablet."
+        self.assertEqual(render._trim_text(txt, 0.0, 0.25), "more of the same.")
 
     def test_trim_does_not_extend_across_a_whole_sentence(self):
         """The extension is local: it cannot drag in the whole next sentence."""
-        txt = "primeira. " + " ".join(f"p{i}" for i in range(20)) + " end."
+        txt = "first. " + " ".join(f"p{i}" for i in range(20)) + " end."
         out = render._trim_text(txt, 0.0, 0.2)
         self.assertNotIn("end.", out)
 
@@ -211,8 +216,8 @@ class TestSegmentsInCut(unittest.TestCase):
 class TestWrapByPixels(unittest.TestCase):
     """wrap_by_pixels serves the burned-in caption AND the quote post."""
 
-    DESIGN_QUOTE = ("A gente descobriu que não precisava mudar de cidade "
-                         "para construir algo grande. Precisava ficar.")
+    DESIGN_QUOTE = ("Everybody told us we had to move to a bigger city. We "
+                         "stayed, and that turned out to be the edge.")
 
     def test_wrap_accepts_an_alternative_font_and_width(self):
         """The wrap serves caption and post, with different font and width.
@@ -248,15 +253,15 @@ class TestWrapByPixels(unittest.TestCase):
         self.assertEqual(fnt.getname(), ("Poppins", "SemiBold"))
         lines = render.wrap_by_pixels(self.DESIGN_QUOTE, fnt=fnt,
                                        width=config.POST_TEXT_W)
-        self.assertEqual(lines, ["A gente descobriu que",
-                                  "não precisava mudar",
-                                  "de cidade para",
-                                  "construir algo grande.",
-                                  "Precisava ficar."])
+        self.assertEqual(lines, ["Everybody told us we",
+                                  "had to move to a",
+                                  "bigger city. We stayed,",
+                                  "and that turned out to",
+                                  "be the edge."])
 
     def test_wrap_with_no_arguments_keeps_the_caption_behaviour(self):
         from talaria import render
-        lines = render.wrap_by_pixels("palavra " * 30)
+        lines = render.wrap_by_pixels("word " * 30)
         self.assertGreater(len(lines), 1)
 
 
@@ -280,7 +285,7 @@ class TestSuggestFrames(unittest.TestCase):
     def test_suggests_inside_the_clips(self):
         for t in self.thumbnail.suggest_frames(self.moments):
             self.assertTrue(any(m["start"] <= t <= m["end"] for m in self.moments),
-                            f"{t} fora de qualquer corte")
+                            f"{t} outside every clip")
 
     def test_respects_the_requested_limit(self):
         self.assertLessEqual(len(self.thumbnail.suggest_frames(self.moments, n=3)), 3)
@@ -311,93 +316,93 @@ class TestClipCaption(unittest.TestCase):
 
     def test_writes_a_txt_for_each_platform(self):
         # Every rendered piece gets a sibling .txt.
-        self._texts({"hashtags": "#Um #Dois"})
+        self._texts({"hashtags": "#One #Two"})
         pieces = [os.path.join(self.d, "youtube_shorts", "c1_short.mp4"),
                  os.path.join(self.d, "instagram_reels", "c1_reel.mp4")]
         render.write_captions(self.d, {"slug": "c1",
-                                         "post_caption": "A frase."}, pieces)
+                                         "post_caption": "The sentence."}, pieces)
         for p in pieces:
             txt = p[:-4] + ".txt"
             self.assertTrue(os.path.exists(txt), txt)
             with open(txt, encoding="utf-8") as f:
-                self.assertEqual(f.read(), "A frase.\n\n#Um #Dois")
+                self.assertEqual(f.read(), "The sentence.\n\n#One #Two")
 
     def test_missing_post_caption_warns_and_writes_hashtags(self):
         # An absence must not pass silently.
-        self._texts({"hashtags": "#Um"})
+        self._texts({"hashtags": "#One"})
         piece = os.path.join(self.d, "youtube_shorts", "c5_short.mp4")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             render.write_captions(self.d, {"slug": "c5"}, [piece])
         self.assertIn("c5", buf.getvalue())
-        self.assertIn("sem post_caption", buf.getvalue())
+        self.assertIn("no post_caption", buf.getvalue())
         with open(piece[:-4] + ".txt", encoding="utf-8") as f:
-            self.assertEqual(f.read(), "#Um")
+            self.assertEqual(f.read(), "#One")
 
     def test_with_a_post_caption_it_does_not_warn(self):
-        self._texts({"hashtags": "#Um"})
+        self._texts({"hashtags": "#One"})
         self._episode("https://youtu.be/XYZ")
         piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             render.write_captions(self.d, {"slug": "c1",
-                                             "post_caption": "A frase."}, [piece])
+                                             "post_caption": "The sentence."}, [piece])
         self.assertEqual(buf.getvalue(), "")
 
     def test_without_texts_json_it_does_not_break(self):
         # An episode with no texts.json still yields a caption.
         piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         render.write_captions(self.d, {"slug": "c1",
-                                         "post_caption": "A frase."}, [piece])
+                                         "post_caption": "The sentence."}, [piece])
         with open(piece[:-4] + ".txt", encoding="utf-8") as f:
-            self.assertEqual(f.read(), "A frase.")
+            self.assertEqual(f.read(), "The sentence.")
 
 
     def test_episode_link_only_on_youtube(self):
         # The episode URL goes into the Short description and NOT the Reels
         # caption: on Instagram it is not clickable and sends the reader away.
-        self._texts({"hashtags": "#Um"})
+        self._texts({"hashtags": "#One"})
         self._episode("https://youtu.be/XYZ")
         yt = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         ig = os.path.join(self.d, "instagram_reels", "c1_reel.mp4")
         render.write_captions(self.d, {"slug": "c1",
-                                         "post_caption": "A frase."}, [yt, ig])
+                                         "post_caption": "The sentence."}, [yt, ig])
         with open(yt[:-4] + ".txt", encoding="utf-8") as f:
             self.assertEqual(
                 f.read(),
-                "A frase.\n\n▶ Full episode: https://youtu.be/XYZ\n\n#Um")
+                "The sentence.\n\n▶ Full episode: https://youtu.be/XYZ\n\n#One")
         with open(ig[:-4] + ".txt", encoding="utf-8") as f:
-            self.assertEqual(f.read(), "A frase.\n\n#Um")
+            self.assertEqual(f.read(), "The sentence.\n\n#One")
 
     def test_missing_youtube_url_warns_and_writes_without_the_link(self):
         # A clip rendered before the long video goes up is the normal case —
         # it must not break, but must not pass silently either: the Short would
         # go live without the call, only noticed after it is published.
-        self._texts({"hashtags": "#Um"})
+        self._texts({"hashtags": "#One"})
         piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         buf = io.StringIO()
         with contextlib.redirect_stdout(buf):
             render.write_captions(self.d, {"slug": "c1",
-                                             "post_caption": "A frase."},
+                                             "post_caption": "The sentence."},
                                     [piece])
         self.assertIn("youtube_url", buf.getvalue())
         with open(piece[:-4] + ".txt", encoding="utf-8") as f:
-            self.assertEqual(f.read(), "A frase.\n\n#Um")
+            self.assertEqual(f.read(), "The sentence.\n\n#One")
 
     def test_invalid_episode_json_does_not_break_the_caption(self):
         # An incomplete episode.json aborts in `load`, which validates the
         # whole episode. The caption reads only the optional URL, and goes on.
-        self._texts({"hashtags": "#Um"})
+        self._texts({"hashtags": "#One"})
         with open(layout.ensure_dir(layout.episode(self.d)), "w",
                   encoding="utf-8") as f:
-            f.write("{ nao é json")
+            f.write("{ not json")
         piece = os.path.join(self.d, "youtube_shorts", "c1_short.mp4")
         with contextlib.redirect_stdout(io.StringIO()):
             render.write_captions(self.d, {"slug": "c1",
-                                             "post_caption": "A frase."},
+                                             "post_caption": "The sentence."},
                                     [piece])
         with open(piece[:-4] + ".txt", encoding="utf-8") as f:
-            self.assertEqual(f.read(), "A frase.\n\n#Um")
+            self.assertEqual(f.read(), "The sentence.\n\n#One")
 
 
 class TestEpisodeCaption(unittest.TestCase):
@@ -417,12 +422,12 @@ class TestEpisodeCaption(unittest.TestCase):
             json.dump({"youtube_url": url}, f)
 
     def test_writes_title_description_and_hashtags(self):
-        self._texts({"title": "O Título", "description": "A descrição.",
-                      "hashtags": "#Um"})
+        self._texts({"title": "The Title", "description": "The description.",
+                      "hashtags": "#One"})
         out = render.write_episode_caption(self.d)
         self.assertEqual(out, layout.episode_txt(self.d))
         with open(out, encoding="utf-8") as f:
-            self.assertEqual(f.read(), "O Título\n\nA descrição.\n\n#Um")
+            self.assertEqual(f.read(), "The Title\n\nThe description.\n\n#One")
 
     def test_without_texts_json_it_neither_writes_nor_breaks(self):
         # An episode before the materials step: nothing to paste yet.
@@ -464,7 +469,7 @@ class TestWatermarkAndCardIntegration(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg não disponível")
+    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg not available")
     def test_clip_comes_out_with_watermark_and_card(self):
         video = layout.ensure_dir(layout.video(self.d))
         subprocess.run([
@@ -474,8 +479,8 @@ class TestWatermarkAndCardIntegration(unittest.TestCase):
             "-c:v", "libx264", "-crf", "30", "-c:a", "aac", "-shortest", video,
         ], check=True)
 
-        segs = [{"start": 0.5, "end": 4.0, "text": "Legenda de teste.", "turn": False},
-                {"start": 4.0, "end": 7.5, "text": "Segunda legenda.", "turn": True}]
+        segs = [{"start": 0.5, "end": 4.0, "text": "Test caption.", "turn": False},
+                {"start": 4.0, "end": 7.5, "text": "Second caption.", "turn": True}]
         with open(layout.ensure_dir(layout.transcript(self.d)), "w", encoding="utf-8") as f:
             json.dump({"segments": segs}, f)
         moment = {"slug": "c1", "start": 0.0, "end": 8.0}
@@ -507,7 +512,7 @@ class TestConcatenateEndCard(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg não disponível")
+    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg not available")
     def test_final_duration_is_clip_plus_card(self):
         clip = os.path.join(self.d, "clip.mp4")
         subprocess.run([
@@ -527,7 +532,7 @@ class TestConcatenateEndCard(unittest.TestCase):
         self.assertAlmostEqual(float(r.stdout.strip()),
                                2.0 + config.CARD_DURATION_S, delta=0.3)
 
-    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg não disponível")
+    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg not available")
     def test_is_in_place_on_the_same_path(self):
         clip = os.path.join(self.d, "clip.mp4")
         subprocess.run([
@@ -544,7 +549,7 @@ class TestConcatenateEndCard(unittest.TestCase):
         self.assertTrue(os.path.exists(clip))
         self.assertGreater(os.path.getsize(clip), before)
 
-    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg não disponível")
+    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg not available")
     def test_path_with_an_apostrophe_does_not_break(self):
         # A hand-typed project slug can contain an apostrophe.
         subdir = os.path.join(self.d, "proj's episode")
@@ -578,7 +583,7 @@ class TestClipsMidWordOrderBeforeCard(unittest.TestCase):
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg não disponível")
+    @unittest.skipUnless(_has_ffmpeg(), "ffmpeg not available")
     def test_mid_word_check_runs_before_concatenation(self):
         video = layout.ensure_dir(layout.video(self.d))
         subprocess.run([
@@ -611,8 +616,8 @@ class TestClipsMidWordOrderBeforeCard(unittest.TestCase):
         # The file the check sees must not already carry the card's +3.5s —
         # otherwise it is measuring the wrong instant.
         self.assertLess(durations_seen[0], 5.0 + config.CARD_DURATION_S,
-                        "clips_mid_word recebeu o arquivo já concatenado com o "
-                        "card — a checagem precisa rodar ANTES do concat")
+                        "clips_mid_word got the file already concatenated with the "
+                        "card — the check has to run BEFORE the concat")
 
         out = os.path.join(layout.platform(self.d, "youtube_shorts"), "c1_short.mp4")
         r = subprocess.run(

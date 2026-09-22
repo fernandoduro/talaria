@@ -201,25 +201,28 @@ def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
     dur = end - start
 
     if dur < config.CLIP_MIN_S:
-        msgs.append(f"duração {dur:.0f}s abaixo do mínimo de {config.CLIP_MIN_S}s")
+        msgs.append(f"duration {dur:.0f}s below the minimum of "
+                    f"{config.CLIP_MIN_S}s")
     elif dur > config.CLIP_MAX_S:
-        msgs.append(f"duração {dur:.0f}s acima do máximo de {config.CLIP_MAX_S}s")
+        msgs.append(f"duration {dur:.0f}s above the maximum of "
+                    f"{config.CLIP_MAX_S}s")
 
     # The clip must not start NOR end mid-sentence.
     # The end was once only a warning, on the assumption the tail would be
     # "trimmed at render" — the render cuts at the exact time, so nothing was
     # trimmed and the video shipped with the last sentence half finished.
     if segs and not _valid_boundary(start, segs):
-        msgs.append(f"início {start:.1f}s não cai em fronteira de frase")
+        msgs.append(f"start {start:.1f}s does not land on a sentence boundary")
 
     # Closing punctuation is only required when the end coincides with a block
     # end. An end in the MIDDLE of a block is legitimate (the manager trims the
     # tail where the sentence ends, even if the block runs on) and is allowed.
     if segs and _valid_boundary(end, segs) and not _ends_sentence(end, segs):
-        msgs.append(f"fim {end:.1f}s não fecha frase (corta a fala no meio)")
+        msgs.append(f"end {end:.1f}s does not close a sentence "
+                    f"(it cuts the speech mid-way)")
 
     if state and is_burned(span, state):
-        msgs.append("sobrepõe faixa já queimada (aprovada ou rejeitada)")
+        msgs.append("overlaps a burned span (approved or rejected)")
 
     return (not msgs), msgs
 
@@ -296,7 +299,8 @@ def clip_warnings(span: tuple, segs: list) -> list:
     inside = segments_in_clip(span, segs)
     for s in inside:
         if has_hedged_number(s["text"]):
-            alerts.append(f"número aproximado em {s['start']:.0f}s: \"{s['text'][:60]}\"")
+            alerts.append(f"hedged figure at {s['start']:.0f}s: "
+                          f"\"{s['text'][:60]}\"")
     # The two alerts below read `speaker`; without trustworthy attribution they
     # would flag a good clip. Warned once that the check did not run.
     if not attribution_trustworthy(segs):
@@ -304,13 +308,13 @@ def clip_warnings(span: tuple, segs: list) -> list:
 
     frac = guest_speech_fraction(span, segs)
     if frac < config.GUEST_SPEECH_MIN:
-        alerts.append(f"convidado fala só {frac*100:.0f}% do corte")
+        alerts.append(f"guest speaks only {frac*100:.0f}% of the clip")
 
     seg_host = host_opening(span, segs)
     if seg_host >= HOST_OPENING_MAX_S:
         alerts.append(
-            f"corte abre com {seg_host:.0f}s de fala do host — o espectador frio "
-            "desiste antes do convidado falar"
+            f"clip opens with {seg_host:.0f}s of host speech — the cold "
+            "viewer leaves before the guest talks"
         )
     return alerts
 
@@ -340,11 +344,11 @@ def approve(state: dict, clip: dict) -> dict:
         # burned — a different question, a different tolerance.
         if overlaps(span, (float(ja["start"]), float(ja["end"])), threshold=0.0):
             raise ValueError(
-                f"corte {clip.get('slug')} sobrepõe o aprovado "
+                f"clip {clip.get('slug')} overlaps approved clip "
                 f"{ja.get('slug')} ({ja['start']:.0f}-{ja['end']:.0f}s)"
             )
     if len(state["approved"]) >= state["target"]:
-        raise ValueError(f"target de {state['target']} cortes já atingida")
+        raise ValueError(f"target of {state['target']} clips already met")
     state["approved"].append(clip)
     return state
 
@@ -398,7 +402,7 @@ def to_moments(state: dict) -> list:
     that has to survive as far as publication.
     """
     if not state.get("approved"):
-        raise ValueError("nenhum corte aprovado — nada a exportar")
+        raise ValueError("no approved clip — nothing to export")
     return [dict(c) for c in state["approved"]]
 
 

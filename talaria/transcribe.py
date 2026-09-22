@@ -28,7 +28,7 @@ def _write_outputs(segments, project_dir):
             f.write(f"[{utils.mmss(a)}-{utils.mmss(b)}] {txt}\n\n")
 
     dur = utils.mmss(segments[-1]["end"]) if segments else "00:00"
-    print(f"[transcribe] {len(segments)} segmentos, {len(blocks)} blocos, duração {dur}")
+    print(f"[transcribe] {len(segments)} segments, {len(blocks)} blocks, duration {dur}")
 
 
 def from_youtube_captions(vtt_path, project_dir):
@@ -37,7 +37,7 @@ def from_youtube_captions(vtt_path, project_dir):
     if not segments:
         return False
     _write_outputs(segments, project_dir)
-    print("[transcribe] via legenda do YouTube")
+    print("[transcribe] via YouTube captions")
     return True
 
 
@@ -50,11 +50,11 @@ def from_whisper(video_path, project_dir, model=None):
     try:
         wm = WhisperModel(model, device=device, compute_type=compute)
     except Exception as e:  # noqa: BLE001
-        print(f"[transcribe] GPU indisponível ({e}); usando CPU int8.")
+        print(f"[transcribe] GPU unavailable ({e}); using CPU int8.")
         device, compute = "cpu", "int8"
         wm = WhisperModel(model, device=device, compute_type=compute)
 
-    print(f"[transcribe] Whisper {model} em {device} (isso leva alguns minutos)...")
+    print(f"[transcribe] Whisper {model} on {device} (this takes a few minutes)...")
     seg_iter, _info = wm.transcribe(
         video_path, language=config.WHISPER_LANG, word_timestamps=True,
     )
@@ -68,7 +68,7 @@ def from_whisper(video_path, project_dir, model=None):
             words.append((s.start, s.text.strip()))
     segments = utils.group_words_into_segments(words)
     _write_outputs(segments, project_dir)
-    print("[transcribe] via Whisper local")
+    print("[transcribe] via local Whisper")
     return True
 
 
@@ -82,5 +82,5 @@ def transcribe(source, video_path, project_dir, model=None):
         vtt = acquire.fetch_youtube_captions(source, project_dir, config.WHISPER_LANG)
         if vtt and from_youtube_captions(vtt, project_dir):
             return
-        print("[transcribe] sem legenda no YouTube; caindo para Whisper.")
+        print("[transcribe] no YouTube captions; falling back to Whisper.")
     from_whisper(video_path, project_dir, model=model)

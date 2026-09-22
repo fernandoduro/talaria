@@ -22,8 +22,8 @@ def _bucket() -> str:
     bucket = os.environ.get("S3_PUBLISH_BUCKET", "")
     if not bucket:
         raise RuntimeError(
-            "S3_PUBLISH_BUCKET não definido no ambiente (.env) — é o bucket "
-            "temporário de onde o Instagram baixa a mídia."
+            "S3_PUBLISH_BUCKET not defined in the environment (.env) — it is "
+            "the temporary bucket Instagram downloads the media from."
         )
     return bucket
 
@@ -83,5 +83,5 @@ def remove(url: str) -> None:
                 key = key[len(bucket) + 1:]
         _client().delete_object(Bucket=bucket, Key=key)
     except Exception as e:  # noqa: BLE001
-        print(f"[storage] !! não removi o temporário ({e}) — "
-              f"resíduo em {PREFIX}, expira sozinho da URL em 1h")
+        print(f"[storage] !! could not remove the temporary file ({e}) — "
+              f"leftover in {PREFIX}, the URL expires on its own in 1h")

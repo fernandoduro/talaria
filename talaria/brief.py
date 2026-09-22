@@ -37,14 +37,14 @@ def readable_metadata(project_dir: str) -> str:
     links = "; ".join(c.get("linkedin", "") for c in guests if c.get("linkedin"))
     topics = ", ".join(ep.get("topics") or [])
     return (
-        f"- Temporada: {ep['season']}\n"
-        f"- Número do episódio: {int(ep['episode']):02d}\n"
-        f"- Código: {episode.code(ep)}\n"
-        f"- Convidado(s) e cargo: {names}\n"
-        f"- Empresa ou instituição: {ep['company']}\n"
-        f"- Cidade/UF da gravação: {ep['city']}/{ep['uf']}\n"
-        f"- LinkedIn do(s) convidado(s): {links}\n"
-        f"- Temas da conversa: {topics}\n"
+        f"- Season: {ep['season']}\n"
+        f"- Episode number: {int(ep['episode']):02d}\n"
+        f"- Code: {episode.code(ep)}\n"
+        f"- Guest(s) and role: {names}\n"
+        f"- Company or institution: {ep['company']}\n"
+        f"- Recording city/state: {ep['city']}/{ep['uf']}\n"
+        f"- Guest(s) LinkedIn: {links}\n"
+        f"- Conversation topics: {topics}\n"
     )
 
 
@@ -64,36 +64,36 @@ def readable_curation(state: dict) -> str:
     rejected = state.get("rejected", [])
 
     if not approved and not rejected:
-        return ("PRIMEIRA RODADA — nenhum corte avaliado ainda.\n"
-                "Proponha 10 trechos, ordenados do mais forte para o mais fraco.")
+        return ("FIRST ROUND — no clip judged yet.\n"
+                "Propose 10 stretches, ordered strongest to weakest.")
 
     lines = [
-        f"Rodada: {state.get('rounds', 0)}",
-        f"Meta: {state['target']} cortes",
-        f"Aprovados: {len(approved)}",
-        f"VAGAS RESTANTES: {cur.slots_left(state)} — proponha exatamente este número.",
+        f"Round: {state.get('rounds', 0)}",
+        f"Target: {state['target']} clips",
+        f"Approved: {len(approved)}",
+        f"SLOTS LEFT: {cur.slots_left(state)} — propose exactly this many.",
         "",
-        "COMPOSIÇÃO POR TIPO:",
+        "COMPOSITION BY KIND:",
     ]
     for kind, n in cur.composition(state).items():
         lines.append(f"  {kind}: {n}")
     missing = cur.missing_kinds(state)
     if missing:
-        lines.append(f"  TIPOS AUSENTES (priorize): {', '.join(missing)}")
+        lines.append(f"  MISSING KINDS (prioritise): {', '.join(missing)}")
 
     lines.append("")
-    lines.append("FAIXAS QUEIMADAS — não proponha nada que se sobreponha a elas:")
+    lines.append("BURNED SPANS — propose nothing that overlaps them:")
     for c in approved:
         lines.append(f"  [{utils.mmss(c['start'])}-{utils.mmss(c['end'])}] "
-                      f"APROVADO: {c.get('screen_text', c.get('slug', ''))}")
+                      f"APPROVED: {c.get('screen_text', c.get('slug', ''))}")
     for r in rejected:
         lines.append(f"  [{utils.mmss(r['start'])}-{utils.mmss(r['end'])}] "
-                      f"REJEITADO ({r.get('reason', '')}): {r.get('summary', '')}")
+                      f"REJECTED ({r.get('reason', '')}): {r.get('summary', '')}")
 
     ms = cur.reasons(state)
     if ms:
         lines.append("")
-        lines.append("MOTIVOS DE REJEIÇÃO ACUMULADOS — aplique como filtro:")
+        lines.append("ACCUMULATED REJECTION REASONS — apply them as a filter:")
         for m in ms:
             lines.append(f"  - {m}")
 
@@ -104,7 +104,7 @@ def _read_prompt(name: str) -> str:
     """Reads a versioned prompt from the prompts/ directory."""
     path = os.path.join(PROMPTS_DIR, name)
     if not os.path.exists(path):
-        raise FileNotFoundError(f"prompt não encontrado: {path}")
+        raise FileNotFoundError(f"prompt not found: {path}")
     with open(path, encoding="utf-8") as f:
         return f.read()
 
@@ -112,7 +112,7 @@ def _read_prompt(name: str) -> str:
 def build(project_dir: str, kind: str) -> str:
     """kind: 'materials' or 'clips'. Returns the path of the file written."""
     if kind not in ("materials", "clips"):
-        raise ValueError("tipo deve ser 'materials' ou 'clips'")
+        raise ValueError("kind must be 'materials' or 'clips'")
     template = _read_prompt(f"{kind}.md")
     state_txt = ""
     if kind == "clips":
@@ -139,7 +139,7 @@ def clip_speech(project_dir: str, clip: dict) -> str:
     Requiring full containment hid the last sentence of every clip, because the
     transcript has ~8s blocks and the boundary almost never coincides with them.
     That is exactly where the punchline usually sits: in one clip the packet
-    ended at "chegou lá na fábrica, você não" while the video went on.
+    ended at "we got to the factory and you did not" while the video went on.
 
     The text comes RAW (no `clean_caption`): the excerpt is chosen over what the
     person actually said. Cleanup comes later, in `post --generate`.
@@ -177,9 +177,9 @@ def readable_clips(project_dir: str, clips: list) -> str:
     for c in clips:
         parts.append(
             f"### {c['slug']}  [{utils.mmss(c['start'])}–{utils.mmss(c['end'])}]\n\n"
-            f"- Tipo: {c.get('kind', '')}\n"
-            f"- Texto de tela do vídeo: {c.get('screen_text', '')}\n\n"
-            f"Fala literal:\n\n{clip_speech(project_dir, c)}\n"
+            f"- Kind: {c.get('kind', '')}\n"
+            f"- Video screen text: {c.get('screen_text', '')}\n\n"
+            f"Literal speech:\n\n{clip_speech(project_dir, c)}\n"
         )
     return "\n".join(parts)
 
@@ -193,8 +193,8 @@ def build_posts(project_dir: str, clips: list) -> str:
     """
     from . import config
     limit = (
-        f"Máximo de {config.POST_QUOTE_MAX_LINES} linhas por card, cerca de "
-        f"100 caracteres. A citação de referência tem 96.\n"
+        f"At most {config.POST_QUOTE_MAX_LINES} lines per card, about "
+        f"100 characters. The reference quote has 97.\n"
     )
     content = fill_template(
         _read_prompt("posts.md"),

@@ -33,7 +33,7 @@ class TestComposeCard(unittest.TestCase):
         # saying where the asset should be, not a raw Pillow FileNotFoundError
         # pointing at a path with no context.
         old_path = config.LOGO_PATH
-        config.LOGO_PATH = "/path/que/nao/existe/logo.png"
+        config.LOGO_PATH = "/path/that/does/not/exist/logo.png"
         try:
             with self.assertRaises(FileNotFoundError) as e:
                 end_card.compose_card()
@@ -91,7 +91,7 @@ class TestCachedCard(unittest.TestCase):
         destination = end_card.cached_card(self.d)
         folder = os.path.dirname(destination)
         leftovers = [n for n in os.listdir(folder) if ".tmp" in n]
-        self.assertEqual(leftovers, [], f"temporário ficou para trás: {leftovers}")
+        self.assertEqual(leftovers, [], f"temporary file left behind: {leftovers}")
 
     def test_race_between_two_processes_does_not_corrupt(self):
         # Simulates two concurrent "processes" calling cached_card() for the

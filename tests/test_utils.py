@@ -59,8 +59,8 @@ class TestFixProperNouns(unittest.TestCase):
                 "we built Kestril in a garage", msg=variant)
 
     def test_correct_spelling_is_preserved(self):
-        self.assertEqual(utils.fix_proper_nouns("a Zarvik hoje", ["Zarvik"]),
-                         "a Zarvik hoje")
+        self.assertEqual(utils.fix_proper_nouns("Zarvik today", ["Zarvik"]),
+                         "Zarvik today")
 
     def test_near_miss_dictionary_word_is_left_alone(self):
         """A real word matching the pattern partway must survive it.
@@ -72,7 +72,8 @@ class TestFixProperNouns(unittest.TestCase):
         self.assertEqual(utils.fix_proper_nouns(txt, ["Kestril"]), txt)
 
     def test_no_names_does_nothing(self):
-        self.assertEqual(utils.fix_proper_nouns("texto qualquer", []), "texto qualquer")
+        self.assertEqual(utils.fix_proper_nouns("any text at all", []),
+                         "any text at all")
 
     def test_word_boundary_is_respected(self):
         self.assertEqual(utils.fix_proper_nouns("Kestrilish", ["Kestril"]), "Kestrilish")
@@ -98,8 +99,8 @@ class TestFixProperNouns(unittest.TestCase):
 
     def test_still_corrects_an_invented_name(self):
         """The case that motivated the function still works."""
-        self.assertEqual(utils.fix_proper_nouns("montar a Zarvic", ["Zarvik"]),
-                         "montar a Zarvik")
+        self.assertEqual(utils.fix_proper_nouns("building Zarvic", ["Zarvik"]),
+                         "building Zarvik")
 
 
 class TestCleanCaption(unittest.TestCase):

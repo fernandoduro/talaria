@@ -107,15 +107,15 @@ class TestMigration(unittest.TestCase):
         d = self._old_project()
         layout.migrate(d)
         with open(layout.moments(d), "w", encoding="utf-8") as f:
-            f.write("NOVO")
+            f.write("NEW")
         with open(os.path.join(d, "moments.json"), "w", encoding="utf-8") as f:
-            f.write("ANTIGO")
+            f.write("OLD")
         layout.migrate(d)
         with open(layout.moments(d), encoding="utf-8") as f:
-            self.assertEqual(f.read(), "NOVO")
+            self.assertEqual(f.read(), "NEW")
         # and the old one is preserved as .bak, not deleted
         with open(os.path.join(d, "moments.json.bak"), encoding="utf-8") as f:
-            self.assertEqual(f.read(), "ANTIGO")
+            self.assertEqual(f.read(), "OLD")
 
 
 class TestDefensiveMigration(unittest.TestCase):
@@ -131,21 +131,21 @@ class TestDefensiveMigration(unittest.TestCase):
         d = tempfile.mkdtemp()
         os.makedirs(os.path.join(d, layout.DECISIONS))
         with open(layout.moments(d), "w", encoding="utf-8") as f:
-            f.write("NOVO")
+            f.write("NEW")
         with open(os.path.join(d, "moments.json"), "w", encoding="utf-8") as f:
-            f.write("ANTIGO")
+            f.write("OLD")
 
         moved = layout.migrate(d)
 
         with open(layout.moments(d), encoding="utf-8") as f:
-            self.assertEqual(f.read(), "NOVO")          # the new one still applies
+            self.assertEqual(f.read(), "NEW")          # the new one still applies
         self.assertFalse(os.path.exists(os.path.join(d, "moments.json")))
         bak = os.path.join(d, "moments.json.bak")
         self.assertTrue(os.path.exists(bak))            # the old one did not vanish
         with open(bak, encoding="utf-8") as f:
-            self.assertEqual(f.read(), "ANTIGO")
+            self.assertEqual(f.read(), "OLD")
         self.assertTrue(any("bak" in destination for _, destination in moved),
-                        f"o relatório precisa mencionar o .bak: {moved}")
+                        f"the report must mention the .bak: {moved}")
 
     def test_folder_name_taken_by_a_file_gives_a_useful_error(self):
         """A file named 'decisions' blocks the folder — the error must say so."""
@@ -153,13 +153,13 @@ class TestDefensiveMigration(unittest.TestCase):
         with open(os.path.join(d, "moments.json"), "w", encoding="utf-8") as f:
             f.write("x")
         with open(os.path.join(d, layout.DECISIONS), "w", encoding="utf-8") as f:
-            f.write("sou um arquivo, não uma pasta")
+            f.write("I am a file, not a folder")
 
         with self.assertRaises(RuntimeError) as ctx:
             layout.migrate(d)
         msg = str(ctx.exception)
         self.assertIn(layout.DECISIONS, msg)
-        self.assertIn("pasta", msg.lower())
+        self.assertIn("folder", msg.lower())
         # nothing was lost: the original file is still where it was
         self.assertTrue(os.path.exists(os.path.join(d, "moments.json")))
 
@@ -180,8 +180,8 @@ class TestDefensiveMigration(unittest.TestCase):
 
         moved = layout.migrate(d)
 
-        self.assertTrue(any("MAIOR" in destination for _, destination in moved),
-                        f"o relatório precisa avisar: {moved}")
+        self.assertTrue(any("BIGGER" in destination for _, destination in moved),
+                        f"the report must warn: {moved}")
 
     def test_duplicate_output_folder_is_reported(self):
         """An old folder holding content the new one lacks cannot be orphaned.
@@ -192,11 +192,11 @@ class TestDefensiveMigration(unittest.TestCase):
         d = tempfile.mkdtemp()
         os.makedirs(os.path.join(d, layout.PUBLISH, "youtube_shorts"))
         with open(os.path.join(d, layout.PUBLISH, "youtube_shorts", "c1.mp4"), "w") as f:
-            f.write("novo")
+            f.write("new")
         os.makedirs(os.path.join(d, "youtube_shorts"))
         for n in ("c1.mp4", "c2.mp4"):
             with open(os.path.join(d, "youtube_shorts", n), "w") as f:
-                f.write("antigo " + n)
+                f.write("old " + n)
 
         moved = layout.migrate(d)
 
@@ -205,9 +205,9 @@ class TestDefensiveMigration(unittest.TestCase):
         self.assertTrue(os.path.exists(os.path.join(destination, "c2.mp4")))
         # what already existed in the new one was not overwritten
         with open(os.path.join(destination, "c1.mp4"), encoding="utf-8") as f:
-            self.assertEqual(f.read(), "novo")
+            self.assertEqual(f.read(), "new")
         # and the report does not stay silent
-        self.assertTrue(moved, "mover conteúdo órfão precisa aparecer no relatório")
+        self.assertTrue(moved, "moving orphan content must show in the report")
         self.assertFalse(os.path.isdir(os.path.join(d, "youtube_shorts")))
 
     def test_interruption_is_recoverable(self):
@@ -226,7 +226,7 @@ class TestDefensiveMigration(unittest.TestCase):
         def move_that_dies(a, b):
             state["n"] += 1
             if state["n"] == 3:
-                raise KeyboardInterrupt("simula ctrl-c no meio")
+                raise KeyboardInterrupt("simulates ctrl-c partway")
             return original(a, b)
 
         _sh.move = move_that_dies

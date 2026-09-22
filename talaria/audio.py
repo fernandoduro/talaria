@@ -2,7 +2,7 @@
 
 Clip times come from the transcript, whose resolution is 1 second. An end taken
 from there lands on the boundary between two words and lets the attack of the
-next one leak: the clip ended at 901.0 and the viewer heard the "Poucas" that
+next one leak: the clip ended at 901.0 and the viewer heard the "Few" that
 opens the following sentence.
 
 The pause between words in continuous speech is short (~40ms in the measured
@@ -127,7 +127,7 @@ def clips_mid_word(video_path: str, end: float, threshold_db: float = -25.0,
     # Speech ending decays; speech cut off stops abruptly, still at high level.
     # Measured: a defective clip sits at -31/-28/-31 dB (stable); the correct
     # ones either end below -35 dB or plunge more than 10 dB in the last window
-    # ("importadas": -25.8 -> -39.4).
+    # ("imported": -25.8 -> -39.4).
     if dbs[-1] <= threshold_db - 10.0:
         return False                     # ended in silence
     return (dbs[0] - dbs[-1]) < 8.0      # did not decay enough

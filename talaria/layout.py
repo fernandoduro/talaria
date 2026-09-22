@@ -157,8 +157,8 @@ def _check_dirs(pd: str) -> None:
         path = os.path.join(pd, name)
         if os.path.exists(path) and not os.path.isdir(path):
             raise RuntimeError(
-                f"'{name}' precisa ser uma pasta, mas é um arquivo em {pd}. "
-                f"Renomeie ou remova esse arquivo e rode de novo."
+                f"'{name}' must be a folder, but it is a file in {pd}. "
+                f"Rename or remove that file and run again."
             )
 
 
@@ -195,14 +195,14 @@ def migrate(pd: str) -> list:
             if os.path.exists(bak):
                 os.remove(bak)
             os.rename(origin, bak)
-            note = "(duplicata)"
+            note = "(duplicate)"
             # Flag when the discarded file is bigger than the active one: the
             # new position may hold a half-written file (interrupted write) that
             # would silently take over. Size decides nothing — a smaller JSON is
             # normal — but the manager needs to see it to check.
             try:
                 if os.path.getsize(bak) > os.path.getsize(destination):
-                    note = "(duplicata — o .bak é MAIOR, confira qual vale)"
+                    note = "(duplicate — the .bak is BIGGER, check which counts)"
             except OSError:
                 pass
             moved.append((old, os.path.basename(bak) + " " + note))
@@ -237,7 +237,7 @@ def migrate(pd: str) -> list:
                     os.remove(bak)
                 shutil.move(current, bak)
                 moved.append((f"{name}/{file}",
-                                os.path.relpath(bak, pd) + " (duplicata)"))
+                                os.path.relpath(bak, pd) + " (duplicate)"))
                 continue
             shutil.move(current, target)
             moved.append((f"{name}/{file}", os.path.relpath(target, pd)))
@@ -248,6 +248,6 @@ def migrate(pd: str) -> list:
         path = os.path.join(pd, name)
         if os.path.exists(path):
             os.remove(path)
-            moved.append((name, "(removido)"))
+            moved.append((name, "(removed)"))
 
     return moved

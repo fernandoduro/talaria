@@ -37,7 +37,7 @@ def privacy() -> str:
         return DEFAULT_PRIVACY
     if value not in PRIVACY_VALUES:
         raise ValueError(
-            f"YT_PRIVACY={value!r} não é válido — use "
+            f"YT_PRIVACY={value!r} is not valid — use "
             f"{', '.join(PRIVACY_VALUES)}."
         )
     return value
@@ -50,9 +50,9 @@ def _credentials() -> Credentials:
                              ("YT_REFRESH_TOKEN", refresh)) if not v]
     if missing:
         raise RuntimeError(
-            f"{', '.join(missing)} não definido no ambiente (.env). Rode "
-            f"'python scripts/youtube_auth.py <client_secret.json>' uma vez "
-            f"para gerar o refresh token."
+            f"{', '.join(missing)} not defined in the environment (.env). Run "
+            f"'python scripts/youtube_auth.py <client_secret.json>' once to "
+            f"generate the refresh token."
         )
     with open(path, encoding="utf-8") as f:
         cs = json.load(f)["installed"]

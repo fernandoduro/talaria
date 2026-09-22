@@ -97,4 +97,4 @@ def build_thumbnail(frame_path, out_path, *, badge, headline_l1, headline_l2,
         _outlined(d, (W - 40, 78), subtitle, _font(24), (210, 210, 210), ow=3, anchor="ra")
 
     img.save(out_path, quality=92)
-    print(f"[thumb] salva -> {out_path}")
+    print(f"[thumb] saved -> {out_path}")

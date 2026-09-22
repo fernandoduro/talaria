@@ -1,0 +1,30 @@
+0:10
+Good afternoon everyone, we are recording another episode today.
+0:15
+Today we are going to talk about Acme and, as always, my co-host here,
+0:21
+John, running the conversation alongside me. Good to be with
+0:26
+you all.
+0:27
+>> Great to be here. Thanks a lot for the invitation, and for the chance
+0:31
+to tell a bit of our R&amp;D story.
+0:35
+>> Tell us how it started, then. When did you decide
+0:40
+this was going to be a real company?
+0:44
+>> Look, at the beginning it was only a side project. We worked somewhere
+0:50
+else and tinkered with it at night, with no ambition at all. [crosstalk]
+0:55
+Then a customer asked whether they could buy it, and we realised there was
+1:01
+something there worth taking seriously.
+1:02:03
+>> And looking back, what would you do differently today?
+1:02:10
+>> I would have validated before building. We spent months making
+1:02:16
+something nobody had asked for, and that costs a lot.

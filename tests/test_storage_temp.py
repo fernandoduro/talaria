@@ -6,15 +6,15 @@ from talaria import storage_temp
 
 
 class TestPut(unittest.TestCase):
-    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
+    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "my-bucket"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_uploads_under_the_prefix_and_returns_a_signed_url(self, boto3_mock):
         s3 = boto3_mock.client.return_value
-        s3.generate_presigned_url.return_value = "https://assinada"
+        s3.generate_presigned_url.return_value = "https://signed"
         url = storage_temp.put("/tmp/video.mp4")
-        self.assertEqual(url, "https://assinada")
+        self.assertEqual(url, "https://signed")
         bucket, key = s3.upload_file.call_args[0][1:3]
-        self.assertEqual(bucket, "meu-bucket")
+        self.assertEqual(bucket, "my-bucket")
         self.assertTrue(key.startswith("tmp-publish/"))
         self.assertTrue(key.endswith("_video.mp4"))
         # 1h validity: time for Instagram to process, without an eternal URL.
@@ -22,14 +22,14 @@ class TestPut(unittest.TestCase):
         self.assertEqual(kwargs.kwargs.get("ExpiresIn"), 3600)
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b",
-                                    "S3_ENDPOINT_URL": "https://r2.exemplo"})
+                                    "S3_ENDPOINT_URL": "https://r2.example"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_custom_endpoint_allows_r2_and_compatibles(self, boto3_mock):
         # Without a configurable endpoint boto3 only talks to AWS. R2/MinIO use
         # the same API — switching provider must not require changing code.
         storage_temp.put("/tmp/video.mp4")
         self.assertEqual(boto3_mock.client.call_args.kwargs.get("endpoint_url"),
-                         "https://r2.exemplo")
+                         "https://r2.example")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "b"}, clear=True)
     @mock.patch("talaria.storage_temp.boto3")
@@ -56,16 +56,16 @@ class TestPut(unittest.TestCase):
 
 
 class TestRemove(unittest.TestCase):
-    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
+    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "my-bucket"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_removes_by_the_key_from_the_url(self, boto3_mock):
         s3 = boto3_mock.client.return_value
         storage_temp.remove(
-            "https://meu-bucket.s3.amazonaws.com/tmp-publish/abc_v.mp4?X-Amz=1")
+            "https://my-bucket.s3.amazonaws.com/tmp-publish/abc_v.mp4?X-Amz=1")
         s3.delete_object.assert_called_once_with(
-            Bucket="meu-bucket", Key="tmp-publish/abc_v.mp4")
+            Bucket="my-bucket", Key="tmp-publish/abc_v.mp4")
 
-    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
+    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "my-bucket"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_removes_from_a_path_style_url(self, boto3_mock):
         # R2 and MinIO sign in the /bucket/key form, not bucket.host/key.
@@ -74,10 +74,10 @@ class TestRemove(unittest.TestCase):
         # until it expired.
         s3 = boto3_mock.client.return_value
         storage_temp.remove(
-            "https://account.r2.cloudflarestorage.com/meu-bucket/"
+            "https://account.r2.cloudflarestorage.com/my-bucket/"
             "tmp-publish/abc_v.mp4?X-Amz-Signature=x")
         s3.delete_object.assert_called_once_with(
-            Bucket="meu-bucket", Key="tmp-publish/abc_v.mp4")
+            Bucket="my-bucket", Key="tmp-publish/abc_v.mp4")
 
     @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "tmp-publish"})
     @mock.patch("talaria.storage_temp.boto3")
@@ -92,7 +92,7 @@ class TestRemove(unittest.TestCase):
         s3.delete_object.assert_called_once_with(
             Bucket="tmp-publish", Key="tmp-publish/abc_v.mp4")
 
-    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "meu-bucket"})
+    @mock.patch.dict("os.environ", {"S3_PUBLISH_BUCKET": "my-bucket"})
     @mock.patch("talaria.storage_temp.boto3")
     def test_a_failed_removal_only_warns(self, boto3_mock):
         # A leftover in the bucket is the acceptable worst case; a lost post is not.

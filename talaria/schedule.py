@@ -44,8 +44,8 @@ def moments(pd: str) -> list:
     path = layout.moments(pd)
     if not os.path.exists(path):
         raise FileNotFoundError(
-            f"{path} não existe. Rode 'python run.py curate --project <slug> "
-            f"--export' antes de agendar cortes."
+            f"{path} does not exist. Run 'python run.py curate --project "
+            f"<slug> --export' before scheduling clips."
         )
     with open(path, encoding="utf-8") as f:
         return json.load(f)
@@ -56,14 +56,14 @@ def load(pd: str) -> list:
     path = layout.schedule(pd)
     if not os.path.exists(path):
         raise FileNotFoundError(
-            f"{path} não existe. Escreva a agenda de publicação: "
+            f"{path} does not exist. Write the publishing schedule: "
             f'{{"schedule": [{{"date": "YYYY-MM-DD", "kind": "clip|post", '
             f'"slug": "..."}}]}}'
         )
     with open(path, encoding="utf-8") as f:
         items = (json.load(f) or {}).get("schedule") or []
     if not items:
-        raise ValueError(f"{path} não tem nenhum item em 'schedule'")
+        raise ValueError(f"{path} has no item in 'schedule'")
 
     # Sources loaded on demand: a posts-only schedule needs no moments.json.
     clips = posts = None
@@ -71,11 +71,11 @@ def load(pd: str) -> list:
     for i, item in enumerate(items, start=1):
         slug = item.get("slug") or ""
         kind = item.get("kind") or ""
-        where = f"item {i} da agenda ('{slug or '?'}')"
+        where = f"schedule item {i} ('{slug or '?'}')"
         if kind not in PLATFORMS:
-            raise ValueError(f"{where}: tipo {kind!r} — use 'clip' ou 'post'")
+            raise ValueError(f"{where}: kind {kind!r} — use 'clip' or 'post'")
         if not slug:
-            raise ValueError(f"{where}: sem slug")
+            raise ValueError(f"{where}: no slug")
         # The slug becomes a filename inside publish/. A slash or a `..` takes
         # it out of the episode folder, and then publish finds an mp4 from
         # outside the project, passes the pre-check and publishes the wrong
@@ -83,9 +83,9 @@ def load(pd: str) -> list:
         # slug is hand-typed in curation.json and nothing validates it before here.
         if "/" in slug or "\\" in slug or slug.strip(". ") != slug:
             raise ValueError(
-                f"{where}: slug não pode ter barra nem começar/terminar com "
-                f"ponto — ele vira nome de arquivo em publish/, e assim "
-                f"apontaria para fora da pasta do episódio"
+                f"{where}: the slug cannot carry a slash nor start/end with "
+                f"a dot — it becomes a filename in publish/, and would then "
+                f"point outside the episode folder"
             )
         # The key is (kind, slug), not the slug: a quote post inherits the slug
         # of the clip it quotes (that is how `post --clips` names it), and clip
@@ -93,39 +93,39 @@ def load(pd: str) -> list:
         # not a repetition. Publishing and recording already split them by platform.
         if (kind, slug) in seen:
             raise ValueError(
-                f"{where}: {kind} aparece duas vezes — para mudar a data, "
-                f"edite o item existente em vez de repetir"
+                f"{where}: {kind} appears twice — to change the date, edit "
+                f"the existing item instead of repeating it"
             )
         seen.add((kind, slug))
         try:
             date_of(item)
         except (TypeError, ValueError):
             raise ValueError(
-                f"{where}: data {item.get('date')!r} inválida — use "
-                f"YYYY-MM-DD de um dia que existe"
+                f"{where}: date {item.get('date')!r} invalid — use "
+                f"YYYY-MM-DD of a day that exists"
             )
         if kind == "clip":
             if clips is None:
                 clips = {m.get("slug") for m in moments(pd)}
             if slug not in clips:
                 raise ValueError(
-                    f"{where}: não está em {layout.moments(pd)} — "
-                    f"cortes disponíveis: {', '.join(sorted(clips))}"
+                    f"{where}: not in {layout.moments(pd)} — "
+                    f"available clips: {', '.join(sorted(clips))}"
                 )
         else:
             if posts is None:
                 posts = {p.get("slug"): p for p in post_instagram.load(pd)}
             if slug not in posts:
                 raise ValueError(
-                    f"{where}: não está em {layout.posts(pd)} — "
-                    f"posts disponíveis: {', '.join(sorted(posts))}"
+                    f"{where}: not in {layout.posts(pd)} — "
+                    f"available posts: {', '.join(sorted(posts))}"
                 )
             cards = posts[slug].get("cards") or []
             if len(cards) > CAROUSEL_MAX:
                 raise ValueError(
-                    f"post '{slug}' tem {len(cards)} cards — o carrossel do "
-                    f"Instagram aceita no máximo {CAROUSEL_MAX}; quebre em "
-                    f"dois posts"
+                    f"post '{slug}' has {len(cards)} cards — the Instagram "
+                    f"carousel accepts at most {CAROUSEL_MAX}; break it into "
+                    f"two posts"
                 )
     return items
 
@@ -162,7 +162,7 @@ def pending(pd: str, day: dt.date = None, only: list = None,
         unknown_platforms = sorted(set(platforms) - known)
         if unknown_platforms:
             raise ValueError(
-                f"plataforma desconhecida: {', '.join(unknown_platforms)} — "
+                f"unknown platform: {', '.join(unknown_platforms)} — "
                 f"use {', '.join(sorted(known))}"
             )
     items = load(pd)
@@ -170,7 +170,7 @@ def pending(pd: str, day: dt.date = None, only: list = None,
         unknown_slugs = sorted(set(only) - {i["slug"] for i in items})
         if unknown_slugs:
             raise ValueError(
-                f"--only: {', '.join(unknown_slugs)} não está(ão) na agenda "
+                f"--only: {', '.join(unknown_slugs)} not in the schedule "
                 f"({layout.schedule(pd)})"
             )
         items = [i for i in items if i["slug"] in set(only)]

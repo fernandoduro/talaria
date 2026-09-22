@@ -14,22 +14,22 @@ class TestTexts(unittest.TestCase):
         with open(os.path.join(self.d, "episode.json"), "w", encoding="utf-8") as f:
             json.dump({
                 "season": 2, "episode": 7, "company": "Zarvik",
-                "city": "Ribeirão Açaí", "uf": "SP",
-                "guests": [{"name": "Teresa", "role": "sócio", "linkedin": ""}],
+                "city": "Fairbrook", "uf": "SP",
+                "guests": [{"name": "Teresa", "role": "partner", "linkedin": ""}],
             }, f)
 
     def test_thumb_args_from_the_episode(self):
         args = texts.thumb_args(self.d)
         self.assertEqual(args["l1"], "Zarvik")
         self.assertEqual(args["l2"], "T2E07")
-        self.assertIn("Ribeirão Açaí", args["subtitle"])
+        self.assertIn("Fairbrook", args["subtitle"])
         self.assertIn("Teresa", args["credits"])
 
     def test_texts_json_overrides_the_episode(self):
         with open(layout.ensure_dir(layout.texts(self.d)), "w", encoding="utf-8") as f:
-            json.dump({"thumb": {"l1": "CUSTOMIZADO", "l2": "T2E07"}}, f)
+            json.dump({"thumb": {"l1": "CUSTOMISED", "l2": "T2E07"}}, f)
         args = texts.thumb_args(self.d)
-        self.assertEqual(args["l1"], "CUSTOMIZADO")
+        self.assertEqual(args["l1"], "CUSTOMISED")
 
     def test_badge_has_the_episode_code(self):
         args = texts.thumb_args(self.d)
@@ -49,11 +49,11 @@ class TestTexts(unittest.TestCase):
         with open(os.path.join(d, "episode.json"), "w", encoding="utf-8") as f:
             json.dump({
                 "season": 3, "episode": 1, "company": "",
-                "city": "Pedra Nova", "uf": "SP", "guests": [],
-                "topics": ["ecossistema local de startups", "outro"],
+                "city": "Stoneridge", "uf": "SP", "guests": [],
+                "topics": ["the local startup ecosystem", "another"],
             }, f)
         args = texts.thumb_args(d)
-        self.assertEqual(args["l1"], "ecossistema local de startups")
+        self.assertEqual(args["l1"], "the local startup ecosystem")
 
     def test_build_kwargs_matches_the_thumbnail_signature(self):
         """Translates l1/l2 -> headline_l1/headline_l2 without dropping a field."""

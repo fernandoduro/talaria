@@ -28,7 +28,7 @@ class TestBurned(unittest.TestCase):
         self.state = {
             "target": 5,
             "approved": [{"slug": "a", "start": 100.0, "end": 170.0}],
-            "rejected": [{"start": 300.0, "end": 370.0, "reason": "gancho fraco"}],
+            "rejected": [{"start": 300.0, "end": 370.0, "reason": "weak hook"}],
             "rounds": 1,
         }
 
@@ -63,9 +63,11 @@ class TestInitialState(unittest.TestCase):
 class TestValidations(unittest.TestCase):
     def setUp(self):
         self.segs = [
-            {"start": 0.0, "end": 30.0, "text": "Pergunta do host?", "turn": False},
-            {"start": 30.0, "end": 95.0, "text": "Resposta longa do convidado.", "turn": True},
-            {"start": 95.0, "end": 120.0, "text": "Continua a response.", "turn": False},
+            {"start": 0.0, "end": 30.0, "text": "Host question?", "turn": False},
+            {"start": 30.0, "end": 95.0, "text": "Long answer from the guest.",
+             "turn": True},
+            {"start": 95.0, "end": 120.0, "text": "The response continues.",
+             "turn": False},
         ]
 
     def test_duration_within_range(self):
@@ -75,24 +77,26 @@ class TestValidations(unittest.TestCase):
     def test_duration_too_short(self):
         ok, msgs = curation.validate_clip((0.0, 30.0), self.segs, {})
         self.assertFalse(ok)
-        self.assertTrue(any("duração" in m for m in msgs))
+        # The branch, not just the word "duration": both duration messages
+        # carry it, so pinning the word alone cannot tell them apart.
+        self.assertTrue(any("below the minimum" in m for m in msgs), msgs)
 
     def test_duration_too_long(self):
         ok, msgs = curation.validate_clip((0.0, 120.0), self.segs, {})
         self.assertFalse(ok)
-        self.assertTrue(any("duração" in m for m in msgs))
+        self.assertTrue(any("above the maximum" in m for m in msgs), msgs)
 
     def test_boundary_outside_a_segment(self):
         ok, msgs = curation.validate_clip((12.0, 87.0), self.segs, {})
         self.assertFalse(ok)
-        self.assertTrue(any("fronteira" in m for m in msgs))
+        self.assertTrue(any("sentence boundary" in m for m in msgs), msgs)
 
     def test_clip_over_a_burned_span(self):
         state = {"target": 5, "approved": [], "rounds": 0,
                   "rejected": [{"start": 0.0, "end": 75.0}]}
         ok, msgs = curation.validate_clip((0.0, 75.0), self.segs, state)
         self.assertFalse(ok)
-        self.assertTrue(any("queimad" in m for m in msgs))
+        self.assertTrue(any("burned span" in m for m in msgs), msgs)
 
 
 class TestEndAtCompleteSentence(unittest.TestCase):
@@ -101,18 +105,22 @@ class TestEndAtCompleteSentence(unittest.TestCase):
     The YouTube transcript breaks blocks by TIME, not by punctuation: a block
     can end mid-sentence. Checking only the block boundary let through a clip
     ending on a stray word — which is what happened (block 1655-1663 closes at
-    "...transferência de tecnologia o dos", a sentence that only ends in the
+    "...technology transfer and the", a sentence that only ends in the
     next block).
     """
 
     def setUp(self):
         self.segs = [
-            {"start": 0.0, "end": 30.0, "text": "Abertura da conversa.", "turn": False},
+            {"start": 0.0, "end": 30.0, "text": "Opening of the conversation.",
+             "turn": False},
             # ends on a complete sentence
-            {"start": 30.0, "end": 95.0, "text": "Você não vai conseguir reproduzir.", "turn": True},
+            {"start": 30.0, "end": 95.0,
+             "text": "You will not be able to reproduce it.", "turn": True},
             # does NOT end a sentence: runs on into the next block
-            {"start": 95.0, "end": 160.0, "text": "Acho que isso é um primeiro ponto que", "turn": False},
-            {"start": 160.0, "end": 200.0, "text": "foi importante para nós.", "turn": False},
+            {"start": 95.0, "end": 160.0,
+             "text": "I think that is a first point which", "turn": False},
+            {"start": 160.0, "end": 200.0, "text": "mattered to us.",
+             "turn": False},
         ]
 
     def test_end_on_a_complete_sentence_passes(self):
@@ -123,15 +131,17 @@ class TestEndAtCompleteSentence(unittest.TestCase):
         """Block 95-160 ends with no closing punctuation: the clip is half done."""
         ok, msgs = curation.validate_clip((95.0, 160.0), self.segs, {})
         self.assertFalse(ok)
-        self.assertTrue(any("não fecha frase" in m.lower() for m in msgs), msgs)
+        self.assertTrue(any("does not close a sentence" in m for m in msgs), msgs)
 
     def test_end_with_an_ellipsis_is_accepted(self):
-        segs = [{"start": 0.0, "end": 65.0, "text": "E aí a gente parou...", "turn": False}]
+        segs = [{"start": 0.0, "end": 65.0, "text": "And then we stopped...",
+                 "turn": False}]
         ok, msgs = curation.validate_clip((0.0, 65.0), segs, {})
         self.assertTrue(ok, msgs)
 
     def test_end_with_a_question_mark_is_accepted(self):
-        segs = [{"start": 0.0, "end": 65.0, "text": "Como que a gente faz isso?", "turn": False}]
+        segs = [{"start": 0.0, "end": 65.0, "text": "How do we do that?",
+                 "turn": False}]
         ok, msgs = curation.validate_clip((0.0, 65.0), segs, {})
         self.assertTrue(ok, msgs)
 
@@ -141,11 +151,13 @@ class TestSentenceEnds(unittest.TestCase):
 
     def setUp(self):
         self.segs = [
-            {"start": 0.0, "end": 30.0, "text": "Abertura da conversa.", "turn": False},
-            {"start": 30.0, "end": 70.0,
-             "text": "Primeira ideia fecha aqui. E a segunda fecha aqui também.",
+            {"start": 0.0, "end": 30.0, "text": "Opening of the conversation.",
              "turn": False},
-            {"start": 70.0, "end": 100.0, "text": "Bem depois do limite.", "turn": False},
+            {"start": 30.0, "end": 70.0,
+             "text": "The first idea closes here. And the second closes here too.",
+             "turn": False},
+            {"start": 70.0, "end": 100.0, "text": "Well past the limit.",
+             "turn": False},
         ]
 
     def test_returns_only_valid_durations(self):
@@ -179,7 +191,9 @@ class TestOverlapBetweenApproved(unittest.TestCase):
     def test_refuses_an_overlapping_clip(self):
         with self.assertRaises(ValueError) as cm:
             curation.approve(self.state, {"slug": "b", "start": 150.0, "end": 220.0})
-        self.assertIn("sobrepõe", str(cm.exception))
+        # The approve-time wording, not the bare verb: validate_clip's
+        # burned-span message also says "overlaps".
+        self.assertIn("overlaps approved clip", str(cm.exception))
 
     def test_accepts_a_disjoint_clip(self):
         curation.approve(self.state, {"slug": "b", "start": 200.0, "end": 270.0})
@@ -243,8 +257,8 @@ class TestAttributionTrustworthy(unittest.TestCase):
              "text": "We set up our own studio, our own lab."},
         ]
         alerts = curation.clip_warnings((0.0, 65.0), segs)
-        self.assertFalse(any("convidado fala só" in a for a in alerts), alerts)
-        self.assertFalse(any("abre com" in a for a in alerts), alerts)
+        self.assertFalse(any("guest speaks only" in a for a in alerts), alerts)
+        self.assertFalse(any("opens with" in a for a in alerts), alerts)
 
 
 class TestHostOpening(unittest.TestCase):
@@ -252,9 +266,9 @@ class TestHostOpening(unittest.TestCase):
 
     def setUp(self):
         self.segs = [
-            {"start": 0.0, "end": 40.0, "text": "Pergunta longa do host?",
+            {"start": 0.0, "end": 40.0, "text": "Long question from the host?",
              "turn": False, "speaker": "host"},
-            {"start": 40.0, "end": 110.0, "text": "Resposta do convidado.",
+            {"start": 40.0, "end": 110.0, "text": "Answer from the guest.",
              "turn": True, "speaker": "guest"},
         ]
 
@@ -264,11 +278,11 @@ class TestHostOpening(unittest.TestCase):
 
     def test_no_alert_when_it_opens_on_the_guest(self):
         alerts = curation.clip_warnings((40.0, 105.0), self.segs)
-        self.assertFalse(any("abre com" in a for a in alerts), alerts)
+        self.assertFalse(any("opens with" in a for a in alerts), alerts)
 
     def test_no_speaker_does_not_alert(self):
         """An origin with no turn marker: do not accuse in the dark."""
-        segs = [{"start": 0.0, "end": 70.0, "text": "Fala qualquer.", "turn": False}]
+        segs = [{"start": 0.0, "end": 70.0, "text": "Some speech.", "turn": False}]
         self.assertEqual(curation.host_opening((0.0, 65.0), segs), 0.0)
 
 
@@ -297,9 +311,9 @@ class TestProminence(unittest.TestCase):
 
     def test_guest_dominates(self):
         segs = [
-            {"start": 0.0, "end": 10.0, "text": "Pergunta?", "turn": False,
+            {"start": 0.0, "end": 10.0, "text": "A question?", "turn": False,
              "speaker": "host"},
-            {"start": 10.0, "end": 90.0, "text": "Resposta longa.", "turn": True,
+            {"start": 10.0, "end": 90.0, "text": "A long answer.", "turn": True,
              "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
@@ -307,9 +321,9 @@ class TestProminence(unittest.TestCase):
 
     def test_host_dominates(self):
         segs = [
-            {"start": 0.0, "end": 80.0, "text": "Fala longa do host.", "turn": False,
+            {"start": 0.0, "end": 80.0, "text": "Long host speech.", "turn": False,
              "speaker": "host"},
-            {"start": 80.0, "end": 90.0, "text": "Sim.", "turn": True,
+            {"start": 80.0, "end": 90.0, "text": "Yes.", "turn": True,
              "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
@@ -325,24 +339,24 @@ class TestProminence(unittest.TestCase):
         the episode. The fraction has to be high.
         """
         segs = [
-            {"start": 0.0, "end": 20.0, "text": "Pergunta do host?", "turn": False,
+            {"start": 0.0, "end": 20.0, "text": "Host question?", "turn": False,
              "speaker": "host"},
-            {"start": 20.0, "end": 60.0, "text": "Comeco da response.", "turn": True,
-             "speaker": "guest"},
-            {"start": 60.0, "end": 110.0, "text": "Meio da response.", "turn": False,
-             "speaker": "guest"},
-            {"start": 110.0, "end": 160.0, "text": "Fim da response.", "turn": False,
-             "speaker": "guest"},
+            {"start": 20.0, "end": 60.0, "text": "Start of the response.",
+             "turn": True, "speaker": "guest"},
+            {"start": 60.0, "end": 110.0, "text": "Middle of the response.",
+             "turn": False, "speaker": "guest"},
+            {"start": 110.0, "end": 160.0, "text": "End of the response.",
+             "turn": False, "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((60.0, 150.0), segs)
         self.assertEqual(frac, 1.0)
 
     def test_clip_mostly_host(self):
         segs = [
-            {"start": 0.0, "end": 70.0, "text": "Contexto longo do host.",
+            {"start": 0.0, "end": 70.0, "text": "Long host context.",
              "turn": False, "speaker": "host"},
-            {"start": 70.0, "end": 90.0, "text": "Comeco da response.", "turn": True,
-             "speaker": "guest"},
+            {"start": 70.0, "end": 90.0, "text": "Start of the response.",
+             "turn": True, "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
         self.assertLess(frac, curation.config.GUEST_SPEECH_MIN)
@@ -352,25 +366,25 @@ class TestProminence(unittest.TestCase):
         prominence cannot be measured. Returns 1.0 — turns the alert off rather
         than falsely accusing a clip that may be 100% guest."""
         segs = [
-            {"start": 0.0, "end": 45.0, "text": "Uma fala.", "turn": False},
-            {"start": 45.0, "end": 90.0, "text": "Outra fala.", "turn": False},
+            {"start": 0.0, "end": 45.0, "text": "Some speech.", "turn": False},
+            {"start": 45.0, "end": 90.0, "text": "Other speech.", "turn": False},
         ]
         self.assertEqual(curation.guest_speech_fraction((0.0, 90.0), segs), 1.0)
 
     def test_absent_speaker_produces_no_prominence_alert(self):
         segs = [
-            {"start": 0.0, "end": 90.0, "text": "Uma fala.", "turn": False},
+            {"start": 0.0, "end": 90.0, "text": "Some speech.", "turn": False},
         ]
         alerts = curation.clip_warnings((0.0, 90.0), segs)
-        self.assertFalse([a for a in alerts if "convidado fala" in a], alerts)
+        self.assertFalse([a for a in alerts if "guest speaks" in a], alerts)
 
     def test_partial_speaker_uses_only_what_is_labelled(self):
         """Mix of segments with and without `speaker`: measures the labelled."""
         segs = [
             {"start": 0.0, "end": 30.0, "text": "Host.", "turn": False,
              "speaker": "host"},
-            {"start": 30.0, "end": 60.0, "text": "Sem marcacao.", "turn": False},
-            {"start": 60.0, "end": 90.0, "text": "Convidado.", "turn": False,
+            {"start": 30.0, "end": 60.0, "text": "Unlabelled.", "turn": False},
+            {"start": 60.0, "end": 90.0, "text": "Guest.", "turn": False,
              "speaker": "guest"},
         ]
         frac = curation.guest_speech_fraction((0.0, 90.0), segs)
@@ -387,8 +401,8 @@ class TestOperations(unittest.TestCase):
 
     def test_reject_records_the_reason(self):
         curation.reject(self.state, {"start": 10.0, "end": 80.0,
-                                         "summary": "trecho X"}, "gancho fraco")
-        self.assertEqual(self.state["rejected"][0]["reason"], "gancho fraco")
+                                         "summary": "stretch X"}, "weak hook")
+        self.assertEqual(self.state["rejected"][0]["reason"], "weak hook")
 
     def test_approving_past_the_target_errors(self):
         for i in range(5):
@@ -413,9 +427,9 @@ class TestOperations(unittest.TestCase):
         self.assertNotIn("story", missing)
 
     def test_accumulated_reasons(self):
-        curation.reject(self.state, {"start": 0.0, "end": 70.0}, "muito técnico")
-        curation.reject(self.state, {"start": 200.0, "end": 270.0}, "muito técnico")
-        self.assertEqual(curation.reasons(self.state), ["muito técnico"])
+        curation.reject(self.state, {"start": 0.0, "end": 70.0}, "too technical")
+        curation.reject(self.state, {"start": 200.0, "end": 270.0}, "too technical")
+        self.assertEqual(curation.reasons(self.state), ["too technical"])
 
     def test_closed_when_the_target_is_met(self):
         self.assertFalse(curation.is_closed(self.state))
@@ -429,16 +443,16 @@ class TestExport(unittest.TestCase):
     def test_exports_moments_with_the_render_fields(self):
         state = curation.new_state(target=2)
         curation.approve(state, {
-            "slug": "corte1", "start": 10.0, "end": 80.0, "kind": "story",
-            "screen_text": "O ganho sem o custo", "post_caption": "...",
+            "slug": "clip1", "start": 10.0, "end": 80.0, "kind": "story",
+            "screen_text": "the upside without the cost", "post_caption": "...",
         })
         moments = curation.to_moments(state)
         self.assertEqual(len(moments), 1)
         m = moments[0]
-        self.assertEqual(m["slug"], "corte1")
+        self.assertEqual(m["slug"], "clip1")
         self.assertEqual(m["start"], 10.0)
         self.assertEqual(m["end"], 80.0)
-        self.assertEqual(m["screen_text"], "O ganho sem o custo")
+        self.assertEqual(m["screen_text"], "the upside without the cost")
 
     def test_exporting_with_no_approvals_errors(self):
         state = curation.new_state(target=5)

@@ -41,18 +41,18 @@ def validate(field: str, value, piece: str) -> None:
     """
     if value is not None and not isinstance(value, str):
         raise ValueError(
-            f"'{piece}': '{field}' esperava texto, recebeu "
-            f"{type(value).__name__} — é o caption que acompanha a "
-            f"publicação, uma string só."
+            f"'{piece}': '{field}' expected text, got "
+            f"{type(value).__name__} — it is the caption that accompanies "
+            f"the publication, one string only."
         )
     if isinstance(value, str) and EM_DASH in value:
         # WARNS instead of aborting: the em dash is a writing choice, and the
         # fix is to rewrite the sentence — swapping the character in code would
         # leave the same AI construction, just with different punctuation.
         # Aborting here would block a render over a matter of style.
-        print(f"[caption] !! {piece}: '{field}' tem travessão — o canal não "
-              f"usa em legenda (sai com cara de texto de IA). Reescreva a "
-              f"frase antes de publicar.")
+        print(f"[caption] !! {piece}: '{field}' has an em dash — the channel "
+              f"does not use one in a caption (it reads as AI text). Rewrite "
+              f"the sentence before publishing.")
 
 
 # Call to the full episode, in the Short description. The YouTube API does not

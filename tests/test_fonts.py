@@ -34,8 +34,8 @@ class TestVersionedFonts(unittest.TestCase):
 
     def test_missing_font_aborts_with_a_useful_message(self):
         with self.assertRaises(FileNotFoundError) as ctx:
-            config._bundled_font("NaoExiste-Bold.ttf")
-        self.assertIn("NaoExiste-Bold.ttf", str(ctx.exception))
+            config._bundled_font("DoesNotExist-Bold.ttf")
+        self.assertIn("DoesNotExist-Bold.ttf", str(ctx.exception))
         self.assertIn("assets/fonts", str(ctx.exception))
 
 

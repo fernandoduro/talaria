@@ -34,9 +34,10 @@ def load(pd: str) -> dict:
             return json.load(f) or {}
         except json.JSONDecodeError as e:
             raise RuntimeError(
-                f"{path} está corrompido ({e}). Não vou assumir 'nada "
-                f"publicado' — isso republicaria tudo. Confira o que já está "
-                f"no ar nos perfis das plataformas e recrie o arquivo à mão."
+                f"{path} is corrupt ({e}). I will not assume 'nothing "
+                f"published' — that would republish everything. Check what is "
+                f"already live on the platform profiles and recreate the file "
+                f"by hand."
             )
 
 

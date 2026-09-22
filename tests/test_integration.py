@@ -12,17 +12,17 @@ import unittest
 from talaria import curation, episode, layout, texts, txt_parse
 
 TRANSCRIPT = """0:00
-Primeira fala do host apresentando o episódio de teste.
+First stretch of host speech, introducing the test episode.
 0:10
->> Resposta do convidado que começa aqui e segue por um bom tempo.
+>> The guest answer, which starts here and runs for a good while.
 0:20
-Continuação da response do convidado com mais detalhes concretos.
+The guest response continues, with more concrete detail.
 0:30
-Ainda o convidado, desenvolvendo o raciocínio até o end da ideia.
+Still the guest, developing the argument up to the end of the idea.
 0:40
-E aqui ele fecha o pensamento com uma conclusão clara.
+And here he closes the thought with a clear conclusion.
 1:10
->> Nova pergunta do host para começar outro assunto.
+>> A new host question, to open another subject.
 """
 
 
@@ -49,32 +49,32 @@ class TestFullFlow(unittest.TestCase):
         segs = txt_parse.parse_txt(self.txt, total_duration=80.0)
         state = curation.new_state(target=1)
 
-        clip = {"slug": "corte1", "start": segs[0]["start"], "end": segs[-1]["end"],
-                 "kind": "story", "screen_text": "Teste de corte"}
+        clip = {"slug": "clip1", "start": segs[0]["start"], "end": segs[-1]["end"],
+                 "kind": "story", "screen_text": "Clip test"}
         curation.approve(state, clip)
         self.assertTrue(curation.is_closed(state))
 
         path = curation.save_moments(self.pd, state)
         with open(path, encoding="utf-8") as f:
             moments = json.load(f)
-        self.assertEqual(moments[0]["slug"], "corte1")
+        self.assertEqual(moments[0]["slug"], "clip1")
 
     def test_a_rejection_does_not_return(self):
         state = curation.new_state(target=5)
-        curation.reject(state, {"start": 0.0, "end": 70.0}, "gancho fraco")
+        curation.reject(state, {"start": 0.0, "end": 70.0}, "weak hook")
         self.assertTrue(curation.is_burned((5.0, 75.0), state))
         self.assertFalse(curation.is_burned((200.0, 270.0), state))
 
     def test_thumb_args_from_the_episode(self):
         episode.save(self.pd, {
             "season": 2, "episode": 7, "company": "Zarvik",
-            "city": "Ribeirão Açaí", "uf": "SP",
-            "guests": [{"name": "Teresa", "role": "sócio", "linkedin": ""}],
+            "city": "Fairbrook", "uf": "SP",
+            "guests": [{"name": "Teresa", "role": "partner", "linkedin": ""}],
         })
         args = texts.thumb_args(self.pd)
         self.assertEqual(args["l2"], "T2E07")
 
-    @unittest.skipUnless(has_ffmpeg(), "ffmpeg não disponível")
+    @unittest.skipUnless(has_ffmpeg(), "ffmpeg not available")
     def test_render_with_a_synthetic_video(self):
         from talaria import render
 
@@ -86,8 +86,8 @@ class TestFullFlow(unittest.TestCase):
             "-c:v", "libx264", "-crf", "30", "-c:a", "aac", "-shortest", video,
         ], check=True)
 
-        segs = [{"start": 0.5, "end": 4.0, "text": "Legenda de teste.", "turn": False},
-                {"start": 4.0, "end": 7.5, "text": "Segunda legenda.", "turn": True}]
+        segs = [{"start": 0.5, "end": 4.0, "text": "Test caption.", "turn": False},
+                {"start": 4.0, "end": 7.5, "text": "Second caption.", "turn": True}]
         with open(layout.ensure_dir(layout.transcript(self.pd)), "w", encoding="utf-8") as f:
             json.dump({"segments": segs}, f)
         with open(layout.ensure_dir(layout.moments(self.pd)), "w", encoding="utf-8") as f:
@@ -105,15 +105,15 @@ class TestFullFlow(unittest.TestCase):
         import tempfile
 
         with tempfile.TemporaryDirectory() as base:
-            proj = os.path.join(base, "epteste")
+            proj = os.path.join(base, "eptest")
             os.makedirs(proj)
             with open(layout.ensure_dir(layout.episode(proj)), "w", encoding="utf-8") as f:
                 json.dump({"season": 2, "episode": 8, "company": "Zarvik",
-                           "city": "Ribeirão Açaí", "uf": "SP", "topics": [],
-                           "guests": [{"name": "Marina Siqueira",
-                                           "role": "Sócio"}]}, f, ensure_ascii=False)
+                           "city": "Fairbrook", "uf": "SP", "topics": [],
+                           "guests": [{"name": "Marina Vance",
+                                           "role": "Partner"}]}, f, ensure_ascii=False)
             with open(layout.ensure_dir(layout.posts(proj)), "w", encoding="utf-8") as f:
-                json.dump({"posts": [{"slug": "c1", "cards": ["Curta e boa."]}]},
+                json.dump({"posts": [{"slug": "c1", "cards": ["Short and good."]}]},
                           f, ensure_ascii=False)
 
             from talaria import post_instagram

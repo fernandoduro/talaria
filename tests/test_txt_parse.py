@@ -4,7 +4,7 @@ import unittest
 
 from talaria import txt_parse
 
-FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "exemplo.txt")
+FIXTURE = os.path.join(os.path.dirname(__file__), "fixtures", "example.txt")
 
 
 def _block(start, end, text, turn=False):
@@ -46,7 +46,7 @@ class TestParseTxt(unittest.TestCase):
     def test_hour_minute_second_format(self):
         # 1:02:03 = 3723s
         self.assertTrue(any(s["start"] == 3723.0 for s in self.segs),
-                        msg="H:MM:SS não foi parseado")
+                        msg="H:MM:SS was not parsed")
 
     def test_total_duration_closes_the_last_segment(self):
         segs = txt_parse.parse_txt(FIXTURE, total_duration=4000.0)
@@ -69,30 +69,31 @@ class TestParseTxt(unittest.TestCase):
 class TestRegroupIntoSentences(unittest.TestCase):
     def test_joins_blocks_until_punctuation(self):
         blocks = [
-            _block(0.0, 5.0, "primeira parte da frase"),
-            _block(5.0, 10.0, "que termina aqui."),
-            _block(10.0, 15.0, "Outra frase."),
+            _block(0.0, 5.0, "first part of the sentence"),
+            _block(5.0, 10.0, "that ends here."),
+            _block(10.0, 15.0, "Another sentence."),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertEqual(len(segs), 2)
-        self.assertEqual(segs[0]["text"], "primeira parte da frase que termina aqui.")
+        self.assertEqual(segs[0]["text"],
+                         "first part of the sentence that ends here.")
         self.assertEqual(segs[0]["start"], 0.0)
         self.assertEqual(segs[0]["end"], 10.0)
 
     def test_turn_change_breaks_the_segment(self):
         blocks = [
-            _block(0.0, 5.0, "fala sem pontuacao final"),
-            _block(5.0, 10.0, "response do outro", turn=True),
+            _block(0.0, 5.0, "speech with no closing punctuation"),
+            _block(5.0, 10.0, "the other one answers", turn=True),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertEqual(len(segs), 2)
 
     def test_breaks_at_maximum_length(self):
         # no closing punctuation: only the character limit can break it
-        blocks = [_block(float(i * 2), float(i * 2 + 2), "palavra " * 12)
+        blocks = [_block(float(i * 2), float(i * 2 + 2), "word " * 12)
                   for i in range(4)]
         segs = txt_parse.regroup_into_sentences(blocks)
-        self.assertGreater(len(segs), 1, msg="SEG_MAX_CHARS não quebrou o segmento")
+        self.assertGreater(len(segs), 1, msg="SEG_MAX_CHARS did not break the segment")
 
     def test_empty_list(self):
         self.assertEqual(txt_parse.regroup_into_sentences([]), [])
@@ -133,10 +134,10 @@ class TestSpeakerResolution(unittest.TestCase):
 
     def test_explicit_alternation(self):
         blocks = [
-            _block(0.0, 5.0, "Abertura do host."),
-            _block(5.0, 10.0, "Resposta do convidado.", turn=True),
-            _block(10.0, 15.0, "Continua a response."),
-            _block(15.0, 20.0, "Pergunta do host?", turn=True),
+            _block(0.0, 5.0, "Host opening."),
+            _block(5.0, 10.0, "The guest answers.", turn=True),
+            _block(10.0, 15.0, "The response continues."),
+            _block(15.0, 20.0, "Host question?", turn=True),
         ]
         segs = txt_parse.regroup_into_sentences(blocks)
         segs = txt_parse.resolve_speakers(segs)
@@ -149,8 +150,8 @@ class TestSpeakerResolution(unittest.TestCase):
     def test_first_segment_with_turn_is_still_host(self):
         """A transcript that opens with '>>' must not invert the episode."""
         blocks = [
-            _block(0.0, 5.0, "Abertura do host.", turn=True),
-            _block(5.0, 10.0, "Resposta do convidado.", turn=True),
+            _block(0.0, 5.0, "Host opening.", turn=True),
+            _block(5.0, 10.0, "The guest answers.", turn=True),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
         self.assertEqual([s["speaker"] for s in segs], ["host", "guest"])
@@ -161,17 +162,17 @@ class TestSpeakerResolution(unittest.TestCase):
         A host's "Right."/"I see." marked with '>>' counts as a real change and
         shifts everything after it. Here the guest's second stretch comes out
         labelled host. No conservative heuristic was applied: in the real
-        transcript the backchannel ('>> Maravilha.') has a 29s duration — the
+        transcript the backchannel ('>> Wonderful.') has a 29s duration — the
         `end` comes from the next timestamp, not from the speech — and has
         DIFFERENT speakers on either side, so neither duration nor "same
         speaker around it" identifies it.
         """
         blocks = [
-            _block(0.0, 5.0, "Pergunta do host?"),
-            _block(5.0, 10.0, "Comeco da response.", turn=True),
-            _block(10.0, 12.0, "Sei.", turn=True),          # host backchannel
-            _block(12.0, 20.0, "Continuo respondendo."),    # still the guest
-            _block(20.0, 30.0, "E foi assim que crescemos."),
+            _block(0.0, 5.0, "Host question?"),
+            _block(5.0, 10.0, "Start of the response.", turn=True),
+            _block(10.0, 12.0, "I see.", turn=True),        # host backchannel
+            _block(12.0, 20.0, "I keep answering."),        # still the guest
+            _block(20.0, 30.0, "And that is how we grew."),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
         # Ideally [host, guest, host, guest, guest]. With an odd number of

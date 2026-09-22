@@ -156,7 +156,7 @@ def _segments_in_cut(segments, start, end, names=None):
 
 # Minimum screen time for a caption to be worth it. The clip end comes from the
 # audio valley, not the transcript grid, so milliseconds of the next block are
-# left over — without this floor they became 1-frame PNGs ("Poucas" blinking at
+# left over — without this floor they became 1-frame PNGs ("Few" blinking at
 # the clip end, the very word the audio adjustment had removed).
 CAPTION_MIN_S = 0.30
 
@@ -185,7 +185,7 @@ def adjust_end_by_audio(video_path, start, end):
 
     The times come from the transcript, whose resolution is 1 second — the end
     lands on the boundary between two words and leaks the attack of the next
-    ("Poucas"). This is the correction that used to be made by measuring the
+    ("Few"). This is the correction that used to be made by measuring the
     envelope by hand.
 
     Backs off at most AUDIO_ADJUST_MAX_S and never below the minimum duration;
@@ -205,7 +205,7 @@ def _trim_text(txt: str, start: float, end: float) -> str:
     The transcript carries no per-word time, so the position is estimated
     proportionally to the text — close enough not to display a sentence the clip
     does not play. The cut is made on a word boundary: cutting by character
-    would leave "reprodu" on screen.
+    would leave "reprodu" on screen (half of "reproduce").
     """
     if start <= 0 and end >= 1:
         return txt
@@ -234,9 +234,10 @@ PUNCTUATION_WINDOW = 2
 def _snap_to_punctuation(words: list, b: int) -> int:
     """Moves the slice end to the nearest punctuation, within the window.
 
-    Going back avoids dragging in the start of the next sentence ("...reproduzir.
-    Acho que"); going forward avoids cutting before the full stop the audio has
-    already reached ("muito mais do" when the speech says "muito mais do mesmo.").
+    Going back avoids dragging in the start of the next sentence ("...reproduce
+    it. I think"); going forward avoids cutting before the full stop the audio
+    has already reached ("a lot more of the" when the speech says "a lot more
+    of the same.").
     """
     sentence_end = (".", "!", "?", "…")
     for d in range(0, PUNCTUATION_WINDOW + 1):
@@ -296,7 +297,7 @@ def append_end_card(clip_path: str, project_dir: str) -> None:
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
-            raise RuntimeError(f"ffmpeg falhou ao concatenar o encerramento:\n"
+            raise RuntimeError(f"ffmpeg failed to concatenate the end card:\n"
                                f"{r.stderr[-1500:]}")
         shutil.move(concat_path, clip_path)
     finally:
@@ -316,7 +317,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, names=None)
         outputs.append(("instagram_reels", f"{slug}_reel.mp4"))
 
     if not outputs:
-        raise ValueError("Nenhuma plataforma selecionada (use youtube e/ou instagram).")
+        raise ValueError("No platform selected (use youtube and/or instagram).")
 
     # Render once; if both platforms were asked for, copy (pixel-identical).
     first_subdir, first_name = outputs[0]
@@ -325,7 +326,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, names=None)
     first_out = os.path.join(first_dir, first_name)
 
     print(f"[render] {slug} ({end - start:.0f}s) -> {first_subdir}/{first_name} "
-          f"[legenda: {config.CAPTION_BACKEND}]")
+          f"[caption: {config.CAPTION_BACKEND}]")
 
     tmpdir = None
     try:
@@ -364,7 +365,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, names=None)
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
-            raise RuntimeError(f"ffmpeg falhou em {slug}:\n{r.stderr[-1500:]}")
+            raise RuntimeError(f"ffmpeg failed on {slug}:\n{r.stderr[-1500:]}")
     finally:
         if tmpdir:
             shutil.rmtree(tmpdir, ignore_errors=True)
@@ -377,8 +378,8 @@ def render_cut(video_path, segments, moment, project_dir, platforms, names=None)
     # and report "clean tail" even when the speech was cut mid-word. The order
     # matters: measure on the file without the card.
     if audio.clips_mid_word(first_out, end - start):
-        print(f"[render] !! {slug}: a fala não termina limpa — o fim pode estar "
-              f"cortando palavra. Ajuste o `end` e renderize de novo.")
+        print(f"[render] !! {slug}: the speech does not end cleanly — the end "
+              f"may be cutting a word. Adjust `end` and render again.")
 
     # The card goes in AFTER the check above and BEFORE copying to the other
     # platforms — both platforms need the same final file.
@@ -426,15 +427,16 @@ def write_captions(project_dir, moment, pieces):
     caption.validate("post_caption", moment.get("post_caption"), moment["slug"])
     description = (moment.get("post_caption") or "").strip()
     if not description:
-        print(f"[caption] !! {moment['slug']}: sem post_caption — o .txt sai "
-              f"só com as hashtags. Preencha em decisions/curation.json.")
+        print(f"[caption] !! {moment['slug']}: no post_caption — the .txt "
+              f"comes out with the hashtags only. Fill it in "
+              f"decisions/curation.json.")
 
     hashtags = (texts.load(project_dir) or {}).get("hashtags", "")
     url = episode.youtube_url(project_dir)
     if not url:
-        print(f"[caption] !! {moment['slug']}: sem youtube_url no "
-              f"episode.json — o Short sai sem chamada para o episódio "
-              f"completo. Preencha quando o vídeo longo estiver no ar.")
+        print(f"[caption] !! {moment['slug']}: no youtube_url in "
+              f"episode.json — the Short goes out with no call to the full "
+              f"episode. Fill it when the long video is live.")
 
     written = []
     for piece in pieces:
@@ -485,7 +487,7 @@ def render_all(project_dir, platforms, only=None):
     # publishing, and that is when both texts get pasted into YouTube.
     ep_txt = write_episode_caption(project_dir)
     if ep_txt:
-        print(f"[caption] episódio -> {os.path.basename(ep_txt)}")
+        print(f"[caption] episode -> {os.path.basename(ep_txt)}")
 
 
 def _proper_nouns(project_dir):
