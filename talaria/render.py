@@ -274,7 +274,7 @@ def append_end_card(clip_path: str, project_dir: str) -> None:
 
     tmpdir = tempfile.mkdtemp(prefix="talaria_concat_")
     try:
-        output_dir = os.path.join(tmpdir, "concatenated.mp4")
+        concat_path = os.path.join(tmpdir, "concatenated.mp4")
         cmd = [
             "ffmpeg", "-y", "-v", "error",
             "-i", clip_path, "-i", card_path,
@@ -291,13 +291,13 @@ def append_end_card(clip_path: str, project_dir: str) -> None:
             "-c:v", config.VCODEC, "-preset", config.PRESET, "-crf", config.CRF,
             "-pix_fmt", config.PIX_FMT,
             "-c:a", config.ACODEC, "-b:a", config.ABITRATE,
-            output_dir,
+            concat_path,
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
         if r.returncode != 0:
             raise RuntimeError(f"ffmpeg falhou ao concatenar o encerramento:\n"
                                f"{r.stderr[-1500:]}")
-        shutil.move(output_dir, clip_path)
+        shutil.move(concat_path, clip_path)
     finally:
         shutil.rmtree(tmpdir, ignore_errors=True)
 

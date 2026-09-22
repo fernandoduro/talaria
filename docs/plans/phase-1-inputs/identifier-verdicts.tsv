@@ -47,7 +47,7 @@ msg	7	abbreviation
 status	7	english	
 fnt	7	abbreviation	
 dados	7	renamed	-> data (global); generic-dict local/param, several files; no collision with the schedule-item "date" sense already renamed
-saida	7	renamed	-> output/output_dir (global); output-path local, several files; named output_dir in post_instagram.py/render.py, output in two test helpers
+saida	7	renamed	-> output_dir/concat_path/output (global); deliberate, context-dependent split, not an inconsistency to unify: post_instagram.py's is a directory (output_dir), render.py's append_end_card local held a file path, not a directory, and was renamed concat_path in fix round 3; the two test helpers' is a returned message string (output)
 gerados	7	renamed	-> generated (global); list of generated output paths
 base	7	english	
 faixa	7	renamed	-> span (manual); (start,end) tuple parameter in curation.py; also an ordinary Portuguese noun ("band/range") in a few comments - those stay
