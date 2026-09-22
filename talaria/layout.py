@@ -114,6 +114,10 @@ def posts_png(pd: str) -> str:
 
 # Posição antiga -> nova. O prefixo do name antigo era necessário quando tudo
 # ficava na mesma pasta; dentro da subpasta ele vira redundância.
+#
+# Esta tabela descreve um layout pré-Phase-1 (nomes em Portuguese); nenhum
+# `projects/` real está nesse estado, então ela não é testada contra dados
+# de verdade — só contra fixtures que a recriam.
 _MIGRATION = [
     ("source.mp4", video),
     ("transcript.json", transcript),
@@ -122,8 +126,8 @@ _MIGRATION = [
     ("moments.json", moments),
     ("texts.json", texts),
     ("posts.json", posts),
-    ("brief_materiais.md", lambda pd: brief(pd, "materials")),
-    ("brief_cortes.md", lambda pd: brief(pd, "clips")),
+    ("brief_materials.md", lambda pd: brief(pd, "materials")),
+    ("brief_clips.md", lambda pd: brief(pd, "clips")),
     ("brief_posts.md", lambda pd: brief(pd, "posts")),
     ("thumbnail.jpg", thumbnail),
 ]

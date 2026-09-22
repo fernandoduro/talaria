@@ -42,7 +42,7 @@ class TestCaminhos(unittest.TestCase):
 class TestMigracao(unittest.TestCase):
     ANTIGOS = ["source.mp4", "transcript.json", "transcript.txt",
                "curation.json", "moments.json", "texts.json", "posts.json",
-               "brief_materiais.md", "brief_cortes.md", "brief_posts.md",
+               "brief_materials.md", "brief_clips.md", "brief_posts.md",
                "thumbnail.jpg", "_thumb_frame.jpg", "episode.json"]
 
     def _projeto_antigo(self):
@@ -214,9 +214,9 @@ class TestMigracaoDefensiva(unittest.TestCase):
         """Migração parcial: rodar de novo termina o serviço, sem perder nada."""
         import shutil as _sh
         d = tempfile.mkdtemp()
-        nomes = ("source.mp4", "moments.json", "curation.json", "texts.json",
-                 "brief_cortes.md", "thumbnail.jpg")
-        for n in nomes:
+        names = ("source.mp4", "moments.json", "curation.json", "texts.json",
+                 "brief_clips.md", "thumbnail.jpg")
+        for n in names:
             with open(os.path.join(d, n), "w", encoding="utf-8") as f:
                 f.write(n)
 
@@ -241,7 +241,7 @@ class TestMigracaoDefensiva(unittest.TestCase):
         sobreviventes = []
         for raiz, _, arquivos in os.walk(d):
             sobreviventes += arquivos
-        self.assertEqual(len(sobreviventes), len(nomes))
+        self.assertEqual(len(sobreviventes), len(names))
         self.assertTrue(os.path.exists(layout.moments(d)))
         self.assertTrue(os.path.exists(layout.video(d)))
 
