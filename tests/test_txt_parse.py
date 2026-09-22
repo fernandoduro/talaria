@@ -56,10 +56,14 @@ class TestParseTxt(unittest.TestCase):
         last = self.segs[-1]
         self.assertGreater(last["end"] - last["start"], 1.0)
 
-    def test_remove_marcacao_de_som_e_entidades(self):
+    def test_strips_sound_tags_and_html_entities(self):
         combined = " ".join(s["text"] for s in self.segs)
-        self.assertNotIn("[música]", combined)
+        self.assertNotIn("[crosstalk]", combined)
         self.assertNotIn("&amp;", combined)
+        # The fixture carries both, so neither assertion can pass vacuously.
+        raw = open(FIXTURE, encoding="utf-8").read()
+        self.assertIn("[crosstalk]", raw)
+        self.assertIn("&amp;", raw)
 
 
 class TestRegroupIntoSentences(unittest.TestCase):

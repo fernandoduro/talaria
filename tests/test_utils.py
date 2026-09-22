@@ -5,35 +5,35 @@ from talaria import utils
 
 
 class TestStripMarkup(unittest.TestCase):
-    def test_remove_marcacao_minuscula(self):
-        self.assertEqual(utils.strip_markup("[música] olá"), "olá")
+    def test_strips_english_sound_tags(self):
+        self.assertEqual(utils.strip_markup("[music] we shipped it [laughter]"),
+                         "we shipped it")
 
-    def test_remove_marcacao_maiuscula(self):
-        # regressão: a lista antiga era case-sensitive e deixava passar
-        self.assertEqual(utils.strip_markup("[MÚSICA] olá"), "olá")
+    def test_tag_match_is_case_insensitive(self):
+        # regression: the original list was case-sensitive, so [MUSIC] went
+        # burned into the video caption
+        self.assertEqual(utils.strip_markup("[MUSIC] hello"), "hello")
 
-    def test_remove_capitalizada(self):
-        self.assertEqual(utils.strip_markup("[Risadas] olá"), "olá")
+    def test_strips_capitalised_tag(self):
+        self.assertEqual(utils.strip_markup("[Applause] hello"), "hello")
 
-    def test_remove_palmas(self):
-        self.assertEqual(utils.strip_markup("[Palmas] olá"), "olá")
+    def test_strips_every_tag_in_the_set(self):
+        for tag in ("[music]", "[laughter]", "[applause]", "[noise]",
+                    "[silence]", "[inaudible]", "[crosstalk]"):
+            self.assertEqual(utils.strip_markup(f"{tag} hello"), "hello", msg=tag)
 
-    def test_remove_variantes_singular_plural(self):
-        for tag in ("[riso]", "[risos]", "[aplauso]", "[aplausos]"):
-            self.assertEqual(utils.strip_markup(f"{tag} olá"), "olá", msg=tag)
-
-    def test_remove_entidades_html(self):
+    def test_removes_html_entities(self):
         self.assertEqual(utils.strip_markup("a &amp; b"), "a & b")
 
-    def test_nao_altera_texto_normal(self):
-        self.assertEqual(utils.strip_markup("texto normal"), "texto normal")
+    def test_leaves_plain_text_alone(self):
+        self.assertEqual(utils.strip_markup("plain text"), "plain text")
 
-    def test_nao_remove_colchete_de_conteudo(self):
-        self.assertEqual(utils.strip_markup("[importante] isso fica"),
-                         "[importante] isso fica")
+    def test_keeps_bracketed_content_that_is_not_a_sound_tag(self):
+        txt = "[important] this stays"
+        self.assertEqual(utils.strip_markup(txt), txt)
 
-    def test_colapsa_espaco_deixado_pela_remocao(self):
-        self.assertNotIn("  ", utils.strip_markup("olá [música] mundo"))
+    def test_collapses_space_left_by_removal(self):
+        self.assertEqual(utils.strip_markup("hello [music] world"), "hello world")
 
 
 class TestMmss(unittest.TestCase):

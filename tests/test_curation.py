@@ -212,27 +212,35 @@ class TestOverlapBetweenApproved(unittest.TestCase):
 class TestAttributionTrustworthy(unittest.TestCase):
     """Alerta que mente treina o operador a ignorar a saída."""
 
-    def test_episodio_bem_atribuido(self):
+    def test_well_attributed_episode(self):
         segs = [
             {"start": 0.0, "end": 30.0, "speaker": "host",
-             "text": "Conta pra gente sobre sua trajetória?"},
+             "text": "How did the company get started?"},
             {"start": 30.0, "end": 90.0, "speaker": "guest",
-             "text": "A gente começou com nossa primeira empresa."},
+             "text": "We built our first product in a garage."},
         ]
         self.assertTrue(curation.attribution_trustworthy(segs))
 
-    def test_host_falando_da_propria_empresa_e_suspeito(self):
+    def test_host_talking_about_own_company_is_suspect(self):
         segs = [
             {"start": 0.0, "end": 60.0, "speaker": "host",
-             "text": "A gente montou nossa estrutura, nosso laboratório."},
-            {"start": 60.0, "end": 70.0, "speaker": "host", "text": "Sim."},
+             "text": "We set up our own studio, our own lab."},
+            {"start": 60.0, "end": 70.0, "speaker": "host", "text": "Right."},
         ]
         self.assertFalse(curation.attribution_trustworthy(segs))
 
-    def test_suprime_alertas_que_leem_speaker(self):
+    def test_first_person_plural_is_detected(self):
+        for txt in ("we built it here", "our first hire", "my co-founder left"):
+            self.assertTrue(bool(curation.RE_FIRST_PERSON.search(txt)), txt)
+
+    def test_third_person_is_not_detected(self):
+        self.assertFalse(bool(curation.RE_FIRST_PERSON.search(
+            "the company hired three people")))
+
+    def test_suppresses_warnings_that_read_speaker(self):
         segs = [
             {"start": 0.0, "end": 65.0, "speaker": "host",
-             "text": "A gente montou nossa estrutura, nosso laboratório."},
+             "text": "We set up our own studio, our own lab."},
         ]
         alerts = curation.clip_warnings((0.0, 65.0), segs)
         self.assertFalse(any("convidado fala só" in a for a in alerts), alerts)
@@ -265,23 +273,18 @@ class TestHostOpening(unittest.TestCase):
 
 
 class TestHedgedNumber(unittest.TestCase):
-    def test_detecta_uns(self):
-        self.assertTrue(curation.has_hedged_number("eram uns 570, 580 clientes"))
+    def test_detects_approximate_figure(self):
+        for txt in ("about 2005", "roughly 570 users", "I think 12 people"):
+            self.assertTrue(curation.has_hedged_number(txt), txt)
 
-    def test_detecta_acho_que(self):
-        self.assertTrue(curation.has_hedged_number("acho que uns 40%"))
+    def test_exact_figure_does_not_warn(self):
+        self.assertFalse(curation.has_hedged_number("founded in 2006"))
 
-    def test_detecta_aproximadamente(self):
-        self.assertTrue(curation.has_hedged_number("aproximadamente 2005"))
-
-    def test_detecta_se_nao_me_engano(self):
-        self.assertTrue(curation.has_hedged_number("se eu não me engano, 12"))
-
-    def test_numero_cravado_nao_alerta(self):
-        self.assertFalse(curation.has_hedged_number("fundada em 2006"))
-
-    def test_texto_sem_numero_nao_alerta(self):
-        self.assertFalse(curation.has_hedged_number("acho que é importante"))
+    def test_marker_without_a_number_does_not_warn(self):
+        self.assertFalse(curation.has_hedged_number("I think this matters"))
+        # Same marker, now with a digit: without this the assertion above
+        # would also pass on a marker the pattern no longer recognises.
+        self.assertTrue(curation.has_hedged_number("I think this matters, 12"))
 
 
 class TestProminence(unittest.TestCase):

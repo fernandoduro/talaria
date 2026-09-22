@@ -74,12 +74,13 @@ def save(project_dir: str, state: dict) -> str:
     return path
 
 
-# Marcadores de número aproximado.
-# Isolado num clip, "uns 570, 580" vira afirmação categórica que a pessoa
-# não fez.
+# Approximate-figure markers. Lifted into a clip on its own, "roughly 570,
+# 580" reads as a categorical claim the speaker never made. The digit must
+# follow within the same sentence, so the 40-character window stops before
+# sentence-ending punctuation.
 RE_HEDGED_NUMBER = re.compile(
-    r"\b(uns|umas|aproximadamente|cerca de|por volta de|acho que|"
-    r"se (?:eu )?não me engano|se eu não tiver enganado|mais ou menos)\b"
+    r"\b(about|around|approximately|roughly|some|maybe|I think|"
+    r"if I remember|more or less|or so|give or take)\b"
     r"[^.!?]{0,40}?\d",
     re.IGNORECASE,
 )
@@ -227,12 +228,21 @@ def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
 # como "host" está cheio delas, quem fala ali é o convidado e a atribuição
 # escorregou.
 RE_FIRST_PERSON = re.compile(
-    r"\b(a gente|nosso|nossa|nossos|nossas|eu vim|meu sócio|minha empresa)\b",
+    r"\b(we|our|us|my company|my co-?founder|I joined|I started)\b",
     re.IGNORECASE,
 )
 
-# Acima desta fração, a atribuição não merece confiança. Metade do tempo do
-# host falando da própria company não acontece num episódio bem atribuído.
+# Above this fraction the attribution does not deserve trust.
+#
+# OPEN QUESTION: 0.30 was tuned against Portuguese, where the markers were
+# "a gente" and "nosso". The English alternation includes bare we/our/us,
+# which host register uses constantly ("tell us about", "we talked about"),
+# so a well-attributed episode can now score far above 0.30 and the warning
+# would fire on every episode. Re-deriving the fraction needs a real English
+# transcript with known-good speaker labels to measure the base rate on;
+# there is none in this repo, so the number is left as it was rather than
+# replaced by a guess. Narrowing the marker set to own-company phrases is
+# the other candidate fix.
 SUSPECT_ATTRIBUTION_THRESHOLD = 0.30
 
 

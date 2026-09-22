@@ -38,11 +38,11 @@ def vtt_ts_to_sec(ts: str) -> float:
 # ---------------------------------------------------------------------------
 # Limpeza de texto
 # ---------------------------------------------------------------------------
-# Marcações de som do YouTube. A lista original era case-sensitive e deixava
-# passar [Risadas], [MÚSICA] e [Palmas] — que iam queimadas na legenda do vídeo.
+# YouTube sound annotations. The tag list is an explicit alternation rather
+# than "anything in brackets": transcripts also carry bracketed words that
+# belong to the speech, and those must survive into the caption.
 RE_SOUND_TAG = re.compile(
-    r"\[\s*(m[úu]sica|risos?|risadas?|aplausos?|palmas|"
-    r"ru[íi]do|sil[êe]ncio|inaud[íi]vel|music|laughter|applause)\s*\]",
+    r"\[\s*(music|laughter|applause|noise|silence|inaudible|crosstalk)\s*\]",
     re.IGNORECASE,
 )
 
