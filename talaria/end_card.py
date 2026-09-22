@@ -22,7 +22,7 @@ _HANDLE_SIZE = 50
 def compose_card() -> Image.Image:
     """O frame estático do card: fundo sólido, logo + @ centralizados.
 
-    Devolve a imagem em memória — who chama decide se grava PNG, vídeo, ou só
+    Devolve a imagem em memória — quem chama decide se grava PNG, vídeo, ou só
     inspeciona (é o que os testes fazem, sem precisar do ffmpeg cacheado).
     """
     if not os.path.exists(config.LOGO_PATH):

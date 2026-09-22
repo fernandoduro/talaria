@@ -168,7 +168,7 @@ class TestFinsDeFrase(unittest.TestCase):
 class TestSobreposicaoEntreAprovados(unittest.TestCase):
     """Dois approved no mesmo trecho competem entre si na distribuição.
 
-    `validate_clip` já barrava, mas who chamava `approve()` direto escapava —
+    `validate_clip` já barrava, mas quem chamava `approve()` direto escapava —
     dois cortes dividiram 74s por isso.
     """
 

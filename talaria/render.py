@@ -6,7 +6,7 @@ config.CAPTION_BACKEND — ver talaria/caption_png.py.
 Lê transcript.json (segmentos) + moments.json (cortes curados) e, por clip,
 gera o MP4 vertical com legenda para as plataformas escolhidas.
 
-moments.json: lista de {slug, start, end, ...}. Campos extras (who, title,
+moments.json: lista de {slug, start, end, ...}. Campos extras (quem, title,
 frase_efeito) são ignorados aqui — servem para os texts.
 """
 from __future__ import annotations

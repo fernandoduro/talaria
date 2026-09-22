@@ -1,6 +1,6 @@
 """Carrega o `.env` para dentro do environment do processo.
 
-Os módulos de publicação leem credencial de `os.environ`, mas who write o
+Os módulos de publicação leem credencial de `os.environ`, mas quem write o
 `.env` é o gestor num editor — sem esta ponte o arquivo fica preenchido e o
 `publish` reclama de variável não definida, que é o error mais confuso possível
 (a resposta está no arquivo aberto na tela).
@@ -38,7 +38,7 @@ def load(path: str = None) -> int:
     O que já está no environment VENCE o arquivo: `IG_PAGE_TOKEN=x python run.py`
     precisa sobrepor, que é como se testa outra credencial sem editar nada.
 
-    Arquivo ausente não é error — who só renderiza clip nunca criou um.
+    Arquivo ausente não é error — quem só renderiza clip nunca criou um.
     Variável declarada e vazia também não entra: "não configurada" é o estado
     honesto, e uma string vazia faria a checagem de credencial passar para a
     API recusar depois, com mensagem pior.

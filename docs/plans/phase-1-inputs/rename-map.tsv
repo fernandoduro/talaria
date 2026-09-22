@@ -235,7 +235,7 @@ json_key	motivo	reason	global
 json_key	nome	name	global	
 json_key	pessoal	personal	manual	the clip-kind value in curadoria.TIPOS and its test fixtures; txt_parse.py:6 uses pessoal as "folks" in the docstring example
 json_key	publicado_em	published_at	global	
-json_key	quem	who	global	
+json_key	quem	who	manual	the posts.json key and the episode_author(who=...) kwarg at post_instagram.py:74-99,219-222 are correctly "who"; the other 13 occurrences are the Portuguese pronoun ("who chama", "who revisa") in caption.py, end_card.py, environment.py, curation.py, episode.py, render.py, scripts/youtube_auth.py and tests - leave those as "quem", Task 8 translates the sentence
 json_key	registro_falhou	record_failed	global	
 json_key	rejeitados	rejected	global	
 json_key	resumo	summary	global	

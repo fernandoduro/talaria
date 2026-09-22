@@ -1,6 +1,6 @@
 """Autorização única do canal: imprime o YT_REFRESH_TOKEN para o .env.
 
-Roda uma vez, na máquina de who é dono do canal — o pipeline nunca abre
+Roda uma vez, na máquina de quem é dono do canal — o pipeline nunca abre
 browser. O `publish` só recebe o refresh token pelo environment.
 """
 from __future__ import annotations

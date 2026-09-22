@@ -223,8 +223,8 @@ def validate_clip(faixa: tuple, segs: list, estado: dict) -> tuple:
     return (not msgs), msgs
 
 
-# Marcas de who fala da PRÓPRIA company em 1ª pessoa. Se o segmento marcado
-# como "host" está cheio delas, who fala ali é o convidado e a atribuição
+# Marcas de quem fala da PRÓPRIA company em 1ª pessoa. Se o segmento marcado
+# como "host" está cheio delas, quem fala ali é o convidado e a atribuição
 # escorregou.
 RE_FIRST_PERSON = re.compile(
     r"\b(a gente|nosso|nossa|nossos|nossas|eu vim|meu sócio|minha empresa)\b",
@@ -265,7 +265,7 @@ HOST_OPENING_MAX_S = 8.0
 def host_opening(faixa: tuple, segs: list) -> float:
     """Quantos segundos de fala do host abrem o clip, antes do convidado.
 
-    Zero quando o clip já abre no convidado ou quando não dá para saber who
+    Zero quando o clip já abre no convidado ou quando não dá para saber quem
     fala (`speaker` ausente) — o alerta não deve disparar no escuro.
     """
     dentro = segments_in_clip(faixa, segs)
@@ -315,7 +315,7 @@ def approve(estado: dict, clip: dict) -> dict:
     Recusa clip que se sobreponha a outro JÁ APROVADO: dois vídeos com o mesmo
     trecho competem entre si na distribuição. Dois approved dividiam 74s
     porque nada checava isso aqui — `validate_clip` olha faixa queimada, que
-    inclui approved, mas who chama `approve()` direto escapava da checagem.
+    inclui approved, mas quem chama `approve()` direto escapava da checagem.
 
     Reaprovar o MESMO slug é ajuste de tempo, não duplicata: substitui.
     """
