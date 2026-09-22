@@ -40,14 +40,14 @@ class TestPaths(unittest.TestCase):
 
 
 class TestMigration(unittest.TestCase):
-    OLD_NAMES = ["source.mp4", "transcript.json", "transcript.txt",
-               "curation.json", "moments.json", "texts.json", "posts.json",
-               "brief_materials.md", "brief_clips.md", "brief_posts.md",
-               "thumbnail.jpg", "_thumb_frame.jpg", "episode.json"]
+    FLAT_NAMES = ["source.mp4", "transcript.json", "transcript.txt",
+                  "curation.json", "moments.json", "texts.json", "posts.json",
+                  "brief_materials.md", "brief_clips.md", "brief_posts.md",
+                  "thumbnail.jpg", "_thumb_frame.jpg", "episode.json"]
 
-    def _old_project(self):
+    def _flat_project(self):
         d = tempfile.mkdtemp()
-        for name in self.OLD_NAMES:
+        for name in self.FLAT_NAMES:
             with open(os.path.join(d, name), "w", encoding="utf-8") as f:
                 f.write(name)
         for sub in ("youtube_shorts", "instagram_reels", "instagram_posts"):
@@ -57,7 +57,7 @@ class TestMigration(unittest.TestCase):
         return d
 
     def test_moves_everything_to_the_right_place(self):
-        d = self._old_project()
+        d = self._flat_project()
         moved = layout.migrate(d)
         self.assertGreater(len(moved), 0)
         self.assertTrue(os.path.exists(layout.video(d)))
@@ -69,31 +69,31 @@ class TestMigration(unittest.TestCase):
             os.path.join(layout.platform(d, "youtube_shorts"), "x.mp4")))
 
     def test_content_preserved(self):
-        d = self._old_project()
+        d = self._flat_project()
         layout.migrate(d)
         with open(layout.moments(d), encoding="utf-8") as f:
             self.assertEqual(f.read(), "moments.json")
 
     def test_episode_json_stays_at_the_root(self):
-        d = self._old_project()
+        d = self._flat_project()
         layout.migrate(d)
         self.assertTrue(os.path.exists(layout.episode(d)))
         self.assertEqual(os.path.dirname(layout.episode(d)), d)
 
     def test_temporary_junk_is_removed(self):
-        d = self._old_project()
+        d = self._flat_project()
         layout.migrate(d)
         self.assertFalse(os.path.exists(os.path.join(d, "_thumb_frame.jpg")))
 
     def test_root_keeps_only_episode_and_the_folders(self):
-        d = self._old_project()
+        d = self._flat_project()
         layout.migrate(d)
         at_root = {n for n in os.listdir(d) if not n.startswith(".")}
         self.assertEqual(at_root, {"episode.json", "source", "decisions",
                                    "briefs", "publish"})
 
     def test_is_idempotent(self):
-        d = self._old_project()
+        d = self._flat_project()
         layout.migrate(d)
         self.assertEqual(layout.migrate(d), [])   # 2nd run moves nothing
         self.assertTrue(os.path.exists(layout.moments(d)))
@@ -104,7 +104,7 @@ class TestMigration(unittest.TestCase):
 
     def test_does_not_overwrite_an_already_migrated_file(self):
         """If both exist, the NEW position wins — it is the most recent."""
-        d = self._old_project()
+        d = self._flat_project()
         layout.migrate(d)
         with open(layout.moments(d), "w", encoding="utf-8") as f:
             f.write("NEW")

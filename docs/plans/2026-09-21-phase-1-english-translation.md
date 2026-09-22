@@ -887,7 +887,14 @@ cd /data/Code/talaria
 python3 docs/plans/phase-1-inputs/check-assertion-pointers.py
 ```
 
-Exit 0 and "0 stale" is the pass condition. The classification keys on
+Exit 0 and "0 stale" is the pass condition. The check also holds each row to
+the test it names: the nearest preceding `def test_*` must match the row's
+`test` column. Without that it validated file existence, line range and an
+`assert` within three lines, so a row shifted onto a DIFFERENT test's assertion
+passed while its `proves` statement described the wrong test. Twenty-three rows
+needed repointing in the final fix wave, ten of which the old form accepted.
+
+The classification keys on
 `file:line`, and every task that edits a test file shifts those lines. Worse,
 Task 3 renamed nine test modules and left 33 rows pointing at files that no
 longer existed — missed by four fix rounds and two reviews, because nothing

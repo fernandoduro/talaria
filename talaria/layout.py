@@ -115,9 +115,14 @@ def posts_png(pd: str) -> str:
 # Old position -> new. The prefix in the old name was needed while everything
 # sat in the same folder; inside the subfolder it becomes redundant.
 #
-# This table describes a pre-Phase-1 layout (Portuguese names); no real
-# `projects/` is in that state, so it is not exercised against real data —
-# only against fixtures that recreate it.
+# Retained for its SHAPE only. The keys are the pre-subfolder positions under
+# current names, and no directory has ever held that combination: the layout
+# that was flat held Portuguese names, and Phase 1 translated these keys rather
+# than preserving them, because no `projects/` existed on disk to migrate. So
+# the table is untested against real legacy data and can only match a fixture
+# that recreates it. `migrate` stays wired into every command for the
+# `_check_dirs` refusal and the duplicate-to-.bak handling, both of which apply
+# to a project the pipeline itself half-wrote.
 _MIGRATION = [
     ("source.mp4", video),
     ("transcript.json", transcript),
