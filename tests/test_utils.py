@@ -111,6 +111,17 @@ class TestCleanCaption(unittest.TestCase):
         self.assertEqual(utils.clean_caption("so uh we um shipped it"),
                          "so we shipped it")
 
+    def test_a_word_starting_with_a_filler_survives(self):
+        """The filler pattern's \\b, without which real words lose a prefix.
+
+        Dropping it turns "we are ahead of plan" into "we are ead of plan" and
+        leaves every other assertion in this class green -- "yeah" is protected
+        by the leading \\s+, not by the boundary.
+        """
+        for txt in ("we are ahead of plan", "the umbrella policy",
+                    "an error in the export", "yeah it shipped"):
+            self.assertEqual(utils.clean_caption(txt), txt)
+
     def test_strips_sentence_initial_hesitation(self):
         self.assertEqual(utils.clean_caption("Uh, we shipped it"),
                          "we shipped it")

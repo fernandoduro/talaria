@@ -66,7 +66,9 @@ _CONTRACTIONS = [
     (r"kinda", "kind of"),
 ]
 
-# Hesitation noise, as standalone words only: 'ah' inside "yeah" must survive.
+# Hesitation noise, as standalone words only. The \b is what protects a word
+# that STARTS with a filler -- "ahead", "umbrella", "error". A word that merely
+# contains one ("yeah") is already protected by the leading \s+.
 RE_FILLER = re.compile(r"\s+(uh|um|er|ah|hmm)\b\s*,?\s*", re.IGNORECASE)
 
 # Discourse fillers, bounded to a comma-flanked or sentence-initial span.
