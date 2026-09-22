@@ -123,7 +123,6 @@ def publish_reel(video_path: str, caption: str) -> dict:
         _wait_for_processing(body["id"], token)
         return _publish_container(body["id"], token, account)
     finally:
-        # Success or failure, the temporary file leaves the bucket.
         storage_temp.remove(url)
 
 
