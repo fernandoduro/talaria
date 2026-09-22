@@ -1,262 +1,266 @@
-kind	old	new	note
-cli_verb	agenda	schedule	run.py local agenda would shadow the schedule module
-cli_verb	curar	curate	
-constant	ABERTURA_HOST_MAX_S	HOST_OPENING_MAX_S	
-constant	AJUSTE_AUDIO_MAX_S	AUDIO_ADJUST_MAX_S	
-constant	BUSCA_S	SEARCH_S	
-constant	CAMPOS_OBRIGATORIOS	REQUIRED_FIELDS	
-constant	CAMPOS_OBRIGATORIOS_PREENCHIDOS	REQUIRED_NONEMPTY_FIELDS	subset that must also be non-empty
-constant	CARD_ARROBA	CARD_HANDLE	arroba here means the @handle text
-constant	CARD_COR_ARROBA	CARD_HANDLE_COLOR	arroba here means the @handle text
-constant	CARD_DURACAO_S	CARD_DURATION_S	
-constant	CARD_FUNDO	CARD_BG	
-constant	CARD_LOGO_LARGURA	CARD_LOGO_W	
-constant	CARROSSEL_MAX	CAROUSEL_MAX	
-constant	CATEGORIA	CATEGORY_ID	holds YouTube's numeric categoryId
-constant	CHAVES_INSTALLED	INSTALLED_KEYS	keys required inside the installed block
-constant	_CONTRACOES	_CONTRACTIONS	
-constant	CONVIDADO	GUEST	
-constant	CORTE_MAX_S	CLIP_MAX_S	
-constant	CORTE_MIN_S	CLIP_MIN_S	
-constant	_CREDENCIAIS	_CREDENTIALS	
-constant	DECISOES	DECISIONS	
-constant	_DIR_FONTES	_FONTS_DIR	
-constant	_EQUIV_FONETICA	_PHONETIC_EQUIVALENTS	
-constant	ESCOPO	SCOPES	plural: the value is a list of scopes
-constant	ESPERADAS	EXPECTED	
-constant	FALA_CONVIDADO_MIN	GUEST_SPEECH_MIN	
-constant	FIXAS	CHANNEL_TAGS	the channel's always-present hashtags
-constant	FONTE	SOURCE	
-constant	FUSO_PUBLICACAO	PUBLISH_TZ	name only; the value stays America/Sao_Paulo
-constant	IG_LEGENDA_MAX	IG_CAPTION_MAX	
-constant	JANELA_PONTUACAO	PUNCTUATION_WINDOW	
-constant	JANELA_S	WINDOW_S	
-constant	LEGENDA_MIN_S	CAPTION_MIN_S	
-constant	LIMIAR_ATRIBUICAO_SUSPEITA	SUSPECT_ATTRIBUTION_THRESHOLD	
-constant	LIMIAR_PAUSA_DB	PAUSE_THRESHOLD_DB	
-constant	LIMIAR_SOBREPOSICAO	OVERLAP_THRESHOLD	
-constant	_LIXO	_JUNK	
-constant	MARCA_DAGUA_LARGURA	WATERMARK_W	
-constant	MARCA_DAGUA_MARGEM	WATERMARK_MARGIN	
-constant	MARGEM_FIM_S	END_MARGIN_S	
-constant	_MIGRACAO	_MIGRATION	
-constant	MOMENTOS	MOMENTS	
-constant	NOME_ARQUIVO	FILE_NAME	
-constant	NOME_PROGRAMA	SHOW_NAME	programa is the show, not a computer program
-constant	PADRAO	DEFAULT_PATH	it holds the default .env path
-constant	_PALAVRAS_COMUNS	_COMMON_WORDS	
-constant	_PASTAS_PUBLICAR	_PUBLISH_DIRS	
-constant	PLATAFORMAS	PLATFORMS	
-constant	POLL_INTERVALO_S	POLL_INTERVAL_S	
-constant	POST_CARGO_SIZE	POST_ROLE_SIZE	
-constant	POST_CARGO_Y	POST_ROLE_Y	
-constant	POST_CIT_ALTURA	POST_QUOTE_LINE_H	height of one quote line, not the block
-constant	POST_CIT_MAX_LINHAS	POST_QUOTE_MAX_LINES	
-constant	POST_CIT_PASSO	POST_QUOTE_STEP	
-constant	POST_CIT_SIZE	POST_QUOTE_SIZE	
-constant	POST_CIT_Y	POST_QUOTE_Y	
-constant	POST_COR_CARGO	POST_ROLE_COLOR	
-constant	POST_COR_CITACAO	POST_QUOTE_COLOR	
-constant	POST_COR_NOME	POST_NAME_COLOR	
-constant	POST_FILETE_Y	POST_RULE_Y	filete is the template's hairline rule
-constant	POST_LARGURA_UTIL	POST_TEXT_W	max line width for the quote text
-constant	POST_MARGEM_X	POST_MARGIN_X	
-constant	POST_NOME_SIZE	POST_NAME_SIZE	
-constant	POST_NOME_Y	POST_NAME_Y	
-constant	PREFIXO	PREFIX	
-constant	PREFIXO_EPISODIO	EPISODE_PREFIX	
-constant	PRIVACIDADE_PADRAO	DEFAULT_PRIVACY	
-constant	PRIVACIDADES	PRIVACY_VALUES	accepted privacyStatus values
-constant	PROJETOS	PROJECTS	
-constant	PUBLICAR	PUBLISH	
-constant	_RAIZ	_ROOT	
-constant	RE_FIM_DE_FRASE	RE_SENTENCE_END	
-constant	RE_HESITACAO	RE_HEDGED_NUMBER	matches hedging words followed by a number
-constant	RE_PRIMEIRA_PESSOA	RE_FIRST_PERSON	
-constant	RE_SOM	RE_SOUND_TAG	matches bracketed sound annotations
-constant	SEPARADOR	SEPARATOR	
-constant	SILENCIO_MIN_S	SILENCE_MIN_S	
-constant	_SUFIXO_MP4	_MP4_SUFFIX	
-constant	_TAMANHO_ARROBA	_HANDLE_SIZE	arroba here means the @handle text
-constant	TAXA_HZ	RATE_HZ	
-constant	TIPOS	KINDS	kind, not type: type shadows the builtin
-constant	TRANSCRICAO	TRANSCRIPT	
-constant	TRAVESSAO	EM_DASH	
-constant	VALIDADE_S	EXPIRY_S	how long the signed URL stays valid
-constant	YT_DESCRICAO_MAX	YT_DESCRIPTION_MAX	
-constant	YT_TITULO_MAX	YT_TITLE_MAX	
-dir	decisoes	decisions	
-dir	fonte	source	dir only; fonte elsewhere means font, not source
-dir	projetos	projects	
-dir	publicar	publish	
-function	abertura_do_host	host_opening	
-function	_ajusta_ate_pontuacao	_snap_to_punctuation	snaps the slice end to nearby punctuation
-function	ajusta_fim_por_audio	adjust_end_by_audio	
-function	alertas_corte	clip_warnings	warnings, not alerts: they do not block
-function	_apara_texto	_trim_text	
-function	aplica_margem_fim	apply_end_margin	
-function	aprovar	approve	
-function	atribuicao_confiavel	attribution_trustworthy	
-function	autor_do_episodio	episode_author	
-function	_bloco	_block	
-function	caminho	txt_path	function only; caminho locals elsewhere are plain paths
-function	card_cacheado	cached_card	
-function	card_encerramento	end_card_mp4	matches layout's episode_txt/transcript_txt suffix convention
-function	carrega	load	joins the existing load() on episode, texts, curation
-function	cauda_vaza	clips_mid_word	names the fault, not the tail metaphor
-function	_chama	_call	
-function	_cliente	_client	
-function	cmd_agenda	cmd_schedule	
-function	cmd_curar	cmd_curate	
-function	codigo	code	
-function	compoe_card	render_card	writes a PNG; compose_card is end_card's frame
-function	composicao	composition	
-function	concatena_encerramento	append_end_card	in-place append; concat is the ffmpeg mechanism
-function	_confere_pastas	_check_dirs	
-function	corrige_nomes	fix_proper_nouns	nomes here are proper nouns from episode.json
-function	cortes_legiveis	readable_clips	
-function	_credenciais	_credentials	
-function	curadoria_legivel	readable_curation	
-function	data_do	date_of	
-function	_duracao_silencio	_silence_duration	
-function	_e_do_youtube	_is_youtube_output	tests the output directory, not the file
-function	_e_palavra_comum	_is_common_word	
-function	episodio_txt	episode_txt	
-function	_escreve	_write	
-function	escreve	write	
-function	escreve_caption_episodio	write_episode_caption	
-function	escreve_captions	write_captions	
-function	_espera_processar	_wait_for_processing	
-function	esta_queimado	is_burned	
-function	executar	execute	
-function	_expande_contracoes	_expand_contractions	
-function	faixas_queimadas	burned_spans	faixa is a (start, end) time span
-function	fala_do_corte	clip_speech	
-function	fechado	is_closed	
-function	_fecha_frase	_ends_sentence	
-function	fins_de_frase	sentence_ends	
-function	_fonte	_truetype	_font taken by thumbnail; takes an explicit path
-function	_fonte_citacao	_quote_font	
-function	_fonte_versionada	_bundled_font	versioned means shipped in the repo, not fc-match
-function	fracao_convidado	guest_speech_fraction	matches GUEST_SPEECH_MIN, the threshold it feeds
-function	_fronteira_valida	_valid_boundary	
-function	garante	ensure_dir	creates the parent directory, returns the path unchanged
-function	gerar	generate	
-function	hoje	today	
-function	host_do_token	host_for_token	
-function	ja_publicado	is_published	
-function	_le	_read	
-function	_ler_prompt	_read_prompt	
-function	_limpa	_clean_value	strips whitespace and one surrounding quote pair
-function	limpa_citacao	clean_quote	
-function	linha_episodio	episode_line	
-function	_marca_dagua_graph	_watermark_graph	
-function	metadados_legiveis	readable_metadata	
-function	migrar	migrate	
-function	momentos	moments	
-function	_momentos_por_slug	_moments_by_slug	
-function	monta	compose	compose: build is taken by hashtags.build
-function	monta_card	compose_card	compose: build is taken by hashtags.build
-function	monta_episodio	compose_episode	compose: build is taken by hashtags.build
-function	montar	build	accepted cross-module twin of hashtags.build
-function	montar_posts	build_posts	
-function	motivos	reasons	
-function	_nomes_proprios	_proper_nouns	
-function	novo_estado	new_state	
-function	_padrao_fonetico	_phonetic_pattern	
-function	para_momentos	to_moments	
-function	pasta_fonte	source_dir	
-function	pendente	pending	
-function	plataforma	platform	
-function	plataformas_do	platforms_of	
-function	_pngs_do_post	_post_pngs	
-function	pre_checa	precheck	
-function	preencher	fill_template	fills the prompt template's placeholders
-function	_prepara	_prepare	
-function	privacidade	privacy	
-function	_projeto	_project	
-function	_projeto_falso	_fake_project	
-function	_publica_container	_publish_container	
-function	_publica_par	_publish_pair	
-function	publica_post	publish_post	
-function	publica_reel	publish_reel	
-function	quebra	wrap	wraps the quote to the post width
-function	registra	record	
-function	rejeitar	reject	
-function	_resposta	_response	
-function	salvar_momentos	save_moments	
-function	_segmentos	_segments	
-function	segmentos_no_corte	segments_in_clip	clip, not cut: render._segments_in_cut differs
-function	slug_de_arquivo	file_slug	
-function	sobe	put	upload taken by publish_youtube; pairs with remove
-function	sobrepoe	overlaps	
-function	sugere_frames	suggest_frames	
-function	_tem_ffmpeg	_has_ffmpeg	
-function	tem_ffmpeg	has_ffmpeg	
-function	tem_hesitacao_numerica	has_hedged_number	the fault is a hedged number, not hesitation
-function	tipos_ausentes	missing_kinds	kind, not type: type shadows the builtin
-function	transcricao	transcript	
-function	transcricao_legivel	readable_transcript	
-function	transcricao_txt	transcript_txt	
-function	_txt_do_post	_post_txt	
-function	url_youtube	youtube_url	
-function	vagas	slots_left	approvals still needed before the goal is met
-function	vale_antes	valley_before	
-function	valida	validate	
-function	valida_card	validate_card	
-function	valida_client_secret	validate_client_secret	
-function	valida_corte	validate_clip	
-function	_valida_empresa_ou_tema	_validate_company_or_topic	
-json_key	aprovados	approved	
-json_key	cabe	fits	
-json_key	cargo	role	cargo is the guest's job title
-json_key	chamada_l1	headline_l1	chamada is the thumbnail headline
-json_key	chamada_l2	headline_l2	chamada is the thumbnail headline
-json_key	cidade	city	
-json_key	conselho	advice	
-json_key	convidado	guest	
-json_key	convidados	guests	
-json_key	corte	clip	
-json_key	creditos	credits	
-json_key	data	date	Portuguese date; the save(data) params are English
-json_key	descricao	description	
-json_key	empresa	company	
-json_key	erro	error	
-json_key	historia	story	historia here is a story, not history
-json_key	legenda	caption	post_instagram local must not shadow the caption module
-json_key	legenda_post	post_caption	
-json_key	linhas	lines	
-json_key	meta	target	goal count; the _COMMON_WORDS entry meta is unrelated
-json_key	motivo	reason	
-json_key	nome	name	
-json_key	pessoal	personal	
-json_key	publicado_em	published_at	
-json_key	quem	who	
-json_key	registro_falhou	record_failed	
-json_key	rejeitados	rejected	
-json_key	resumo	summary	
-json_key	rodadas	rounds	
-json_key	selo	badge	selo is the thumbnail's top-left label strip
-json_key	subtitulo	subtitle	
-json_key	temas	topics	conversation subjects; themes misreads in English
-json_key	temporada	season	
-json_key	tese	thesis	
-json_key	texto_tela	screen_text	
-json_key	tipo	kind	type would shadow the builtin; acquire already uses kind
-json_key	titulo	title	
-module	ambiente	environment	
-module	calendario	schedule	avoids shadowing the stdlib calendar module
-module	curadoria	curation	
-module	encerramento	end_card	names the artifact: the closing card
-module	episodio	episode	
-module	publicado	published	
-module	test_ambiente	test_environment	
-module	test_calendario	test_schedule	
-module	test_curadoria	test_curation	
-module	test_encerramento	test_end_card	
-module	test_episodio	test_episode	
-module	test_fontes	test_fonts	
-module	test_integracao	test_integration	
-module	test_publicado	test_published	
-module	test_textos	test_texts	
-module	textos	texts	texts, not copy: copy is a stdlib module
+kind	old	new	scope	note
+cli_flag	cortes	clips	manual	flag, brief-type value, kwarg and locals all mean clips, but the value becomes a filename - rename prompts/cortes.md to prompts/clips.md in the same commit or _read_prompt breaks
+cli_flag	exportar	export	global	
+cli_flag	materiais	materials	manual	same as cortes: the value becomes a filename, so rename prompts/materiais.md to prompts/materials.md in the same commit
+cli_flag	projeto	project	global	
+cli_verb	agenda	schedule	manual	the calendario.json key and the CLI verb; run.py:359 does `agenda = calendario.carrega(pd)` and then calls calendario.plataformas_do - renaming both shadows the schedule module with a list, so rename that local to `items`
+cli_verb	curar	curate	global	
+constant	ABERTURA_HOST_MAX_S	HOST_OPENING_MAX_S	global	
+constant	AJUSTE_AUDIO_MAX_S	AUDIO_ADJUST_MAX_S	global	
+constant	BUSCA_S	SEARCH_S	global	
+constant	CAMPOS_OBRIGATORIOS	REQUIRED_FIELDS	global	
+constant	CAMPOS_OBRIGATORIOS_PREENCHIDOS	REQUIRED_NONEMPTY_FIELDS	global	subset that must also be non-empty
+constant	CARD_ARROBA	CARD_HANDLE	global	arroba here means the @handle text
+constant	CARD_COR_ARROBA	CARD_HANDLE_COLOR	global	arroba here means the @handle text
+constant	CARD_DURACAO_S	CARD_DURATION_S	global	
+constant	CARD_FUNDO	CARD_BG	global	
+constant	CARD_LOGO_LARGURA	CARD_LOGO_W	global	
+constant	CARROSSEL_MAX	CAROUSEL_MAX	global	
+constant	CATEGORIA	CATEGORY_ID	global	holds YouTube's numeric categoryId
+constant	CHAVES_INSTALLED	INSTALLED_KEYS	global	keys required inside the installed block
+constant	CONVIDADO	GUEST	global	
+constant	CORTE_MAX_S	CLIP_MAX_S	global	
+constant	CORTE_MIN_S	CLIP_MIN_S	global	
+constant	DECISOES	DECISIONS	global	
+constant	ESCOPO	SCOPES	global	plural: the value is a list of scopes
+constant	ESPERADAS	EXPECTED	global	
+constant	FALA_CONVIDADO_MIN	GUEST_SPEECH_MIN	global	
+constant	FIXAS	CHANNEL_TAGS	global	the channel's always-present hashtags
+constant	FONTE	SOURCE	global	
+constant	FUSO_PUBLICACAO	PUBLISH_TZ	global	name only; the value stays America/Sao_Paulo
+constant	IG_LEGENDA_MAX	IG_CAPTION_MAX	global	
+constant	JANELA_PONTUACAO	PUNCTUATION_WINDOW	global	
+constant	JANELA_S	WINDOW_S	global	
+constant	LEGENDA_MIN_S	CAPTION_MIN_S	global	
+constant	LIMIAR_ATRIBUICAO_SUSPEITA	SUSPECT_ATTRIBUTION_THRESHOLD	global	
+constant	LIMIAR_PAUSA_DB	PAUSE_THRESHOLD_DB	global	
+constant	LIMIAR_SOBREPOSICAO	OVERLAP_THRESHOLD	global	
+constant	MARCA_DAGUA_LARGURA	WATERMARK_W	global	
+constant	MARCA_DAGUA_MARGEM	WATERMARK_MARGIN	global	
+constant	MARGEM_FIM_S	END_MARGIN_S	global	
+constant	MOMENTOS	MOMENTS	global	
+constant	NOME_ARQUIVO	FILE_NAME	global	
+constant	NOME_PROGRAMA	SHOW_NAME	global	programa is the show, not a computer program
+constant	PADRAO	DEFAULT_PATH	global	it holds the default .env path
+constant	PLATAFORMAS	PLATFORMS	global	
+constant	POLL_INTERVALO_S	POLL_INTERVAL_S	global	
+constant	POST_CARGO_SIZE	POST_ROLE_SIZE	global	
+constant	POST_CARGO_Y	POST_ROLE_Y	global	
+constant	POST_CIT_ALTURA	POST_QUOTE_LINE_H	global	height of one quote line, not the block
+constant	POST_CIT_MAX_LINHAS	POST_QUOTE_MAX_LINES	global	
+constant	POST_CIT_PASSO	POST_QUOTE_STEP	global	
+constant	POST_CIT_SIZE	POST_QUOTE_SIZE	global	
+constant	POST_CIT_Y	POST_QUOTE_Y	global	
+constant	POST_COR_CARGO	POST_ROLE_COLOR	global	
+constant	POST_COR_CITACAO	POST_QUOTE_COLOR	global	
+constant	POST_COR_NOME	POST_NAME_COLOR	global	
+constant	POST_FILETE_Y	POST_RULE_Y	global	filete is the template's hairline rule
+constant	POST_LARGURA_UTIL	POST_TEXT_W	global	max line width for the quote text
+constant	POST_MARGEM_X	POST_MARGIN_X	global	
+constant	POST_NOME_SIZE	POST_NAME_SIZE	global	
+constant	POST_NOME_Y	POST_NAME_Y	global	
+constant	PREFIXO	PREFIX	global	
+constant	PREFIXO_EPISODIO	EPISODE_PREFIX	global	
+constant	PRIVACIDADES	PRIVACY_VALUES	global	accepted privacyStatus values
+constant	PRIVACIDADE_PADRAO	DEFAULT_PRIVACY	global	
+constant	PROJETOS	PROJECTS	global	
+constant	PUBLICAR	PUBLISH	global	
+constant	RE_FIM_DE_FRASE	RE_SENTENCE_END	global	
+constant	RE_HESITACAO	RE_HEDGED_NUMBER	global	matches hedging words followed by a number
+constant	RE_PRIMEIRA_PESSOA	RE_FIRST_PERSON	global	
+constant	RE_SOM	RE_SOUND_TAG	global	matches bracketed sound annotations
+constant	SEPARADOR	SEPARATOR	global	
+constant	SILENCIO_MIN_S	SILENCE_MIN_S	global	
+constant	TAXA_HZ	RATE_HZ	global	
+constant	TIPOS	KINDS	global	kind, not type: type shadows the builtin
+constant	TRANSCRICAO	TRANSCRIPT	manual	ONLY the test fixture constant at test_integracao.py:14 and 38; brief.py:55 and test_brief.py:40 and 43 are the {{TRANSCRICAO}} prompt placeholder, which Task 7 renames together with prompts/*.md
+constant	TRAVESSAO	EM_DASH	global	
+constant	VALIDADE_S	EXPIRY_S	global	how long the signed URL stays valid
+constant	YT_DESCRICAO_MAX	YT_DESCRIPTION_MAX	global	
+constant	YT_TITULO_MAX	YT_TITLE_MAX	global	
+constant	_CONTRACOES	_CONTRACTIONS	global	
+constant	_CREDENCIAIS	_CREDENTIALS	global	
+constant	_DIR_FONTES	_FONTS_DIR	global	
+constant	_EQUIV_FONETICA	_PHONETIC_EQUIVALENTS	global	
+constant	_LIXO	_JUNK	global	
+constant	_MIGRACAO	_MIGRATION	global	
+constant	_PALAVRAS_COMUNS	_COMMON_WORDS	global	
+constant	_PASTAS_PUBLICAR	_PUBLISH_DIRS	global	
+constant	_RAIZ	_ROOT	global	
+constant	_SUFIXO_MP4	_MP4_SUFFIX	global	
+constant	_TAMANHO_ARROBA	_HANDLE_SIZE	global	arroba here means the @handle text
+dir	decisoes	decisions	global	
+dir	fonte	source	manual	applies to the FONTE dir value and "fonte.mp4" in layout.py plus the acquire/transcribe/episodio prose; in config.py:12-25/74, encerramento.py:41-55, post_instagram.py:24-32, render.py:38-69 and test_fontes/test_render, fonte means FONT and must not become source
+dir	projetos	projects	global	
+dir	publicar	publish	global	
+function	_ajusta_ate_pontuacao	_snap_to_punctuation	global	snaps the slice end to nearby punctuation
+function	_apara_texto	_trim_text	global	
+function	_bloco	_block	global	
+function	_chama	_call	global	
+function	_cliente	_client	global	
+function	_confere_pastas	_check_dirs	global	
+function	_credenciais	_credentials	global	
+function	_duracao_silencio	_silence_duration	global	
+function	_e_do_youtube	_is_youtube_output	global	tests the output directory, not the file
+function	_e_palavra_comum	_is_common_word	global	
+function	_escreve	_write	global	
+function	_espera_processar	_wait_for_processing	global	
+function	_expande_contracoes	_expand_contractions	global	
+function	_fecha_frase	_ends_sentence	global	
+function	_fonte	_truetype	global	_font taken by thumbnail; takes an explicit path
+function	_fonte_citacao	_quote_font	global	
+function	_fonte_versionada	_bundled_font	global	versioned means shipped in the repo, not fc-match
+function	_fronteira_valida	_valid_boundary	global	
+function	_le	_read	global	
+function	_ler_prompt	_read_prompt	global	
+function	_limpa	_clean_value	global	strips whitespace and one surrounding quote pair
+function	_marca_dagua_graph	_watermark_graph	global	
+function	_momentos_por_slug	_moments_by_slug	global	
+function	_nomes_proprios	_proper_nouns	global	
+function	_padrao_fonetico	_phonetic_pattern	global	
+function	_pngs_do_post	_post_pngs	global	
+function	_prepara	_prepare	global	
+function	_projeto	_project	global	
+function	_projeto_falso	_fake_project	global	
+function	_publica_container	_publish_container	global	
+function	_publica_par	_publish_pair	global	
+function	_resposta	_response	global	
+function	_segmentos	_segments	global	
+function	_tem_ffmpeg	_has_ffmpeg	global	
+function	_txt_do_post	_post_txt	global	
+function	_valida_empresa_ou_tema	_validate_company_or_topic	global	
+function	abertura_do_host	host_opening	global	
+function	ajusta_fim_por_audio	adjust_end_by_audio	global	
+function	alertas_corte	clip_warnings	global	warnings, not alerts: they do not block
+function	aplica_margem_fim	apply_end_margin	global	
+function	aprovar	approve	global	
+function	atribuicao_confiavel	attribution_trustworthy	global	
+function	autor_do_episodio	episode_author	global	
+function	caminho	txt_path	manual	applies ONLY to caption.py:113 (the def) and its callers publish.py:101, 162 and 165; the other ~85 occurrences are local variables and parameters meaning plain path - rename those to `path`, not txt_path
+function	card_cacheado	cached_card	global	
+function	card_encerramento	end_card_mp4	global	matches layout's episode_txt/transcript_txt suffix convention
+function	carrega	load	manual	the four module-level functions (ambiente, calendario, post_instagram, publicado) and their callers; txt_parse.py:132 and utils.py:66 use carrega as "carries" in a comment - not load
+function	cauda_vaza	clips_mid_word	global	names the fault, not the tail metaphor
+function	cmd_agenda	cmd_schedule	global	
+function	cmd_curar	cmd_curate	global	
+function	codigo	code	global	
+function	compoe_card	render_card	global	writes a PNG; compose_card is end_card's frame
+function	composicao	composition	global	
+function	concatena_encerramento	append_end_card	global	in-place append; concat is the ffmpeg mechanism
+function	corrige_nomes	fix_proper_nouns	global	nomes here are proper nouns from episode.json
+function	cortes_legiveis	readable_clips	global	
+function	curadoria_legivel	readable_curation	global	
+function	data_do	date_of	global	
+function	episodio_txt	episode_txt	global	
+function	escreve	write	global	
+function	escreve_caption_episodio	write_episode_caption	global	
+function	escreve_captions	write_captions	global	
+function	esta_queimado	is_burned	global	
+function	executar	execute	global	
+function	faixas_queimadas	burned_spans	global	faixa is a (start, end) time span
+function	fala_do_corte	clip_speech	global	
+function	fechado	is_closed	global	
+function	fins_de_frase	sentence_ends	global	
+function	fracao_convidado	guest_speech_fraction	global	matches GUEST_SPEECH_MIN, the threshold it feeds
+function	garante	ensure_dir	global	creates the parent directory, returns the path unchanged
+function	gerar	generate	global	
+function	hoje	today	manual	calendario.py:28 (def) and its callers and locals in run.py; test_utils.py:62-94 and txt_parse.py:6 use hoje as Portuguese filler inside fixtures and a docstring example
+function	host_do_token	host_for_token	global	
+function	ja_publicado	is_published	global	
+function	limpa_citacao	clean_quote	global	
+function	linha_episodio	episode_line	global	
+function	metadados_legiveis	readable_metadata	global	
+function	migrar	migrate	global	
+function	momentos	moments	global	
+function	monta	compose	global	compose: build is taken by hashtags.build
+function	monta_card	compose_card	global	compose: build is taken by hashtags.build
+function	monta_episodio	compose_episode	global	compose: build is taken by hashtags.build
+function	montar	build	manual	brief.py:112 (def) and its callers in run.py and test_brief; test_utils.py:98-99 use montar as filler text inside a phonetic-correction fixture, and caption.py:116 uses it as the verb "to assemble"
+function	montar_posts	build_posts	global	
+function	motivos	reasons	global	
+function	novo_estado	new_state	global	
+function	para_momentos	to_moments	global	
+function	pasta_fonte	source_dir	global	
+function	pendente	pending	global	
+function	plataforma	platform	global	
+function	plataformas_do	platforms_of	global	
+function	pre_checa	precheck	global	
+function	preencher	fill_template	manual	brief.py:51 (def) and its callers and tests; episodio.py:26 uses preencher as the verb "to fill in", describing what the operator does
+function	privacidade	privacy	global	
+function	publica_post	publish_post	global	
+function	publica_reel	publish_reel	global	
+function	quebra	wrap	manual	post_instagram.py:23 (def) and its calls at 40 and 147; txt_parse.py:89-90, curadoria.py:109, config.py:101, render.py:38 and 493, post_instagram.py:172 and youtube_auth.py:20 use quebra as "breaks"
+function	registra	record	global	
+function	rejeitar	reject	global	
+function	salvar_momentos	save_moments	global	
+function	segmentos_no_corte	segments_in_clip	global	clip, not cut: render._segments_in_cut differs
+function	slug_de_arquivo	file_slug	global	
+function	sobe	put	manual	storage_temp.py:47 (def), its callers and the storage.sobe mocks in test_publish_instagram; storage_temp.py:4 and episodio.py:36 use sobe as "is uploaded" in prose
+function	sobrepoe	overlaps	global	
+function	sugere_frames	suggest_frames	global	
+function	tem_ffmpeg	has_ffmpeg	global	
+function	tem_hesitacao_numerica	has_hedged_number	global	the fault is a hedged number, not hesitation
+function	tipos_ausentes	missing_kinds	global	kind, not type: type shadows the builtin
+function	transcricao	transcript	global	
+function	transcricao_legivel	readable_transcript	global	
+function	transcricao_txt	transcript_txt	global	
+function	url_youtube	youtube_url	global	
+function	vagas	slots_left	global	approvals still needed before the goal is met
+function	vale_antes	valley_before	global	
+function	valida	validate	global	
+function	valida_card	validate_card	global	
+function	valida_client_secret	validate_client_secret	global	
+function	valida_corte	validate_clip	global	
+json_key	aprovados	approved	global	
+json_key	cabe	fits	global	
+json_key	cargo	role	global	cargo is the guest's job title
+json_key	chamada_l1	headline_l1	global	chamada is the thumbnail headline
+json_key	chamada_l2	headline_l2	global	chamada is the thumbnail headline
+json_key	cidade	city	manual	the episode key and the hashtags.build/format_line params; test_render.py:214 and 253 and test_post_instagram.py:30 contain "de cidade" inside the design-quote fixture whose exact pixel wrap is asserted
+json_key	conselho	advice	global	
+json_key	convidado	guest	manual	the speaker-label VALUE at txt_parse.py:120 and curadoria.py:155 and the tests asserting it; test_integracao.py:17, 19 and 21 have convidado as prose inside a transcript fixture
+json_key	convidados	guests	global	
+json_key	corte	clip	global	
+json_key	creditos	credits	global	
+json_key	data	date	manual	applies to the schedule-item key in calendario/publish/run.py and the test fixtures; textos.py:27 and episodio.py:121 save(project_dir, data) and test_episodio.py:11 _escreve(self, data) are the ENGLISH word data holding a dict - leave those three alone
+json_key	descricao	description	global	
+json_key	empresa	company	global	
+json_key	erro	error	global	
+json_key	historia	story	global	historia here is a story, not history
+json_key	legenda	caption	manual	applies to the posts.json key, IG_LEGENDA_MAX's field and publish_instagram's params; post_instagram.py:273-279 binds a local `legenda` inside a function that calls the caption MODULE - rename that local to `text`, never caption
+json_key	legenda_post	post_caption	global	
+json_key	linhas	lines	global	
+json_key	meta	target	manual	applies to the curation goal count everywhere except utils.py:155, where the string "meta" is a Portuguese common word in the company-name allowlist and must stay
+json_key	motivo	reason	global	
+json_key	nome	name	global	
+json_key	pessoal	personal	manual	the clip-kind value in curadoria.TIPOS and its test fixtures; txt_parse.py:6 uses pessoal as "folks" in the docstring example
+json_key	publicado_em	published_at	global	
+json_key	quem	who	global	
+json_key	registro_falhou	record_failed	global	
+json_key	rejeitados	rejected	global	
+json_key	resumo	summary	global	
+json_key	rodadas	rounds	global	
+json_key	selo	badge	global	selo is the thumbnail's top-left label strip
+json_key	subtitulo	subtitle	global	
+json_key	temas	topics	global	conversation subjects; themes misreads in English
+json_key	temporada	season	global	
+json_key	tese	thesis	global	
+json_key	texto_tela	screen_text	global	
+json_key	tipo	kind	global	type would shadow the builtin; acquire already uses kind
+json_key	titulo	title	global	
+module	ambiente	environment	global	
+module	calendario	schedule	global	avoids shadowing the stdlib calendar module
+module	curadoria	curation	global	
+module	encerramento	end_card	global	names the artifact: the closing card
+module	episodio	episode	global	
+module	publicado	published	global	
+module	test_ambiente	test_environment	global	
+module	test_calendario	test_schedule	global	
+module	test_curadoria	test_curation	global	
+module	test_encerramento	test_end_card	global	
+module	test_episodio	test_episode	global	
+module	test_fontes	test_fonts	global	
+module	test_integracao	test_integration	global	
+module	test_publicado	test_published	global	
+module	test_textos	test_texts	global	
+module	textos	texts	global	texts, not copy: copy is a stdlib module
