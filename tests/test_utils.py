@@ -103,47 +103,61 @@ class TestFixProperNouns(unittest.TestCase):
 
 
 class TestCleanCaption(unittest.TestCase):
-    def test_remove_repeticao(self):
-        self.assertEqual(utils.clean_caption("eu eu gosto"), "eu gosto")
+    def test_deduplicates_repeated_words(self):
+        self.assertEqual(utils.clean_caption("we we shipped it"), "we shipped it")
 
-    def test_remove_muletas(self):
-        self.assertNotIn(" eh ", utils.clean_caption("isso eh muito bom"))
+    def test_strips_hesitation_fillers(self):
+        self.assertEqual(utils.clean_caption("so uh we um shipped it"),
+                         "so we shipped it")
 
-    def test_expande_contracoes(self):
-        """Contrações da fala viram forma plena na legenda queimada."""
-        self.assertEqual(utils.clean_caption("tá do seu lado"), "está do seu lado")
-        self.assertEqual(utils.clean_caption("pra gente poder"), "para gente poder")
-        self.assertEqual(utils.clean_caption("eu tô vendo"), "eu estou vendo")
-        self.assertEqual(utils.clean_caption("vou pro mercado"), "vou para mercado")
+    def test_strips_sentence_initial_hesitation(self):
+        self.assertEqual(utils.clean_caption("Uh, we shipped it"),
+                         "we shipped it")
 
-    def test_nao_expande_pro_em_locucao(self):
-        """'pro labore', 'pro rata': 'pro' aqui é latim, não contração."""
-        self.assertEqual(utils.clean_caption("o pro labore dos sócios"),
-                         "o pro labore dos sócios")
-        self.assertEqual(utils.clean_caption("dividido pro rata"),
-                         "dividido pro rata")
+    def test_strips_you_know_filler(self):
+        self.assertEqual(utils.clean_caption("we shipped it, you know, fast"),
+                         "we shipped it, fast")
 
-    def test_contracao_nao_inventa_artigo(self):
-        """'pra'/'pro' viram só 'para': inserir artigo erra fora do caso comum.
+    def test_strips_filler_at_end_of_sentence(self):
+        self.assertEqual(utils.clean_caption("it works, you know."),
+                         "it works.")
 
-        "vim pra junto do Rafael" viraria "para a junto do Rafael".
-        """
-        self.assertEqual(utils.clean_caption("vim pra junto do Rafael"),
-                         "vim para junto do Rafael")
+    def test_strips_i_mean_filler(self):
+        self.assertEqual(utils.clean_caption("we shipped it, I mean, fast"),
+                         "we shipped it, fast")
 
-    def test_contracao_respeita_fronteira_de_palavra(self):
-        """'tá' dentro de outra palavra não pode ser trocado."""
-        self.assertEqual(utils.clean_caption("está montado"), "está montado")
-        self.assertEqual(utils.clean_caption("a etapa"), "a etapa")
-        self.assertEqual(utils.clean_caption("compra online"), "compra online")
+    def test_strips_like_as_filler(self):
+        self.assertEqual(utils.clean_caption("we shipped it, like, fast"),
+                         "we shipped it, fast")
 
-    def test_remove_ne_interrogativo(self):
-        """'né?' é muleta de fala e polui a legenda."""
-        self.assertEqual(utils.clean_caption("é isso, né?"), "é isso.")
-        self.assertEqual(utils.clean_caption("olha, né, eu acho"), "olha, eu acho")
+    def test_like_as_a_verb_survives(self):
+        txt = "customers like the new flow"
+        self.assertEqual(utils.clean_caption(txt), txt)
 
-    def test_preserva_maiuscula_inicial(self):
-        self.assertEqual(utils.clean_caption("Tá bom"), "Está bom")
+    def test_like_introducing_an_example_survives(self):
+        txt = "tools, like Slack, are everywhere"
+        self.assertEqual(utils.clean_caption(txt), txt)
+
+    def test_expands_spoken_only_forms(self):
+        self.assertEqual(utils.clean_caption("we gonna ship it"),
+                         "we going to ship it")
+        self.assertEqual(utils.clean_caption("I wanna ship it"),
+                         "I want to ship it")
+        self.assertEqual(utils.clean_caption("you gotta ship it"),
+                         "you got to ship it")
+        self.assertEqual(utils.clean_caption("it was kinda slow"),
+                         "it was kind of slow")
+
+    def test_keeps_real_contractions(self):
+        txt = "we don't ship what we haven't tested"
+        self.assertEqual(utils.clean_caption(txt), txt)
+
+    def test_expansion_respects_word_boundary(self):
+        txt = "a wannabe founder"
+        self.assertEqual(utils.clean_caption(txt), txt)
+
+    def test_preserves_initial_capital(self):
+        self.assertEqual(utils.clean_caption("Gonna ship it"), "Going to ship it")
 
 
 if __name__ == "__main__":

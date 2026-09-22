@@ -55,59 +55,38 @@ def strip_markup(txt: str) -> str:
     return t.strip()
 
 
-# Contrações da fala -> forma plena na legenda. A legenda queimada é lida como
-# texto, não ouvida: "tá" na tela parece error de digitação, ainda que seja
-# transcrição fiel do que foi dito. Só formas em que a expansão é inequívoca —
-# gíria e escolha de palavra ficam como estão, para não reescrever a fala.
+# Spoken-only forms -> written form. The burned-in caption is read, not heard,
+# so "gonna" on screen looks like a typo even when it transcribes the speech
+# faithfully. Real contractions ("don't", "it's") are correct written English
+# and are deliberately left alone.
 _CONTRACTIONS = [
-    (r"t[áa]", "está"),
-    (r"t[ôo]", "estou"),
-    (r"t[ãa]o", None),      # sentinela: 'tão' NÃO é contração (ver _expande)
-    # 'pra'/'pro' expandem só para 'para': a contração carrega o artigo, mas
-    # nem sempre ("vim pra junto do Rafael" não vira "para a junto"). Inserir
-    # artigo exigiria analisar o que vem depois; 'para' está sempre correto.
-    (r"pra", "para"),
-    (r"pro", "para"),
-    (r"c[êe]", "você"),
+    (r"gonna", "going to"),
+    (r"wanna", "want to"),
+    (r"gotta", "got to"),
+    (r"kinda", "kind of"),
 ]
 
-# 'né' como muleta: some junto com a vírgula que o cerca. Quando encerra a
-# frase ("é isso, né?"), o ponto final entra no lugar da interrogação, porque
-# a pergunta era retórica.
-RE_NE_FIM = re.compile(r",?\s*n[ée]\s*\?", re.IGNORECASE)
-RE_NE_MEIO = re.compile(r",\s*n[ée]\s*,", re.IGNORECASE)
+# Hesitation noise, as standalone words only: 'ah' inside "yeah" must survive.
+RE_FILLER = re.compile(r"\s+(uh|um|er|ah|hmm)\b\s*,?\s*", re.IGNORECASE)
 
-
-# Locuções em que 'pro' é latim, não contração de "para o".
-RE_PRO_LATIM = re.compile(r"\bpro\s+(labore|rata|forma|bono|indiviso)\b", re.IGNORECASE)
+# Discourse fillers, bounded to a comma-flanked or sentence-initial span.
+# 'like' is also a verb and a preposition, and the filler has to be the whole
+# span between the commas, so "tools, like Slack, are everywhere" is untouched.
+_DISCOURSE_FILLER = r"you know|i mean|like"
+RE_FILLER_MID = re.compile(rf",\s*(?:{_DISCOURSE_FILLER})\s*,", re.IGNORECASE)
+RE_FILLER_END = re.compile(rf",\s*(?:{_DISCOURSE_FILLER})\s*(?=[.?!]|\s*$)",
+                           re.IGNORECASE)
+RE_FILLER_START = re.compile(
+    rf"(?:(?<=^)|(?<=[.?!]))\s*(?:{_DISCOURSE_FILLER})\s*,\s*", re.IGNORECASE)
 
 
 def _expand_contractions(t: str) -> str:
-    """Troca contrações por forma plena, respeitando fronteira de palavra.
-
-    Preserva a maiúscula inicial: "Tá bom" -> "Está bom".
-    """
-    # Protege as locuções antes de mexer nas contrações; devolve no end.
-    reserved = []
-
-    def _reserve(m):
-        reserved.append(m.group(0))
-        return f"\x00{len(reserved) - 1}\x00"
-
-    t = RE_PRO_LATIM.sub(_reserve, t)
-
+    """Expand spoken-only forms, keeping the sentence's initial capital."""
     for pat, target in _CONTRACTIONS:
-        if target is None:      # na lista só para documentar a exclusão
-            continue
-
         def _sub(m, target=target):
-            orig = m.group(0)
-            return target.capitalize() if orig[0].isupper() else target
+            return target.capitalize() if m.group(0)[0].isupper() else target
 
         t = re.sub(rf"\b{pat}\b", _sub, t, flags=re.IGNORECASE)
-
-    for i, orig in enumerate(reserved):
-        t = t.replace(f"\x00{i}\x00", orig)
     return t
 
 
@@ -193,19 +172,20 @@ def fix_proper_nouns(txt: str, names: list) -> str:
 
 
 def clean_caption(txt: str) -> str:
-    """Limpa a legenda para exibição: remove repetição, muletas e contrações.
+    """Clean a caption for display: drop repetition, fillers, spoken-only forms.
 
-    Ex.: 'eu eu gosto' -> 'eu gosto'; remove 'eh/ah/uhum/hã' e 'né';
-    'tá' -> 'está'. (Não altera o áudio — só o texto que aparece na tela.)
+    E.g. 'we we shipped' -> 'we shipped'; strips uh/um/er/ah/hmm and the
+    you-know, I-mean and like discourse fillers; 'gonna' -> 'going to'.
+    (The audio is untouched -- only the text that appears on screen.)
     """
     t = " " + txt.strip() + " "
-    # duas passadas p/ pegar triplas ('a a a')
+    # two passes to catch triples ('a a a')
     t = re.sub(r"\b(\w{1,5})\s+\1\b", r"\1", t, flags=re.IGNORECASE)
     t = re.sub(r"\b(\w{1,5})\s+\1\b", r"\1", t, flags=re.IGNORECASE)
-    t = re.sub(r"\s+(eh|ah|uhum|hã)\s*,?\s*", " ", t, flags=re.IGNORECASE)
-    # 'né' antes das contrações: RE_NE_* casa a forma falada, não a expandida.
-    t = RE_NE_FIM.sub(".", t)
-    t = RE_NE_MEIO.sub(", ", t)
+    t = RE_FILLER.sub(" ", t)
+    t = RE_FILLER_MID.sub(", ", t)
+    t = RE_FILLER_END.sub("", t)
+    t = RE_FILLER_START.sub(" ", t)
     t = _expand_contractions(t)
     t = re.sub(r"\s{2,}", " ", t)
     t = re.sub(r"\s+([,.?!])", r"\1", t)

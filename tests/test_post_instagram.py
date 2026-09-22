@@ -169,10 +169,10 @@ class TestAuthorAndText(unittest.TestCase):
             self.assertIn("Quem Nao Existe", str(ctx.exception))
             self.assertIn("Marina Siqueira", str(ctx.exception))
 
-    def test_contracoes_sao_expandidas(self):
-        t = post_instagram.clean_quote("A oportunidade tá do seu lado", [])
-        self.assertIn("está", t)
-        self.assertNotIn(" tá ", f" {t} ")
+    def test_spoken_only_forms_are_expanded(self):
+        t = post_instagram.clean_quote("You gotta pick one problem", [])
+        self.assertIn("got to", t)
+        self.assertNotIn(" gotta ", f" {t} ")
 
     def test_nome_da_empresa_e_corrigido(self):
         t = post_instagram.clean_quote("A Zarvic cresceu rápido", ["Zarvik"])
