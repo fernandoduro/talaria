@@ -1,12 +1,12 @@
-"""Registro do que já foi published — a trava contra post duplicado.
+"""Record of what has already been published — the lock against duplicates.
 
-A unidade do registro é (platform, slug): um clip publica em YouTube E
-Reels, e se só uma das duas passou, o retry do day seguinte publica só a que
-faltou: pendência por item republicaria a que já foi.
+The record's unit is (platform, slug): one clip publishes to YouTube AND Reels,
+and if only one of the two went through, the next day's retry publishes only
+the one that was missing; a per-item pending flag would republish the other.
 
-Cada sucesso grava NA HORA, atomicamente. Registrar só no end do lote deixa
-uma janela: processo morto no meio e a próxima execução duplica o que já
-tinha saído — post duplicado não tem correção depois de published.
+Each success is written IMMEDIATELY, atomically. Recording only at the end of
+the batch leaves a window: the process dies partway and the next run duplicates
+what had already gone out — a duplicate post cannot be fixed after publishing.
 """
 from __future__ import annotations
 
@@ -19,12 +19,12 @@ from . import config, layout
 
 
 def load(pd: str) -> dict:
-    """Lê o registro. Arquivo corrompido ABORTA — fail closed.
+    """Reads the record. A corrupt file ABORTS — fail closed.
 
-    JSON inválido nunca é tratado como "nada published ainda": isso
-    republicaria o histórico inteiro. `projects/` é git-ignored, então não há
-    backup no git — a mensagem manda conferir os perfis das platforms antes
-    de recriar o arquivo.
+    Invalid JSON is never treated as "nothing published yet": that would
+    republish the whole history. `projects/` is git-ignored, so there is no
+    backup in git — the message tells the manager to check the platform
+    profiles before recreating the file.
     """
     path = layout.published(pd)
     if not os.path.exists(path):
@@ -46,10 +46,10 @@ def is_published(reg: dict, platform: str, slug: str) -> bool:
 
 def record(pd: str, platform: str, slug: str, post_id: str,
              url: str) -> str:
-    """Acrescenta UMA publicação e grava na hora, atomicamente.
+    """Appends ONE publication and writes it immediately, atomically.
 
-    temp + os.replace no mesmo filesystem: ou o arquivo novo inteiro, ou o
-    antigo intacto — nunca um JSON pela metade (que o `load` recusaria).
+    temp + os.replace on the same filesystem: either the whole new file or the
+    old one intact — never a half-written JSON (which `load` would refuse).
     """
     reg = load(pd)
     reg.setdefault(platform, []).append({

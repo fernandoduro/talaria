@@ -1,9 +1,9 @@
-"""Hospedagem temporária no S3 — a Graph API busca a mídia numa URL pública.
+"""Temporary S3 hosting — the Graph API fetches the media from a public URL.
 
-O Instagram não aceita upload binário direto: o container de mídia recebe uma
-URL e o Instagram baixa de lá. O arquivo sobe pra `tmp-publish/`, a URL é
-assinada com validade de 1h (tempo de o Instagram processar) e o chamador
-remove no `finally` — sucesso ou falha.
+Instagram accepts no direct binary upload: the media container takes a URL and
+Instagram downloads from there. The file goes up to `tmp-publish/`, the URL is
+signed with a 1h validity (time for Instagram to process it) and the caller
+removes it in `finally` — success or failure.
 """
 from __future__ import annotations
 
@@ -29,15 +29,15 @@ def _bucket() -> str:
 
 
 def _client():
-    """Cliente S3, apontando para outro provedor quando configurado.
+    """S3 client, pointed at another provider when one is configured.
 
-    Cloudflare R2, MinIO e afins falam a mesma API do S3 — só mudam de
-    endereço. Sem `S3_ENDPOINT_URL` o boto3 usa a AWS, que é o padrão; com
-    ele, trocar de provedor é editar o `.env`, não o código.
+    Cloudflare R2, MinIO and the like speak the same S3 API — only the address
+    changes. Without `S3_ENDPOINT_URL` boto3 uses AWS, which is the default;
+    with it, switching provider means editing `.env`, not the code.
 
-    A assinatura é fixada em SigV4: sem isso o boto3 pode assinar em SigV2, e
-    o R2 recusa a URL com 401. O sintoma apareceria só na publicação, como
-    container que falha — sem nada apontando para a assinatura.
+    The signature is pinned to SigV4: without that boto3 may sign with SigV2 and
+    R2 refuses the URL with a 401. The symptom would only surface at publishing
+    time, as a failing container — with nothing pointing at the signature.
     """
     return boto3.client("s3",
                         endpoint_url=os.environ.get("S3_ENDPOINT_URL") or None,
@@ -45,10 +45,10 @@ def _client():
 
 
 def put(path: str) -> str:
-    """Sobe o arquivo e devolve a URL assinada que o Instagram vai buscar.
+    """Uploads the file and returns the signed URL Instagram will fetch.
 
-    O uuid no name evita colisão entre publicações simultâneas do mesmo slug
-    (retry manual em outra janela, por exemplo).
+    The uuid in the name avoids a collision between simultaneous publications
+    of the same slug (a manual retry in another window, for instance).
     """
     s3 = _client()
     key = f"{PREFIX}{uuid.uuid4().hex}_{os.path.basename(path)}"
@@ -61,23 +61,23 @@ def put(path: str) -> str:
 
 
 def remove(url: str) -> None:
-    """Apaga o temporário. Melhor esforço: falha aqui só avisa, não aborta.
+    """Deletes the temporary file. Best effort: a failure warns, never aborts.
 
-    O arquivo não é segredo e a URL expira em 1h — um resíduo no bucket é o
-    pior caso aceitável. Derrubar uma publicação já feita porque o delete
-    falhou seria trocar um problema pequeno por um grande.
+    The file is not secret and the URL expires in 1h — a leftover in the bucket
+    is the acceptable worst case. Bringing down a publication already made
+    because the delete failed would trade a small problem for a big one.
     """
     try:
         bucket = _bucket()
         parts = urlparse(url)
         key = unquote(parts.path.lstrip("/"))
-        # Onde o bucket aparece depende do estilo da URL: a AWS usa
-        # virtual-hosted (`bucket.host/key`) e o R2/MinIO usam path-style
-        # (`host/bucket/key`). Quem decide é o HOST, não o texto do path —
-        # olhar só o path erra quando o bucket se chama como o PREFIX
-        # ("tmp-publish"), cortando o prefixo real da key. Nos dois casos o
-        # delete miraria objeto inexistente e falharia calado, deixando a
-        # mídia acessível pela URL até expirar.
+        # Where the bucket appears depends on the URL style: AWS uses
+        # virtual-hosted (`bucket.host/key`) while R2/MinIO use path-style
+        # (`host/bucket/key`). The HOST decides, not the path text — looking at
+        # the path alone gets it wrong when the bucket is named like the PREFIX
+        # ("tmp-publish"), cutting the key's real prefix. Either way the delete
+        # would target a non-existent object and fail quietly, leaving the media
+        # reachable by URL until it expires.
         if not parts.hostname.startswith(bucket + "."):
             if key.startswith(bucket + "/"):
                 key = key[len(bucket) + 1:]

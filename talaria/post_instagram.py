@@ -1,9 +1,9 @@
-"""Post de citação para Instagram (4:5), escrito sobre o template do canal.
+"""Instagram quote post (4:5), written over the channel template.
 
-O template (assets/template_instagram.png) traz o fundo: gradiente, filete e
-barra. Logo e aspas são do canal. Este módulo write por cima apenas o que
-muda por post: citação, name e role. Não conhece vídeo nem ffmpeg — recebe
-texto e devolve PNG.
+The template (assets/template_instagram.png) carries the background: gradient,
+rule and bar. Logo and quote marks are the channel's. This module writes over
+it only what changes per post: quote, name and role. It knows nothing of video
+or ffmpeg — it takes text and returns a PNG.
 """
 from __future__ import annotations
 
@@ -21,17 +21,17 @@ def _quote_font():
 
 
 def wrap(text: str) -> list:
-    """Linhas da citação, medidas na fonte real do post."""
+    """The quote's lines, measured in the post's real font."""
     return render.wrap_by_pixels(text, fnt=_quote_font(),
                                  width=config.POST_TEXT_W)
 
 
 def validate_card(text: str) -> dict:
-    """O texto fits num card? Mede na fonte, não account caracteres.
+    """Does the text fit in a card? Measured in the font, not counted in chars.
 
-    Não encolhe a fonte para forçar o encaixe: fonte smaller quebra a hierarquia
-    visual e denuncia texto espremido. Card que estoura é problema editorial —
-    encurtar a frase ou virar mais um card do carrossel.
+    It does not shrink the font to force a fit: a smaller font breaks the visual
+    hierarchy and gives away squeezed text. A card that overflows is an editorial
+    problem — shorten the sentence or make it one more card in the carousel.
     """
     text = (text or "").strip()
     if not text:
@@ -39,9 +39,9 @@ def validate_card(text: str) -> dict:
 
     lines = wrap(text)
 
-    # Palavra sozinha maior que a largura útil: a quebra a coloca na linha
-    # assim mesmo, porque não há onde quebrar. Passaria na contagem de lines
-    # e sairia cortada na lateral da imagem, sem aviso.
+    # A single word wider than the usable width: the wrap puts it on the line
+    # anyway, because there is nowhere to break. It would pass the line count
+    # and come out cut off at the edge of the image, unannounced.
     fnt = _quote_font()
     for line in lines:
         width = fnt.getlength(line)
@@ -72,15 +72,16 @@ def _truetype(path, size):
 
 
 def episode_author(project_dir: str, who: str = "") -> dict:
-    """Nome, role e company do rodapé, lidos do episode.json.
+    """Footer name, role and company, read from episode.json.
 
-    Nome próprio vem daqui, nunca da transcrição — é a mesma regra da legenda
-    queimada. Sem convidado externo, a company assina a citação.
+    Proper nouns come from here, never from the transcript — the same rule as
+    the burned-in caption. With no external guest, the company signs the quote.
 
-    `who` escolhe o convidado quando o episódio tem mais de um. Sem `who`,
-    assina o primeiro. Nome que não está no episode.json levanta error em vez
-    de cair no primeiro: publish a frase de uma pessoa com o name de outra é
-    o error mais caro desta etapa, e silêncio aqui produziria exatamente isso.
+    `who` picks the guest when the episode has more than one. Without `who`, the
+    first one signs. A name absent from episode.json raises an error instead of
+    falling back to the first: publishing one person's sentence under another
+    person's name is the costliest error of this step, and silence here would
+    produce exactly that.
     """
     ep = episode.load(project_dir)
     guests = ep.get("guests") or []
@@ -106,25 +107,25 @@ def episode_author(project_dir: str, who: str = "") -> dict:
 
 
 def clean_quote(text: str, names: list) -> str:
-    """Prepara a fala transcrita para virar citação publicada.
+    """Prepares transcribed speech to become a published quote.
 
-    Mesmo tratamento da legenda queimada — expande contração, remove muleta,
-    corrige name próprio — e pelo mesmo reason: "tá" na tela parece error de
-    digitação. Numa citação atribuída a uma pessoa identificada isso pesa mais,
-    então o limite também é mais rígido: NUNCA reescrever a frase. Citação que
-    precisa ser reescrita para funcionar não é a citação certa.
+    The same treatment as the burned-in caption — expand contractions, strip
+    fillers, fix proper nouns — and for the same reason: "gonna" on screen looks
+    like a typo. In a quote attributed to a named person that weighs more, so the
+    limit is stricter too: NEVER rewrite the sentence. A quote that has to be
+    rewritten to work is not the right quote.
     """
     return utils.fix_proper_nouns(utils.clean_caption(text), names)
 
 
 def render_card(text: str, author: dict, out_path: str, template: str = None):
-    """Escreve citação e autor sobre o template e salva o PNG.
+    """Writes quote and author over the template and saves the PNG.
 
-    `author` traz name, role e company — vindos do episode.json, nunca da
-    transcrição (a transcrição erra name próprio).
+    `author` carries name, role and company — from episode.json, never from the
+    transcript (the transcript gets proper nouns wrong).
 
-    Levanta ValueError se o texto não couber: a decisão de encurtar ou quebrar
-    em outro card é editorial e não pode ser tomada aqui.
+    Raises ValueError if the text does not fit: the decision to shorten or split
+    into another card is editorial and cannot be taken here.
     """
     template = template or config.POST_TEMPLATE
     if not os.path.exists(template):
@@ -140,16 +141,15 @@ def render_card(text: str, author: dict, out_path: str, template: str = None):
     img = Image.open(template).convert("RGB")
     d = ImageDraw.Draw(img)
 
-    # Citação — ancorada pelo TOPO, não centralizada: cards de 2 e de 5 lines
-    # partem da mesma altura, então o texto não pula a cada deslize do
-    # carrossel.
+    # Quote — anchored at the TOP, not centred: 2-line and 5-line cards start
+    # at the same height, so the text does not jump as the carousel is swiped.
     quote_font = _quote_font()
     for i, line in enumerate(wrap(text)):
         y = config.POST_QUOTE_Y + i * config.POST_QUOTE_STEP
         d.text((config.POST_MARGIN_X, y), line, font=quote_font,
                fill=config.POST_QUOTE_COLOR)
 
-    # Rodapé (o filete já vem desenhado no template)
+    # Footer (the rule already comes drawn on the template)
     name_font = _truetype(config.POST_FONT, config.POST_NAME_SIZE)
     d.text((config.POST_MARGIN_X, config.POST_NAME_Y), author["name"],
            font=name_font, fill=config.POST_NAME_COLOR)
@@ -165,17 +165,17 @@ def render_card(text: str, author: dict, out_path: str, template: str = None):
 
 
 def file_slug(slug: str) -> str:
-    """Slug seguro para virar name de arquivo, preservando a legibilidade.
+    """A slug safe to become a filename, keeping it readable.
 
-    O slug é digitado à mão no `posts.json` e vira name de arquivo. Sem isto um
-    `../` cria diretório lixo dentro da pasta de saída e, com barras demais,
-    quebra num FileNotFoundError do Pillow em vez de generate o post — error que
-    não diz ao gestor o que ele digitou de errado.
+    The slug is typed by hand into `posts.json` and becomes a filename. Without
+    this a `../` creates a junk directory inside the output folder and, with
+    enough slashes, breaks in a Pillow FileNotFoundError instead of generating
+    the post — an error that does not say what was typed wrong.
 
-    É público porque o `publish` também sanea por aqui, e pelo mesmo reason:
-    slug que escapa da pasta faz o publish achar um arquivo de fora do
-    project e publicá-lo. Os dois precisam da MESMA regra — duas cópias
-    divergem na primeira mudança e a divergência só aparece publicada.
+    It is public because `publish` sanitises through here too, for the same
+    reason: a slug that escapes the folder makes publish find a file from
+    outside the project and publish it. Both need the SAME rule — two copies
+    diverge at the first change and the divergence only shows once published.
     """
     cleaned = re.sub(r"[^\w.-]", "_", (slug or "").strip(), flags=re.UNICODE)
     cleaned = cleaned.strip("._-")
@@ -183,7 +183,7 @@ def file_slug(slug: str) -> str:
 
 
 def load(project_dir: str) -> list:
-    """Lê o posts.json do project."""
+    """Reads the project's posts.json."""
     path = layout.posts(project_dir)
     if not os.path.exists(path):
         raise FileNotFoundError(
@@ -195,11 +195,11 @@ def load(project_dir: str) -> list:
 
 
 def generate(project_dir: str) -> list:
-    """Renderiza todos os posts do posts.json. Devolve os paths generated.
+    """Renders every post in posts.json. Returns the generated paths.
 
-    Valida TODOS os cards antes de escrever qualquer arquivo: material pela
-    metade numa pasta de publicação é pior que error na hora — o gestor pode
-    publish o card 1 de um carrossel que nunca teve card 2.
+    Validates ALL cards before writing any file: half-finished material in a
+    publishing folder is worse than an error up front — the manager could
+    publish card 1 of a carousel that never had a card 2.
     """
     posts = load(project_dir)
     if not posts:
@@ -208,7 +208,7 @@ def generate(project_dir: str) -> list:
     ep = episode.load(project_dir)
     names = [ep.get("company", "")] + [c.get("name", "")
                                        for c in (ep.get("guests") or [])]
-    # 1ª passada: limpa e validate tudo.
+    # First pass: clean and validate everything.
     planned = []
     for p in posts:
         slug = p.get("slug") or "post"
@@ -216,14 +216,14 @@ def generate(project_dir: str) -> list:
         if not cards:
             raise ValueError(f"post '{slug}' não tem nenhum card")
 
-        # Quem assina: o `who` do post (episódio com dois guests) ou, por
-        # omissão, o primeiro. Resolvido aqui na 1ª passada para que um name
-        # errado aborte antes de escrever qualquer arquivo.
+        # Who signs: the post's `who` (an episode with two guests) or, by
+        # default, the first. Resolved here in the first pass so a wrong name
+        # aborts before any file is written.
         author = episode_author(project_dir, who=p.get("who", ""))
 
-        # A legenda é validada AQUI, não na hora de gravar o .txt: o contrato
-        # desta função é abortar antes de escrever qualquer arquivo, e um kind
-        # errado descoberto depois já teria deixado os PNGs na pasta.
+        # The caption is validated HERE, not when the .txt is written: this
+        # function's contract is to abort before writing any file, and a wrong
+        # type found later would already have left the PNGs in the folder.
         caption.validate("caption", p.get("caption"), f"post {slug}")
         for i, raw in enumerate(cards, start=1):
             if not isinstance(raw, str):
@@ -242,7 +242,7 @@ def generate(project_dir: str) -> list:
                     else f"post_{fname}_{i}.png")
             planned.append((name, text, author))
 
-    # 2ª passada: write.
+    # Second pass: write.
     output_dir = layout.posts_png(project_dir)
     os.makedirs(output_dir, exist_ok=True)
     generated = []
@@ -251,8 +251,8 @@ def generate(project_dir: str) -> list:
                                    os.path.join(output_dir, name)))
         print(f"[post] {name}")
 
-    # Um caption por POST, não por card: um carrossel é uma publicação só, com
-    # uma legenda só. Por isso a lista vem de `posts` e não de `planned`.
+    # One caption per POST, not per card: a carousel is a single publication
+    # with a single caption. Hence the list comes from `posts`, not `planned`.
     write_captions(output_dir,
                      [(p.get("slug") or "post", p.get("caption", "")) for p in posts],
                      (texts.load(project_dir) or {}).get("hashtags", ""))
@@ -260,14 +260,14 @@ def generate(project_dir: str) -> list:
 
 
 def write_captions(output_dir: str, captions: list, hashtags: str) -> list:
-    """Grava o `.txt` de publicação de cada post na pasta de saída.
+    """Writes each post's publishing `.txt` into the output folder.
 
-    `captions` é [(slug, caption)] — um item por POST. O name do arquivo usa o
-    slug do post (`post_<slug>.txt`), então um carrossel de N cards continua
-    com um único caption, ao lado dos seus `post_<slug>_1.png`, `_2.png`...
+    `captions` is [(slug, caption)] — one item per POST. The filename uses the
+    post slug (`post_<slug>.txt`), so an N-card carousel still has a single
+    caption, beside its `post_<slug>_1.png`, `_2.png`...
 
-    O slug passa pelo mesmo saneamento do PNG: sem isso um `../` no JSON
-    escreveria o `.txt` fora da pasta de publicação.
+    The slug goes through the same sanitising as the PNG: without it a `../` in
+    the JSON would write the `.txt` outside the publishing folder.
     """
     written = []
     for slug, text in captions:

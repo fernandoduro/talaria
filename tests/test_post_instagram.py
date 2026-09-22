@@ -1,4 +1,4 @@
-"""Testes do post de citação para Instagram."""
+"""Tests for the Instagram quote post."""
 import json
 import os
 import tempfile
@@ -8,17 +8,17 @@ from talaria import config, layout, post_instagram
 
 
 class TestConfigPost(unittest.TestCase):
-    def test_template_existe_no_repo(self):
+    def test_template_exists_in_the_repo(self):
         self.assertTrue(os.path.exists(config.POST_TEMPLATE),
                         f"template não encontrado em {config.POST_TEMPLATE}")
 
-    def test_medidas_batem_com_o_template(self):
+    def test_measurements_match_the_template(self):
         from PIL import Image
         with Image.open(config.POST_TEMPLATE) as im:
             self.assertEqual(im.size, (config.POST_W, config.POST_H))
 
-    def test_citacao_nao_invade_o_filete(self):
-        # 5 lines cabem; a 6ª invadiria o filete em y=2242.
+    def test_quote_does_not_invade_the_rule(self):
+        # 5 lines fit; a 6th would invade the rule at y=2242.
         end_5 = config.POST_QUOTE_Y + 4 * config.POST_QUOTE_STEP + config.POST_QUOTE_LINE_H
         end_6 = config.POST_QUOTE_Y + 5 * config.POST_QUOTE_STEP + config.POST_QUOTE_LINE_H
         self.assertLess(end_5, config.POST_RULE_Y)
@@ -26,19 +26,19 @@ class TestConfigPost(unittest.TestCase):
 
 
 class TestFit(unittest.TestCase):
-    def test_citacao_do_design_cabe_em_5_linhas(self):
+    def test_design_quote_fits_in_5_lines(self):
         txt = ("A gente descobriu que não precisava mudar de cidade "
                "para construir algo grande. Precisava ficar.")
         r = post_instagram.validate_card(txt)
         self.assertTrue(r["fits"])
         self.assertEqual(r["lines"], 5)
 
-    def test_citacao_curta_cabe(self):
+    def test_short_quote_fits(self):
         r = post_instagram.validate_card("O mar azul estava do lado.")
         self.assertTrue(r["fits"])
         self.assertLessEqual(r["lines"], 5)
 
-    def test_citacao_longa_e_rejeitada_com_o_excesso(self):
+    def test_long_quote_is_rejected_with_the_excess(self):
         txt = ("Às vezes a oportunidade está do seu lado e você está tão "
                "focado em uma coisa que não olha para o lado.")
         r = post_instagram.validate_card(txt)
@@ -46,29 +46,29 @@ class TestFit(unittest.TestCase):
         self.assertGreater(r["lines"], 5)
         self.assertIn("linha", r["reason"])
 
-    def test_texto_vazio_e_rejeitado(self):
+    def test_empty_text_is_rejected(self):
         r = post_instagram.validate_card("   ")
         self.assertFalse(r["fits"])
 
-    def test_palavra_mais_larga_que_o_card_e_rejeitada(self):
-        """Palavra sem onde quebrar sai cortada na lateral — recusa, não gera.
+    def test_word_wider_than_the_card_is_rejected(self):
+        """A word with nowhere to break comes out cut off — refuse, not write.
 
-        A contagem de lines não pega este caso: a palavra ocupa UMA linha e
-        passa no limite de 5, mas transborda a largura. 'anticonstitucionalis-
-        simamente' já estoura, e URL ou name composto chegam lá com facilidade.
+        The line count misses this case: the word occupies ONE line and passes
+        the limit of 5, but overflows the width. 'anticonstitucionalissimamente'
+        already overflows, and a URL or compound name gets there easily.
         """
         r = post_instagram.validate_card("anticonstitucionalissimamente")
         self.assertFalse(r["fits"])
         self.assertIn("não cabe na largura", r["reason"])
 
-    def test_frase_com_palavra_normal_longa_ainda_cabe(self):
-        """A recusa é por medida, não por tamanho de palavra em caracteres."""
+    def test_sentence_with_a_long_ordinary_word_still_fits(self):
+        """The refusal is by measurement, not by word length in characters."""
         r = post_instagram.validate_card("Desenvolvimento e estruturação.")
         self.assertTrue(r["fits"])
 
 
 class TestRender(unittest.TestCase):
-    def test_gera_png_no_tamanho_do_template(self):
+    def test_produces_a_png_at_the_template_size(self):
         from PIL import Image
         with tempfile.TemporaryDirectory() as d:
             out = os.path.join(d, "post.png")
@@ -81,7 +81,7 @@ class TestRender(unittest.TestCase):
             with Image.open(out) as im:
                 self.assertEqual(im.size, (config.POST_W, config.POST_H))
 
-    def test_card_que_nao_cabe_levanta_erro(self):
+    def test_a_card_that_does_not_fit_raises(self):
         with tempfile.TemporaryDirectory() as d:
             out = os.path.join(d, "post.png")
             with self.assertRaises(ValueError) as ctx:
@@ -94,7 +94,7 @@ class TestRender(unittest.TestCase):
             self.assertIn("linhas", str(ctx.exception))
             self.assertFalse(os.path.exists(out))
 
-    def test_template_ausente_da_erro_claro(self):
+    def test_missing_template_gives_a_clear_error(self):
         with tempfile.TemporaryDirectory() as d:
             out = os.path.join(d, "post.png")
             with self.assertRaises(FileNotFoundError) as ctx:
@@ -106,7 +106,7 @@ class TestRender(unittest.TestCase):
 
 
 def _fake_project(d):
-    """Cria um project mínimo com episode.json preenchido."""
+    """Creates a minimal project with episode.json filled in."""
     ep = {
         "season": 2, "episode": 8, "company": "Zarvik",
         "city": "Ribeirão Açaí", "uf": "SP",
@@ -120,7 +120,7 @@ def _fake_project(d):
 
 
 class TestAuthorAndText(unittest.TestCase):
-    def test_autor_vem_do_episodio_json(self):
+    def test_author_comes_from_episode_json(self):
         with tempfile.TemporaryDirectory() as d:
             _fake_project(d)
             a = post_instagram.episode_author(d)
@@ -128,7 +128,7 @@ class TestAuthorAndText(unittest.TestCase):
             self.assertEqual(a["role"], "Sócio")
             self.assertEqual(a["company"], "Zarvik")
 
-    def test_episodio_sem_convidado_usa_a_empresa(self):
+    def test_episode_without_a_guest_uses_the_company(self):
         with tempfile.TemporaryDirectory() as d:
             _fake_project(d)
             with open(os.path.join(d, "episode.json"), encoding="utf-8") as f:
@@ -140,11 +140,11 @@ class TestAuthorAndText(unittest.TestCase):
             self.assertEqual(a["name"], "Zarvik")
             self.assertEqual(a["role"], "")
 
-    def test_episodio_com_dois_convidados_permite_escolher_quem_assina(self):
-        """Citação do 2º convidado não pode sair com o name do 1º.
+    def test_two_guests_allow_choosing_who_signs(self):
+        """The 2nd guest's quote must not come out under the 1st one's name.
 
-        Atribuir a frase à pessoa errada é o pior error desta etapa — o post
-        publica name e role embaixo de aspas.
+        Attributing the sentence to the wrong person is the worst error of this
+        step — the post prints name and role beneath the quote marks.
         """
         with tempfile.TemporaryDirectory() as d:
             _fake_project(d)
@@ -161,7 +161,7 @@ class TestAuthorAndText(unittest.TestCase):
             self.assertEqual(second["name"], "Rafael Nunes")
             self.assertEqual(second["role"], "CEO")
 
-    def test_autor_desconhecido_da_erro_em_vez_de_atribuir_errado(self):
+    def test_unknown_author_errors_instead_of_misattributing(self):
         with tempfile.TemporaryDirectory() as d:
             _fake_project(d)
             with self.assertRaises(ValueError) as ctx:
@@ -174,7 +174,7 @@ class TestAuthorAndText(unittest.TestCase):
         self.assertIn("got to", t)
         self.assertNotIn(" gotta ", f" {t} ")
 
-    def test_nome_da_empresa_e_corrigido(self):
+    def test_company_name_is_corrected(self):
         t = post_instagram.clean_quote("A Zarvic cresceu rápido", ["Zarvik"])
         self.assertIn("Zarvik", t)
         self.assertNotIn("Zarvic", t)
@@ -186,7 +186,7 @@ class TestGenerate(unittest.TestCase):
         with open(layout.ensure_dir(layout.posts(d)), "w", encoding="utf-8") as f:
             json.dump({"posts": posts}, f, ensure_ascii=False)
 
-    def test_card_unico_gera_um_arquivo(self):
+    def test_single_card_produces_one_file(self):
         with tempfile.TemporaryDirectory() as d:
             self._with_posts(d, [{"slug": "corte1_mar_azul",
                                  "cards": ["O mar azul estava do lado."]}])
@@ -195,7 +195,7 @@ class TestGenerate(unittest.TestCase):
             self.assertTrue(generated[0].endswith("post_corte1_mar_azul.png"))
             self.assertTrue(os.path.exists(generated[0]))
 
-    def test_carrossel_gera_arquivos_numerados_na_ordem(self):
+    def test_carousel_produces_numbered_files_in_order(self):
         with tempfile.TemporaryDirectory() as d:
             self._with_posts(d, [{"slug": "corte3_b2b", "cards": [
                 "No B2B você entrega e acabou.",
@@ -206,7 +206,7 @@ class TestGenerate(unittest.TestCase):
             self.assertTrue(generated[0].endswith("post_corte3_b2b_1.png"))
             self.assertTrue(generated[1].endswith("post_corte3_b2b_2.png"))
 
-    def test_card_que_estoura_aborta_sem_gerar_nada(self):
+    def test_overflowing_card_aborts_without_writing_anything(self):
         with tempfile.TemporaryDirectory() as d:
             self._with_posts(d, [{"slug": "ok", "cards": ["Curta."]},
                                 {"slug": "bad", "cards": [
@@ -216,23 +216,23 @@ class TestGenerate(unittest.TestCase):
             with self.assertRaises(ValueError) as ctx:
                 post_instagram.generate(d)
             self.assertIn("bad", str(ctx.exception))
-            # Falha antes de escrever: nada de pasta com material pela metade.
+            # Fails before writing: no folder with half-finished material.
             self.assertFalse(os.path.exists(layout.posts_png(d)))
 
-    def test_card_que_nao_e_texto_da_erro_util(self):
-        """posts.json é escrito à mão: um card numérico não pode virar
-        AttributeError vindo de dentro da limpeza de texto."""
+    def test_non_text_card_gives_a_useful_error(self):
+        """posts.json is hand-written: a numeric card must not become an
+        AttributeError coming out of the text cleanup."""
         with tempfile.TemporaryDirectory() as d:
             self._with_posts(d, [{"slug": "a", "cards": [123]}])
             with self.assertRaises(ValueError) as ctx:
                 post_instagram.generate(d)
             self.assertIn("esperava texto", str(ctx.exception))
 
-    def test_slug_com_barra_nao_escapa_da_pasta_de_saida(self):
-        """Slug é digitado à mão no posts.json — não pode virar path.
+    def test_slug_with_a_slash_does_not_escape_the_output_folder(self):
+        """The slug is hand-typed in posts.json — it must not become a path.
 
-        Sem saneamento, `../fora` cria diretório lixo e `../../..` quebra com
-        FileNotFoundError obscuro do Pillow, em vez de generate o arquivo.
+        Without sanitising, `../fora` creates a junk directory and `../../..`
+        breaks with an obscure Pillow FileNotFoundError instead of writing.
         """
         with tempfile.TemporaryDirectory() as d:
             self._with_posts(d, [{"slug": "../../fora", "cards": ["Curta."]}])
@@ -241,13 +241,13 @@ class TestGenerate(unittest.TestCase):
             self.assertTrue(os.path.realpath(generated[0]).startswith(output + os.sep))
             self.assertNotIn("..", os.path.basename(generated[0]))
 
-    def test_autor_do_json_e_ignorado_em_favor_do_episodio(self):
+    def test_author_in_the_json_is_ignored_in_favour_of_the_episode(self):
         with tempfile.TemporaryDirectory() as d:
             self._with_posts(d, [{"slug": "c1", "cards": ["Curta."],
                                  "autor": {"name": "Nome Errado",
                                            "role": "X", "company": "Y"}}])
             post_instagram.generate(d)
-            # Não dá para ler texto do PNG; o contrato é a função de autor.
+            # The PNG text cannot be read; the contract is the author function.
             self.assertEqual(post_instagram.episode_author(d)["name"],
                              "Marina Siqueira")
 
@@ -257,13 +257,13 @@ if __name__ == "__main__":
 
 
 class TestPostCaption(unittest.TestCase):
-    """O .txt de publicação do post — um por post, não um por card."""
+    """The post's publishing .txt — one per post, not one per card."""
 
     def setUp(self):
         self.d = tempfile.mkdtemp()
 
-    def test_card_unico_tem_txt_com_o_slug(self):
-        # Post simples -> post_<slug>.txt
+    def test_single_card_has_a_txt_named_with_the_slug(self):
+        # Simple post -> post_<slug>.txt
         output = self.d
         written = post_instagram.write_captions(
             output, [("corte1", "A legenda do post.")], "#Um #Dois")
@@ -272,16 +272,16 @@ class TestPostCaption(unittest.TestCase):
         with open(written[0], encoding="utf-8") as f:
             self.assertEqual(f.read(), "A legenda do post.\n\n#Um #Dois")
 
-    def test_carrossel_gera_um_unico_txt(self):
-        # 2 cards, 1 caption. É a borda principal desta feature.
+    def test_carousel_produces_a_single_txt(self):
+        # 2 cards, 1 caption. The main edge case of this feature.
         written = post_instagram.write_captions(
             self.d, [("corte2", "Legenda do carrossel.")], "#Um")
         self.assertEqual(len(written), 1)
         names = sorted(n for n in os.listdir(self.d) if n.endswith(".txt"))
         self.assertEqual(names, ["post_corte2.txt"])
 
-    def test_sem_legenda_avisa_e_grava_hashtags(self):
-        # Mesmo contrato do clip — não some em silêncio.
+    def test_missing_caption_warns_and_writes_hashtags(self):
+        # Same contract as the clip — it does not vanish silently.
         import contextlib
         import io
         buf = io.StringIO()
@@ -292,26 +292,26 @@ class TestPostCaption(unittest.TestCase):
         with open(os.path.join(self.d, "post_corte3.txt"), encoding="utf-8") as f:
             self.assertEqual(f.read(), "#Um")
 
-    def test_slug_sanitizado_no_nome_do_txt(self):
-        # O .txt herda a sanitização do PNG (não cria ../ fora da pasta).
+    def test_slug_is_sanitised_in_the_txt_name(self):
+        # The .txt inherits the PNG sanitising (no ../ outside the folder).
         written = post_instagram.write_captions(
             self.d, [("../fuga", "x")], "")
         self.assertEqual(os.path.dirname(written[0]), self.d)
         self.assertNotIn("..", os.path.basename(written[0]))
 
-    def test_legenda_nao_texto_e_rejeitada(self):
-        # Valida kind, como generate() já faz com os cards.
+    def test_non_text_caption_is_rejected(self):
+        # Validates the type, as generate() already does with the cards.
         with self.assertRaises(ValueError) as e:
             post_instagram.write_captions(self.d, [("corte1", 123)], "")
         self.assertIn("corte1", str(e.exception))
 
 
 class TestCaptionValidatedBeforeWriting(unittest.TestCase):
-    """Legenda inválida aborta ANTES de escrever qualquer PNG.
+    """An invalid caption aborts BEFORE any PNG is written.
 
-    O `generate()` promete na docstring: validate tudo antes de escrever, para não
-    deixar material pela metade numa pasta de publicação. Uma legenda de kind
-    errado tem que respeitar a mesma promessa que os cards já respeitam.
+    `generate()` promises it in its docstring: validate everything before
+    writing, so no half-finished material is left in a publishing folder. A
+    caption of the wrong type must keep the promise the cards already keep.
     """
 
     def setUp(self):
@@ -327,7 +327,7 @@ class TestCaptionValidatedBeforeWriting(unittest.TestCase):
         with open(p, "w", encoding="utf-8") as f:
             json.dump({"posts": data}, f)
 
-    def test_legenda_invalida_nao_deixa_png_orfao(self):
+    def test_invalid_caption_leaves_no_orphan_png(self):
         self._posts([
             {"slug": "bom", "cards": ["Uma citação curta."], "caption": "ok"},
             {"slug": "bad", "cards": ["Outra citação."], "caption": 123},
