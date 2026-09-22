@@ -34,20 +34,28 @@ with open("docs/plans/phase-1-inputs/assertion-classification.tsv") as fh:
         checked += 1
         if n < 1 or n > len(lines):
             bad.append(f"{f}:{n} -- past end of file ({len(lines)} lines)"); continue
-        # The pointer may sit on the first line of a multi-line statement, so
-        # accept an assertion within the next two lines.
-        window = " ".join(lines[n - 1:n + 2])
-        if "assert" not in window:
-            bad.append(f"{f}:{n} -- no assertion here: {lines[n-1].strip()[:70]!r}")
+        # The pointer must land on the assertion line ITSELF, not merely near
+        # one. A row that names one assertion while pointing at another passes
+        # every weaker check -- same file, in range, an assert within a few
+        # lines, inside the right test -- and seven rows drifted exactly that
+        # way in a single wave. The first line of a multi-line assert statement
+        # contains the word, so this costs nothing legitimate: all 116 rows
+        # satisfy it.
+        if "assert" not in lines[n - 1]:
+            bad.append(f"{f}:{n} -- pointer is not on an assertion line: "
+                       f"{lines[n-1].strip()[:60]!r}")
             continue
-        # An assertion at the pointer is not enough: a row shifted onto a
-        # DIFFERENT test's assertion satisfies every check above while its
-        # `proves` statement now describes the wrong test. The row names the
-        # test, so hold it to that.
-        here = enclosing_test(lines, n)
-        if here != named:
-            bad.append(f"{f}:{n} -- row says {named}, assertion is in "
-                       f"{here or '<no enclosing test>'}")
+
+        # And it must sit inside the test the row names, or the `proves`
+        # statement describes someone else's assertion.
+        enclosing = None
+        for k in range(n - 1, -1, -1):
+            m = re.match(r"\s*def (test_\w+)", lines[k])
+            if m:
+                enclosing = m.group(1); break
+        want = row[2] if len(row) > 2 else ""
+        if want and enclosing and enclosing != want:
+            bad.append(f"{f}:{n} -- row says {want}, assertion is in {enclosing}")
 
 for b in bad:
     print(b)

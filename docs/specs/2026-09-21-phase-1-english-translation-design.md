@@ -236,14 +236,20 @@ Phase 0's criteria failed four times by checking the categories already
 imagined. These are written to detect the property — "no Portuguese remains" —
 rather than a list of known Portuguese words.
 
-- `Ran 388 tests` / `OK`, from a rebuilt venv.
+- `Ran 394 tests` / `OK`, from a rebuilt venv.
 - **No accented characters in any source file.** Portuguese cannot be written
   without them, so this catches prose, strings and identifiers in one check
   and needs no vocabulary list:
   ```bash
-  grep -rnP '[\x{00C0}-\x{00FF}]' --include='*.py' --include='*.md' \
-    talaria/ tests/ run.py scripts/ prompts/ README.md
+  git ls-files -z | xargs -0 grep -InP '[\x{00C0}-\x{00FF}]'
   ```
+
+  **Scope it by what is tracked, not by extension.** The first version of this
+  criterion read `--include='*.py' --include='*.md'`, and `.gitignore` and
+  `requirements.txt` were therefore structurally invisible — nine Portuguese
+  comment lines, and a stale `projetos/` path that stopped ignoring source
+  videos once the code moved to `projects/`. A criterion's *scope* needs the
+  same review as its logic.
   Expected empty. `docs/` is excluded: it records the Portuguese originals.
 - **No Portuguese function words**, which catches unaccented prose the first
   check cannot:
