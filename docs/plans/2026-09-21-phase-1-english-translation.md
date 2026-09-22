@@ -645,6 +645,16 @@ rather than for the absence of a marker."
 
 This is the largest volume and the lowest behavioural risk. The suite cannot police it, so the constraint below is the only control.
 
+**Before you start: some Portuguese comments are damaged.** Task 3's mechanical pass substituted renamed words inside Portuguese sentences — about 135 comment and docstring lines. The decision was to leave them, because this task rewrites all that prose anyway. But it means the Portuguese you translate from is in places mangled past recognising the part of speech: `schedule.py` reads "Le e validate a agenda", `environment.py` "who write o", `utils.py` "faz em name proprio", `caption.py` "e o mesmo reason do layout.py".
+
+When a comment does not parse as Portuguese, recover the original rather than guessing:
+
+```bash
+git show adc1623:talaria/<module>.py | sed -n '<line>,<line+3>p'
+```
+
+`adc1623` is the commit immediately before the rename. Do this whenever a sentence reads oddly — a mistranslation founded on a corrupted source is worse than the corruption, because it looks deliberate.
+
 - [ ] **Step 1: Translate, file by file**
 
 Work module by module so each commit is reviewable. Carry the meaning, not the word order — these comments record real empirical findings and the findings must survive. `talaria/config.py`'s `BASE_Y` derivation, `talaria/audio.py`'s dB figures, `talaria/render.py`'s explanation of why `-c copy` is not used: all load-bearing.

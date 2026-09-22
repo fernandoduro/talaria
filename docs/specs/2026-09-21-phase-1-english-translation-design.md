@@ -35,7 +35,14 @@ demonstrated repeatedly that improvised consistency is where things slip.
 
 Four kinds of entry, roughly 145 in total:
 
-- **Functions and classes** — about 60 of the 183 top-level definitions.
+- **Functions, classes, parameters and locals.** About 60 of the 183
+  top-level definitions, plus — added after the fact — Portuguese parameters
+  and locals. The first draft of this map enumerated only top-level names and
+  constants, which left `fix_proper_nouns(txt, nomes)` and
+  `clean_quote(texto, nomes)` with Portuguese parameters that are settable by
+  keyword and therefore part of the API, and roughly 30 Portuguese locals with
+  no row at all. When extending this map, enumerate `def` signatures and
+  assignment targets, not just top-level names.
   `corrige_nomes` → `fix_proper_nouns`, `cauda_vaza` → `tail_leaks`,
   `valida_corte` → `validate_clip`, `sugere_frames` → `suggest_frames`.
 - **Constants** — about 45. `CORTE_MIN_S` → `CLIP_MIN_S`,
