@@ -1,20 +1,20 @@
-"""Hashtags da descrição — regra determinística, não julgamento editorial.
+"""Description hashtags — a deterministic rule, not editorial judgement.
 
-Hashtags não aceitam espaço nem acento: "São Bento" -> #SaoBento.
-Três são fixas em todo episódio; city e company variam.
+Hashtags take neither spaces nor accents: "São Bento" -> #SaoBento.
+Three are fixed in every episode; city and company vary.
 """
 from __future__ import annotations
 
 import re
 import unicodedata
 
-# Hashtags presentes em todo episódio — identity do canal. Troque pelas
-# suas: o resto da regra (city, company) não depende destes valores.
+# Hashtags present in every episode — channel identity. Swap in your own:
+# the rest of the rule (city, company) does not depend on these values.
 CHANNEL_TAGS = ["#MeuPodcast", "#Empreendedorismo", "#Startups"]
 
 
 def slug(text: str) -> str:
-    """'Ribeirão Açaí' -> 'RibeiraoAcai'. Remove acento e não-alfanumérico."""
+    """'Ribeirão Açaí' -> 'RibeiraoAcai'. Strips accents and non-alphanumerics."""
     if not text:
         return ""
     unaccented = "".join(
@@ -26,7 +26,7 @@ def slug(text: str) -> str:
 
 
 def build(city: str, company: str, fallback_topic: str = "") -> list:
-    """Lista de hashtags: as três fixas + city + company (ou tema)."""
+    """The hashtag list: the three fixed ones + city + company (or topic)."""
     tags = list(CHANNEL_TAGS)
     for value in (city, company or fallback_topic):
         s = slug(value)
@@ -36,5 +36,5 @@ def build(city: str, company: str, fallback_topic: str = "") -> list:
 
 
 def format_line(city: str, company: str, fallback_topic: str = "") -> str:
-    """Linha pronta para a descrição."""
+    """A line ready for the description."""
     return " ".join(build(city, company, fallback_topic))

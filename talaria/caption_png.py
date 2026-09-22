@@ -1,13 +1,12 @@
-"""Legendas rasterizadas em PNG (backend 'overlay').
+"""Captions rasterised to PNG (the 'overlay' backend).
 
-Alternativa ao drawtext para ffmpeg compilado sem libfreetype (ex.: build
-mínima do Homebrew no macOS). Cada segmento de fala vira um PNG RGBA do
-tamanho do frame, sobreposto com overlay+enable na janela de tempo do
-segmento — mesmo resultado visual do drawtext.
+The alternative to drawtext for ffmpeg built without libfreetype (e.g. the
+minimal Homebrew build on macOS). Each speech segment becomes a frame-sized
+RGBA PNG, composited with overlay+enable over the segment's time window —
+the same visual result as drawtext.
 
-O estilo (caixa preta translúcida, texto branco com contorno, posição) segue
-as mesmas constantes de config usadas pelo drawtext, para as duas vias
-renderizarem igual.
+The style (translucent black box, outlined white text, position) follows the
+same config constants drawtext uses, so both routes render alike.
 """
 from __future__ import annotations
 
@@ -21,12 +20,12 @@ _FONT = ImageFont.truetype(config.FONT, config.FONTSIZE)
 
 
 def _draw_outlined(d, xy, text, fill, ow):
-    """Texto com contorno. Usa stroke_width do Pillow (>=6.2) quando existe."""
+    """Outlined text. Uses Pillow's stroke_width (>=6.2) when available."""
     x, y = xy
     try:
         d.text((x, y), text, font=_FONT, fill=fill, anchor="ls",
                stroke_width=ow, stroke_fill=(0, 0, 0, 255))
-    except TypeError:  # Pillow antigo, sem stroke_width
+    except TypeError:  # old Pillow, no stroke_width
         for dx in range(-ow, ow + 1):
             for dy in range(-ow, ow + 1):
                 if dx * dx + dy * dy <= ow * ow:
@@ -36,10 +35,10 @@ def _draw_outlined(d, xy, text, fill, ow):
 
 
 def render_caption_png(lines: list[str], out_path: str) -> str:
-    """Desenha as lines de uma legenda num PNG transparente 1080x1920.
+    """Draws a caption's lines into a transparent 1080x1920 PNG.
 
-    Espelha o layout do drawtext: lines centralizadas, empilhadas de baixo
-    para cima a partir de BASE_Y, cada uma sobre uma caixa preta translúcida.
+    Mirrors the drawtext layout: centred lines stacked upwards from BASE_Y,
+    each over a translucent black box.
     """
     img = Image.new("RGBA", (config.FRAME_W, config.FRAME_H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -51,7 +50,7 @@ def render_caption_png(lines: list[str], out_path: str) -> str:
         y = config.BASE_Y - (n - 1 - li) * config.LINE_H
         w = _FONT.getlength(line)
         x = (config.FRAME_W - w) / 2
-        # caixa atrás do texto (equivale a box=1:boxcolor=black@ALPHA)
+        # box behind the text (equivalent to box=1:boxcolor=black@ALPHA)
         asc, desc = _FONT.getmetrics()
         d.rectangle([x - pad, y - asc - pad, x + w + pad, y + desc + pad],
                     fill=(0, 0, 0, alpha))
@@ -62,10 +61,10 @@ def render_caption_png(lines: list[str], out_path: str) -> str:
 
 
 def build_overlay_graph(caption_items, base_label="comp", out_label="outv") -> str:
-    """Monta a cadeia de overlays a partir de [(png_path, start, end)].
+    """Builds the overlay chain from [(png_path, start, end)].
 
-    Os PNGs entram como inputs extras do ffmpeg (índices 1..N, já que 0 é o
-    vídeo). Retorna o trecho de filtergraph que encadeia os overlays.
+    The PNGs enter as extra ffmpeg inputs (indices 1..N, since 0 is the video).
+    Returns the filtergraph fragment that chains the overlays.
     """
     if not caption_items:
         return f"[{base_label}]null[{out_label}]"

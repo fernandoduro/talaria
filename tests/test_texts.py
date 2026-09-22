@@ -1,4 +1,4 @@
-"""Testes da leitura de texts.json para a thumbnail."""
+"""Tests for reading texts.json into the thumbnail."""
 import inspect
 import json
 import os
@@ -18,33 +18,33 @@ class TestTexts(unittest.TestCase):
                 "guests": [{"name": "Teresa", "role": "sócio", "linkedin": ""}],
             }, f)
 
-    def test_thumb_args_a_partir_do_episodio(self):
+    def test_thumb_args_from_the_episode(self):
         args = texts.thumb_args(self.d)
         self.assertEqual(args["l1"], "Zarvik")
         self.assertEqual(args["l2"], "T2E07")
         self.assertIn("Ribeirão Açaí", args["subtitle"])
         self.assertIn("Teresa", args["credits"])
 
-    def test_textos_json_sobrescreve_episodio(self):
+    def test_texts_json_overrides_the_episode(self):
         with open(layout.ensure_dir(layout.texts(self.d)), "w", encoding="utf-8") as f:
             json.dump({"thumb": {"l1": "CUSTOMIZADO", "l2": "T2E07"}}, f)
         args = texts.thumb_args(self.d)
         self.assertEqual(args["l1"], "CUSTOMIZADO")
 
-    def test_selo_tem_codigo_do_episodio(self):
+    def test_badge_has_the_episode_code(self):
         args = texts.thumb_args(self.d)
         self.assertIn("T2E07", args["badge"])
 
-    def test_salvar_e_ler(self):
+    def test_save_and_read(self):
         texts.save(self.d, {"title": "X", "description": "Y"})
         t = texts.load(self.d)
         self.assertEqual(t["title"], "X")
 
-    def test_load_sem_arquivo_retorna_vazio(self):
+    def test_load_without_a_file_returns_empty(self):
         self.assertEqual(texts.load(tempfile.mkdtemp()), {})
 
-    def test_l1_cai_no_tema_quando_nao_ha_empresa(self):
-        """Sem convidado externo, a linha 1 recebe o tema do episódio."""
+    def test_l1_falls_back_to_the_topic_without_a_company(self):
+        """With no external guest, line 1 takes the episode topic."""
         d = tempfile.mkdtemp()
         with open(os.path.join(d, "episode.json"), "w", encoding="utf-8") as f:
             json.dump({
@@ -55,15 +55,15 @@ class TestTexts(unittest.TestCase):
         args = texts.thumb_args(d)
         self.assertEqual(args["l1"], "ecossistema local de startups")
 
-    def test_build_kwargs_bate_com_a_assinatura_do_thumbnail(self):
-        """Traduz l1/l2 -> headline_l1/headline_l2 sem perder campo em silêncio."""
+    def test_build_kwargs_matches_the_thumbnail_signature(self):
+        """Translates l1/l2 -> headline_l1/headline_l2 without dropping a field."""
         kwargs = texts.build_kwargs(self.d)
         sig = inspect.signature(thumbnail.build_thumbnail)
         expected = {n for n, p in sig.parameters.items()
                      if p.kind is inspect.Parameter.KEYWORD_ONLY}
         self.assertEqual(set(kwargs), expected)
 
-    def test_build_kwargs_traduz_os_valores(self):
+    def test_build_kwargs_translates_the_values(self):
         kwargs = texts.build_kwargs(self.d)
         self.assertEqual(kwargs["headline_l1"], "Zarvik")
         self.assertEqual(kwargs["headline_l2"], "T2E07")

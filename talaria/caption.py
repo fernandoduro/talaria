@@ -1,43 +1,43 @@
-"""Caption de publicação: o texto que acompanha cada peça na hora de publish.
+"""The publishing caption: the text that accompanies each piece at publish time.
 
-Um `.txt` ao lado de cada `.mp4`/`.png`, com o mesmo name base — o gestor abre,
-copia e cola no campo de legenda do Instagram ou do YouTube.
+A `.txt` beside every `.mp4`/`.png`, with the same base name — the manager opens
+it, copies and pastes into the Instagram or YouTube caption field.
 
-A descrição vem de quem chama (`post_caption` do clip, `legenda` do post) e as
-hashtags do `texts.json`, que valem para o episódio inteiro. Montar isso aqui,
-e não em cada chamador, é o mesmo reason do `layout.py` ser a autoridade única
-sobre path: `render` e `post_instagram` precisam do formato idêntico, e duas
-cópias divergem na primeira mudança.
+The description comes from the caller (`post_caption` of the clip, `caption` of
+the post) and the hashtags from `texts.json`, which apply to the whole episode.
+Assembling it here, and not in each caller, is the same reason `layout.py` is
+the single authority over paths: `render` and `post_instagram` need an identical
+format, and two copies diverge at the first change.
 
-O único bloco que difere por platform é a chamada para o episódio completo:
-ela entra na descrição do Short e não na legenda do Reels (ver `compose`). A
-divergência é um parâmetro desta função, não um segundo montador — o resto do
-formato tem que continuar idêntico nas duas pontas.
+The only block that differs per platform is the call to the full episode: it
+enters the Short description and not the Reels caption (see `compose`). The
+divergence is a parameter of this function, not a second assembler — the rest
+of the format has to stay identical at both ends.
 """
 from __future__ import annotations
 
 import os
 
-# Descrição e hashtags são blocos separados por linha em branco: é como o
-# Instagram e o YouTube renderizam parágrafo, e deixa a linha de hashtags
-# destacada para quem revisa antes de publish.
+# Description and hashtags are blocks separated by a blank line: that is how
+# Instagram and YouTube render a paragraph, and it keeps the hashtag line set
+# apart for whoever reviews before publishing.
 SEPARATOR = "\n\n"
 
-# O canal não usa travessão em legenda: sai com cara de texto de IA, e mesmo
-# assim já escapou até um clip estar no ar — por isso a regra também vive
-# aqui, onde toda legenda passa.
+# The channel does not use em dashes in captions: it reads as AI text, and one
+# escaped all the way to a live clip anyway — which is why the rule also lives
+# here, where every caption passes through.
 EM_DASH = "\u2014"
 
 
 def validate(field: str, value, piece: str) -> None:
-    """Recusa descrição que não seja texto, dizendo qual peça e qual campo.
+    """Refuses a non-text description, naming the piece and the field.
 
-    Os dois campos de descrição (`post_caption` no clip, `legenda` no post)
-    são digitados à mão no JSON. Sem esta checagem, um valor de outro kind só
-    aparece lá adiante como `AttributeError: 'int' object has no attribute
-    'strip'`, que não diz ao gestor onde ele errou.
+    Both description fields (`post_caption` on the clip, `caption` on the post)
+    are typed by hand into the JSON. Without this check, a value of another kind
+    only surfaces much later as `AttributeError: 'int' object has no attribute
+    'strip'`, which does not tell the manager where he went wrong.
 
-    `None` passa: é a chave ausente, caso normal em episódio anterior ao campo.
+    `None` passes: that is the absent key, normal in an episode older than the field.
     """
     if value is not None and not isinstance(value, str):
         raise ValueError(
@@ -46,28 +46,28 @@ def validate(field: str, value, piece: str) -> None:
             f"publicação, uma string só."
         )
     if isinstance(value, str) and EM_DASH in value:
-        # AVISA em vez de abortar: o travessão é escolha de escrita, e a
-        # correção é reescrever a frase — trocar o caractere por outro no
-        # código deixaria a mesma construção de IA, só com outra pontuação.
-        # Abortar aqui travaria um render por questão de estilo.
+        # WARNS instead of aborting: the em dash is a writing choice, and the
+        # fix is to rewrite the sentence — swapping the character in code would
+        # leave the same AI construction, just with different punctuation.
+        # Aborting here would block a render over a matter of style.
         print(f"[caption] !! {piece}: '{field}' tem travessão — o canal não "
               f"usa em legenda (sai com cara de texto de IA). Reescreva a "
               f"frase antes de publicar.")
 
 
-# Chamada para o episódio completo, na descrição do Short. A API do YouTube
-# não vincula um vídeo a outro (`videos.insert` não tem campo de relação), e
-# o vínculo do painel só existe para Short criado a partir do vídeo longo.
-# Escrever a URL na descrição é o que resta, e é o que o canal já fazia à mão.
+# Call to the full episode, in the Short description. The YouTube API does not
+# link one video to another (`videos.insert` has no relation field), and the
+# dashboard link only exists for a Short created from the long video. Writing
+# the URL into the description is what is left, and what the channel did by hand.
 EPISODE_PREFIX = "▶ Episódio completo: "
 
 
 def episode_line(url: str | None) -> str:
-    """A chamada para o episódio completo, ou vazio quando não há URL.
+    """The call to the full episode, or empty when there is no URL.
 
-    Episódio sem `youtube_url` no episode.json (o caso de todo episódio
-    anterior a este campo) devolve string vazia, que o `compose` descarta como
-    qualquer outro bloco ausente.
+    An episode with no `youtube_url` in episode.json (the case for every episode
+    older than the field) returns an empty string, which `compose` discards like
+    any other absent block.
     """
     url = (url or "").strip()
     return EPISODE_PREFIX + url if url else ""
@@ -75,20 +75,19 @@ def episode_line(url: str | None) -> str:
 
 def compose(description: str | None, hashtags: str | None,
           episode_url: str | None = None) -> str:
-    """Junta descrição, chamada do episódio e hashtags num caption pronto.
+    """Joins description, episode call and hashtags into a finished caption.
 
-    Qualquer um dos blocos pode faltar e o resultado continua utilizável: sem
-    `texts.json` sai só a descrição; sem `post_caption` saem só as hashtags.
-    O que não pode é sobrar linha em branco solta numa das pontas, porque o
-    texto vai direto para o campo de publicação.
+    Any of the blocks may be missing and the result stays usable: with no
+    `texts.json` only the description comes out; with no `post_caption` only the
+    hashtags. What must not happen is a stray blank line at either end, because
+    the text goes straight into the publishing field.
 
-    `episode_url` é opcional de propósito: só a descrição do YouTube a
-    recebe. No Instagram a URL não é clicável e ainda empurra o leitor para
-    fora do app, então a legenda do Reels sai sem ela — é o mesmo `.txt` de
-    antes.
+    `episode_url` is optional on purpose: only the YouTube description gets it.
+    On Instagram the URL is not clickable and pushes the reader out of the app,
+    so the Reels caption comes out without it — the same `.txt` as before.
 
-    `None` chega quando a chave não existe no JSON — trata como vazio em vez de
-    estourar, que é o caso comum de clip antigo, anterior a este campo.
+    `None` arrives when the key does not exist in the JSON — treated as empty
+    rather than blowing up, the common case for an old clip predating the field.
     """
     parts = [(description or "").strip(), episode_line(episode_url),
               (hashtags or "").strip()]
@@ -97,35 +96,35 @@ def compose(description: str | None, hashtags: str | None,
 
 def compose_episode(title: str | None, description: str | None,
                    hashtags: str | None) -> str:
-    """Caption do episódio inteiro: título, descrição e hashtags.
+    """Caption for the whole episode: title, description and hashtags.
 
-    O título entra como primeira linha porque o `.txt` é lido na hora de subir
-    o vídeo, e os dois campos são colados em caixas diferentes do YouTube —
-    tê-los no mesmo arquivo evita abrir o JSON só para copiar o título.
+    The title goes in as the first line because the `.txt` is read while
+    uploading the video, and the two fields are pasted into different YouTube
+    boxes — having both in one file avoids opening the JSON just for the title.
 
-    A descrição já vem com os próprios blocos e separadores; é inserida como
-    está, sem reflow.
+    The description already carries its own blocks and separators; it is
+    inserted as-is, without reflow.
     """
     parts = [(p or "").strip() for p in (title, description, hashtags)]
     return SEPARATOR.join(p for p in parts if p)
 
 
 def txt_path(piece_path: str) -> str:
-    """Caminho do `.txt` irmão de uma peça, trocando a extensão.
+    """Path of a piece's sibling `.txt`, swapping the extension.
 
-    Recebe o path da peça já resolvido pelo `layout` em vez de montar um
-    novo, para não reintroduzir path por literal fora do `layout.py`.
+    Takes the piece path already resolved by `layout` instead of building a new
+    one, so literal paths are not reintroduced outside `layout.py`.
     """
     stem, _ = os.path.splitext(piece_path)
     return stem + ".txt"
 
 
 def write(piece_path: str, text: str) -> str:
-    """Grava o caption ao lado da peça e devolve o path escrito.
+    """Writes the caption beside the piece and returns the path written.
 
-    Sobrescreve o que houver: regerar um clip tem que atualizar o caption, não
-    acumular versão antiga ao lado (o mesmo contrato do `.mp4`, que também é
-    reescrito no lugar).
+    Overwrites whatever is there: regenerating a clip has to update the caption,
+    not pile an old version up beside it (the same contract as the `.mp4`, which
+    is also rewritten in place).
     """
     destination = txt_path(piece_path)
     os.makedirs(os.path.dirname(os.path.abspath(destination)), exist_ok=True)

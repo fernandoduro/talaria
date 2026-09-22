@@ -1,9 +1,9 @@
-"""texts.json — materiais de publicação e alimentação da thumbnail.
+"""texts.json — publishing materials and the thumbnail's input.
 
-O texto da thumb é derivado do episode.json (linha 1 = company, ou o primeiro
-tema quando não há company; linha 2 = T[N]E[NN]), mas o texts.json pode
-sobrescrever qualquer campo quando o modelo propõe algo melhor na etapa de
-materiais.
+The thumbnail text derives from episode.json (line 1 = company, or the first
+topic when there is no company; line 2 = T[N]E[NN]), but texts.json may
+override any field when the model proposes something better during the
+materials step.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ FILE_NAME = "texts.json"
 
 
 def load(project_dir: str) -> dict:
-    """Lê o texts.json do project. Retorna dict vazio se ainda não existe."""
+    """Reads the project's texts.json. Returns an empty dict if absent."""
     path = layout.texts(project_dir)
     if not os.path.exists(path):
         return {}
@@ -25,7 +25,7 @@ def load(project_dir: str) -> dict:
 
 
 def save(project_dir: str, data: dict) -> str:
-    """Grava o texts.json do project e devolve o path escrito."""
+    """Writes the project's texts.json and returns the path written."""
     path = layout.ensure_dir(layout.texts(project_dir))
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
@@ -33,14 +33,14 @@ def save(project_dir: str, data: dict) -> str:
 
 
 def thumb_args(project_dir: str) -> dict:
-    """Argumentos da thumbnail, derivados do episódio e sobrescritos por texts.json."""
+    """Thumbnail arguments, derived from the episode, overridden by texts.json."""
     ep = episode.load(project_dir)
     code = episode.code(ep)
     guests = ep.get("guests") or []
     credits = " & ".join(c.get("name", "") for c in guests if c.get("name"))
 
-    # Em episódio sem convidado externo (logo, sem company), a linha 1
-    # recebe o tema do episódio.
+    # In an episode with no external guest (hence no company), line 1
+    # takes the episode topic.
     topics = ep.get("topics") or []
     l1 = ep.get("company", "") or (topics[0] if topics else "")
 
@@ -56,11 +56,11 @@ def thumb_args(project_dir: str) -> dict:
 
 
 def build_kwargs(project_dir: str) -> dict:
-    """Argumentos no formato que thumbnail.build_thumbnail espera.
+    """Arguments in the shape thumbnail.build_thumbnail expects.
 
-    Ponto único de tradução l1/l2 -> headline_l1/headline_l2: mapear à mão no
-    call site esquece campo em silêncio (credits e subtitle têm default "" e
-    são pulados sem aviso).
+    Single translation point for l1/l2 -> headline_l1/headline_l2: mapping by
+    hand at the call site drops a field silently (credits and subtitle default
+    to "" and get skipped with no warning).
     """
     args = thumb_args(project_dir)
     return {
