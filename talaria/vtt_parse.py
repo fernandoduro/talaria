@@ -1,7 +1,7 @@
-"""Parser correto do VTT de rolagem do YouTube.
+"""A correct parser for YouTube's rolling VTT.
 
-Cada cue tem 2 lines de texto: a consolidada (repetição, sem tags) e a nova
-(tags <c> de timing por palavra). Usamos SÓ a linha com <c>: zero duplicação.
+Each cue has 2 text lines: the consolidated one (repetition, no tags) and the
+new one (<c> per-word timing tags). We use ONLY the <c> line: no duplication.
 """
 from __future__ import annotations
 
@@ -9,11 +9,11 @@ from . import utils
 
 
 def parse_vtt(path: str) -> list[dict]:
-    """Lê o VTT e retorna segmentos [{start, end, text}]."""
+    """Reads the VTT and returns segments [{start, end, text}]."""
     with open(path, encoding="utf-8") as f:
         lines = f.read().splitlines()
 
-    words = []  # (tempo, palavra)
+    words = []  # (time, word)
     i = 0
     while i < len(lines):
         m = utils.RE_CUE.match(lines[i])
@@ -26,11 +26,11 @@ def parse_vtt(path: str) -> list[dict]:
         while i < len(lines) and lines[i].strip() != "" and not utils.RE_CUE.match(lines[i]):
             buf.append(lines[i])
             i += 1
-        # a linha "nova" é a que contém tags <c>
+        # the "new" line is the one carrying <c> tags
         newline = next((l for l in buf if "<c>" in l), None)
         if newline is None:
             continue
-        # texto antes da 1ª tag inline pertence ao início do cue
+        # text before the first inline tag belongs to the cue start
         import re
         head = re.sub(r"<[^>]+>", "", utils.RE_INLINE.split(newline)[0]).strip()
         if head:

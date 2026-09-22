@@ -1,4 +1,4 @@
-"""Testes do parser de transcrição .txt com timestamps."""
+"""Tests for the timestamped .txt transcript parser."""
 import os
 import unittest
 
@@ -15,44 +15,44 @@ class TestParseTxt(unittest.TestCase):
     def setUp(self):
         self.segs = txt_parse.parse_txt(FIXTURE)
 
-    def test_gera_segmentos(self):
+    def test_produces_segments(self):
         self.assertGreater(len(self.segs), 0)
 
-    def test_todo_segmento_tem_campos(self):
+    def test_every_segment_has_the_fields(self):
         for s in self.segs:
             self.assertIn("start", s)
             self.assertIn("end", s)
             self.assertIn("text", s)
             self.assertIn("turn", s)
 
-    def test_end_sempre_maior_que_start(self):
+    def test_end_is_always_after_start(self):
         for s in self.segs:
             self.assertGreater(s["end"], s["start"], msg=str(s))
 
-    def test_sem_sobreposicao(self):
+    def test_no_overlap(self):
         for a, b in zip(self.segs, self.segs[1:]):
             self.assertLessEqual(a["end"], b["start"] + 0.001)
 
-    def test_primeiro_segmento_comeca_em_10s(self):
+    def test_first_segment_starts_at_10s(self):
         self.assertEqual(self.segs[0]["start"], 10.0)
 
-    def test_marcador_de_turno_detectado(self):
+    def test_turn_marker_is_detected(self):
         self.assertTrue(any(s["turn"] for s in self.segs))
 
-    def test_marcador_removido_do_texto(self):
+    def test_marker_is_removed_from_the_text(self):
         for s in self.segs:
             self.assertFalse(s["text"].startswith(">>"), msg=s["text"])
 
-    def test_formato_hora_minuto_segundo(self):
+    def test_hour_minute_second_format(self):
         # 1:02:03 = 3723s
         self.assertTrue(any(s["start"] == 3723.0 for s in self.segs),
                         msg="H:MM:SS não foi parseado")
 
-    def test_total_duration_fecha_ultimo_segmento(self):
+    def test_total_duration_closes_the_last_segment(self):
         segs = txt_parse.parse_txt(FIXTURE, total_duration=4000.0)
         self.assertEqual(segs[-1]["end"], 4000.0)
 
-    def test_ultimo_segmento_estimado_por_ritmo_de_fala(self):
+    def test_last_segment_estimated_from_speaking_rate(self):
         last = self.segs[-1]
         self.assertGreater(last["end"] - last["start"], 1.0)
 
@@ -67,7 +67,7 @@ class TestParseTxt(unittest.TestCase):
 
 
 class TestRegroupIntoSentences(unittest.TestCase):
-    def test_junta_blocos_ate_pontuacao(self):
+    def test_joins_blocks_until_punctuation(self):
         blocks = [
             _block(0.0, 5.0, "primeira parte da frase"),
             _block(5.0, 10.0, "que termina aqui."),
@@ -79,7 +79,7 @@ class TestRegroupIntoSentences(unittest.TestCase):
         self.assertEqual(segs[0]["start"], 0.0)
         self.assertEqual(segs[0]["end"], 10.0)
 
-    def test_troca_de_turno_quebra_segmento(self):
+    def test_turn_change_breaks_the_segment(self):
         blocks = [
             _block(0.0, 5.0, "fala sem pontuacao final"),
             _block(5.0, 10.0, "response do outro", turn=True),
@@ -87,51 +87,51 @@ class TestRegroupIntoSentences(unittest.TestCase):
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertEqual(len(segs), 2)
 
-    def test_quebra_por_tamanho_maximo(self):
-        # sem pontuação final: só o limite de caracteres pode quebrar
+    def test_breaks_at_maximum_length(self):
+        # no closing punctuation: only the character limit can break it
         blocks = [_block(float(i * 2), float(i * 2 + 2), "palavra " * 12)
                   for i in range(4)]
         segs = txt_parse.regroup_into_sentences(blocks)
         self.assertGreater(len(segs), 1, msg="SEG_MAX_CHARS não quebrou o segmento")
 
-    def test_lista_vazia(self):
+    def test_empty_list(self):
         self.assertEqual(txt_parse.regroup_into_sentences([]), [])
 
 
 class TestSpeakerResolution(unittest.TestCase):
-    """O falante é resolvido globalmente, sobre o episódio inteiro.
+    """The speaker is resolved globally, over the whole episode.
 
-    O marcador '>>' diz QUE trocou de interlocutor, não QUEM passou a falar.
-    Como o podcast abre com os apresentadores, o primeiro segmento é host e
-    cada troca alterna a partir dali.
+    The '>>' marker says THAT the speaker changed, not WHO started talking.
+    Since the podcast opens with the hosts, the first segment is host and each
+    change alternates from there.
     """
 
     def setUp(self):
         self.segs = txt_parse.parse_txt(FIXTURE)
 
-    def test_todo_segmento_tem_speaker(self):
+    def test_every_segment_has_a_speaker(self):
         for s in self.segs:
             self.assertIn("speaker", s, msg=str(s))
             self.assertIn(s["speaker"], ("host", "guest"), msg=str(s))
 
-    def test_primeiro_segmento_e_host(self):
+    def test_first_segment_is_host(self):
         self.assertEqual(self.segs[0]["speaker"], "host")
 
-    def test_speaker_alterna_em_cada_turno(self):
+    def test_speaker_alternates_on_each_turn(self):
         previous = None
         for s in self.segs:
             if previous is not None and s["turn"]:
                 self.assertNotEqual(s["speaker"], previous["speaker"], msg=str(s))
             previous = s
 
-    def test_segmentos_entre_turnos_herdam_o_mesmo_speaker(self):
+    def test_segments_between_turns_inherit_the_same_speaker(self):
         previous = None
         for s in self.segs:
             if previous is not None and not s["turn"]:
                 self.assertEqual(s["speaker"], previous["speaker"], msg=str(s))
             previous = s
 
-    def test_alternancia_explicita(self):
+    def test_explicit_alternation(self):
         blocks = [
             _block(0.0, 5.0, "Abertura do host."),
             _block(5.0, 10.0, "Resposta do convidado.", turn=True),
@@ -143,11 +143,11 @@ class TestSpeakerResolution(unittest.TestCase):
         self.assertEqual([s["speaker"] for s in segs],
                          ["host", "guest", "guest", "host"])
 
-    def test_lista_vazia_nao_quebra(self):
+    def test_empty_list_does_not_break(self):
         self.assertEqual(txt_parse.resolve_speakers([]), [])
 
-    def test_primeiro_segmento_com_turn_ainda_e_host(self):
-        """Transcrição que já abre com '>>' não deve inverter o episódio."""
+    def test_first_segment_with_turn_is_still_host(self):
+        """A transcript that opens with '>>' must not invert the episode."""
         blocks = [
             _block(0.0, 5.0, "Abertura do host.", turn=True),
             _block(5.0, 10.0, "Resposta do convidado.", turn=True),
@@ -155,28 +155,28 @@ class TestSpeakerResolution(unittest.TestCase):
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
         self.assertEqual([s["speaker"] for s in segs], ["host", "guest"])
 
-    def test_backchannel_do_host_desloca_atribuicao(self):
-        """RISCO CONHECIDO, não corrigido — documenta o comportamento atual.
+    def test_host_backchannel_shifts_the_attribution(self):
+        """KNOWN RISK, not fixed — documents the current behaviour.
 
-        Um "Sei."/"Certo." do host marcado com '>>' account como troca real e
-        desloca tudo o que vem depois. Aqui o segundo trecho do convidado sai
-        rotulado como host. Nenhuma heurística conservadora foi aplicada: na
-        transcrição real o backchannel ('>> Maravilha.') aparece com 29s de
-        duração — o `end` vem do timestamp seguinte, não da fala — e tem
-        falantes DIFERENTES dos dois lados, então nem duração nem "mesmo
-        falante em volta" o identificam.
+        A host's "Right."/"I see." marked with '>>' counts as a real change and
+        shifts everything after it. Here the guest's second stretch comes out
+        labelled host. No conservative heuristic was applied: in the real
+        transcript the backchannel ('>> Maravilha.') has a 29s duration — the
+        `end` comes from the next timestamp, not from the speech — and has
+        DIFFERENT speakers on either side, so neither duration nor "same
+        speaker around it" identifies it.
         """
         blocks = [
             _block(0.0, 5.0, "Pergunta do host?"),
             _block(5.0, 10.0, "Comeco da response.", turn=True),
-            _block(10.0, 12.0, "Sei.", turn=True),          # backchannel do host
-            _block(12.0, 20.0, "Continuo respondendo."),    # ainda o convidado
+            _block(10.0, 12.0, "Sei.", turn=True),          # host backchannel
+            _block(12.0, 20.0, "Continuo respondendo."),    # still the guest
             _block(20.0, 30.0, "E foi assim que crescemos."),
         ]
         segs = txt_parse.resolve_speakers(txt_parse.regroup_into_sentences(blocks))
-        # O ideal seria [host, convidado, host, convidado, convidado]. Com um
-        # número ímpar de trocas espúrias, a response do convidado sai rotulada
-        # como host daí em diante e subestima a fração no clip.
+        # Ideally [host, guest, host, guest, guest]. With an odd number of
+        # spurious changes, the guest's answer comes out labelled host from
+        # there on and underestimates the fraction in the clip.
         self.assertEqual([s["speaker"] for s in segs],
                          ["host", "guest", "host", "host", "host"])
 

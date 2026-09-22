@@ -1,6 +1,6 @@
-"""Obtém o vídeo-fonte a partir de arquivo local, link do YouTube ou do Drive.
+"""Obtains the source video from a local file, a YouTube link or a Drive link.
 
-Salva sempre em <project>/fonte/video.mp4 (ver layout.video) e retorna o path.
+Always saves to <project>/source/video.mp4 (see layout.video) and returns the path.
 """
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ DRIVE_RE = re.compile(r"drive\.google\.com", re.IGNORECASE)
 
 
 def detect_source(src: str) -> str:
-    """Classifica a fonte: 'youtube', 'drive' ou 'local'."""
+    """Classifies the source: 'youtube', 'drive' or 'local'."""
     if YT_RE.search(src):
         return "youtube"
     if DRIVE_RE.search(src):
@@ -38,7 +38,7 @@ def _ytdlp(args, capture=False):
 
 
 def acquire(src: str, project_dir: str) -> str:
-    """Baixa/copia o vídeo para layout.video(project_dir) e retorna o path."""
+    """Downloads/copies the video to layout.video(project_dir), returns the path."""
     dest = layout.ensure_dir(layout.video(project_dir))
     kind = detect_source(src)
 
@@ -50,7 +50,7 @@ def acquire(src: str, project_dir: str) -> str:
         print(f"[acquire] local -> {dest}")
         return dest
 
-    # youtube ou drive: baixa o melhor mp4 disponível
+    # youtube or drive: download the best mp4 available
     print(f"[acquire] baixando ({kind}) com yt-dlp...")
     r = _ytdlp([
         "-f", "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best",
@@ -64,8 +64,8 @@ def acquire(src: str, project_dir: str) -> str:
 
 
 def fetch_youtube_captions(url: str, project_dir: str, lang="pt") -> str | None:
-    """Tenta baixar a legenda automática (VTT) do YouTube. Retorna o path do
-    .vtt ou None se não houver legenda. Muito mais rápido que transcrever."""
+    """Tries to download YouTube's automatic captions (VTT). Returns the .vtt
+    path, or None when there are none. Far faster than transcribing."""
     vid = youtube_id(url)
     if not vid:
         return None

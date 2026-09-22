@@ -1,16 +1,16 @@
-"""Envelope de energia do áudio — onde a fala pausa, para cortar sem vazar.
+"""Audio energy envelope — where speech pauses, so a clip cuts without leaking.
 
-Os tempos de clip saem da transcrição, cuja resolução é de 1 segundo. Um end
-tirado dali cai em cima da fronteira entre duas words e deixa vazar o ataque
-da seguinte: o clip terminava em 901.0 e o espectador ouvia o "Poucas"
-que abre a frase seguinte.
+Clip times come from the transcript, whose resolution is 1 second. An end taken
+from there lands on the boundary between two words and lets the attack of the
+next one leak: the clip ended at 901.0 and the viewer heard the "Poucas" that
+opens the following sentence.
 
-A pausa entre words numa fala corrida é curta (~40ms no caso medido), então
-margem fixed não resolve — recuar demais come a última sílaba aproveitada. O
-jeito certo é olhar o áudio e cortar no vale.
+The pause between words in continuous speech is short (~40ms in the measured
+case), so a fixed margin does not solve it — backing off too far eats the last
+usable syllable. The right way is to look at the audio and cut in the valley.
 
-Requer ffmpeg no PATH. Sem ele, as funções devolvem o tempo original: o render
-segue funcionando, só sem o ajuste fino.
+Requires ffmpeg on PATH. Without it the functions return the original time: the
+render keeps working, just without the fine adjustment.
 """
 from __future__ import annotations
 
@@ -18,18 +18,18 @@ import array
 import math
 import subprocess
 
-# Janela de análise. 20ms é curto o bastante para achar pausa entre words e
-# longo o bastante para o RMS não oscilar com o período da voz.
+# Analysis window. 20ms is short enough to find a pause between words and long
+# enough that the RMS does not oscillate with the pitch period of the voice.
 WINDOW_S = 0.02
 RATE_HZ = 16000
 
-# Quanto o ajuste pode recuar procurando a pausa. Meia janela de fala normal:
-# além disso o clip perde conteúdo em vez de ganhar limpeza.
+# How far back the adjustment may look for the pause. Half a normal speech
+# window: beyond that the clip loses content instead of gaining cleanliness.
 SEARCH_S = 0.60
 
 
 def _pcm(video_path: str, start: float, dur: float) -> array.array:
-    """Extrai um trecho de áudio como PCM mono 16-bit."""
+    """Extracts a stretch of audio as 16-bit mono PCM."""
     out = subprocess.run(
         ["ffmpeg", "-v", "error", "-ss", f"{start:.3f}", "-t", f"{dur:.3f}",
          "-i", video_path, "-ac", "1", "-ar", str(RATE_HZ), "-f", "s16le", "-"],
@@ -40,7 +40,7 @@ def _pcm(video_path: str, start: float, dur: float) -> array.array:
 
 
 def envelope(video_path: str, start: float, dur: float) -> list:
-    """[(t_absoluto, dB)] em janelas de WINDOW_S. dB relativo ao fundo de escala."""
+    """[(absolute_t, dB)] in WINDOW_S windows. dB relative to full scale."""
     a = _pcm(video_path, start, dur)
     win = int(RATE_HZ * WINDOW_S)
     points = []
@@ -51,20 +51,20 @@ def envelope(video_path: str, start: float, dur: float) -> list:
     return points
 
 
-# Energia abaixo disto account como pausa. Fala fica acima de -25 dB; o floor de
-# sala destes episódios ronda -50 dB.
+# Energy below this counts as a pause. Speech stays above -25 dB; the room
+# floor in these episodes hovers around -50 dB.
 PAUSE_THRESHOLD_DB = -35.0
 
 
-# Silêncio mínimo para uma pausa contar como FIM DE FALA. Abaixo disto é pausa
-# interna — respiração, hesitação, separação entre words — e cortar ali deixa
-# a frase pela metade (vale de 80ms em 2341.56 era interno; a
-# frase só terminava em 2342.26, com 660ms de silêncio depois).
+# Minimum silence for a pause to count as END OF SPEECH. Below this it is an
+# internal pause — breath, hesitation, word separation — and cutting there
+# leaves the sentence half finished (an 80ms valley at 2341.56 was internal;
+# the sentence only ended at 2342.26, with 660ms of silence after it).
 SILENCE_MIN_S = 0.25
 
 
 def _silence_duration(points: list, i: int, threshold: float) -> float:
-    """Por quanto tempo a energia fica abaixo do threshold a partir de `i`."""
+    """How long the energy stays below the threshold starting from `i`."""
     j = i
     while j < len(points) and points[j][1] <= threshold:
         j += 1
@@ -72,14 +72,14 @@ def _silence_duration(points: list, i: int, threshold: float) -> float:
 
 
 def valley_before(video_path: str, t: float, search: float = SEARCH_S) -> float:
-    """Instante da pausa REAL mais próxima de `t`, olhando para trás.
+    """Instant of the REAL pause nearest to `t`, looking backwards.
 
-    Não basta a energia cair: o silêncio precisa DURAR. Numa fala corrida a
-    energia mergulha entre words a cada 100ms, e cortar no primeiro mergulho
-    parte a frase no meio. Só vale a pausa seguida de SILENCE_MIN_S de quietude.
+    The energy dropping is not enough: the silence has to LAST. In continuous
+    speech the energy dips between words every 100ms, and cutting at the first
+    dip splits the sentence. Only a pause followed by SILENCE_MIN_S of quiet counts.
 
-    Sem pausa longa na janela, devolve `t` — melhor não mexer do que cortar no
-    lugar errado.
+    With no long pause in the window it returns `t` — better to leave it alone
+    than to cut in the wrong place.
     """
     try:
         points = envelope(video_path, max(0.0, t - search), search)
@@ -87,12 +87,12 @@ def valley_before(video_path: str, t: float, search: float = SEARCH_S) -> float:
         return t
     if not points:
         return t
-    for i in range(len(points) - 1, -1, -1):     # do end pretendido para trás
+    for i in range(len(points) - 1, -1, -1):     # from the intended end backwards
         inst, db = points[i]
         if db <= PAUSE_THRESHOLD_DB and \
                 _silence_duration(points, i, PAUSE_THRESHOLD_DB) >= SILENCE_MIN_S:
-            # Corta no FUNDO da pausa, não na borda: a borda ainda tem cauda
-            # da fala e o fundo é onde o ouvido não percebe emenda.
+            # Cut at the BOTTOM of the pause, not the edge: the edge still has
+            # the tail of the speech, and the bottom is where no seam is heard.
             j = i
             while j < len(points) and points[j][1] <= PAUSE_THRESHOLD_DB:
                 j += 1
@@ -102,19 +102,19 @@ def valley_before(video_path: str, t: float, search: float = SEARCH_S) -> float:
 
 def clips_mid_word(video_path: str, end: float, threshold_db: float = -25.0,
                window: float = 0.06) -> bool:
-    """True se a fala ainda está ALTA no instante do clip.
+    """True if speech is still LOUD at the instant of the clip.
 
-    Toda fala termina com uma sílaba, então olhar 150ms para trás acusa
-    qualquer clip — inclusive os corretos, onde a última palavra está sendo
-    pronunciada e decai naturalmente. A pergunta certa é mais estreita: no
-    exato ponto do clip, a energia ainda está em nível de fala?
+    All speech ends on a syllable, so looking 150ms back flags every clip —
+    including the correct ones, where the last word is being pronounced and
+    decays naturally. The right question is narrower: at the exact clip point,
+    is the energy still at speech level?
 
-    Janela de 60ms, e só acusa se a energia NÃO estiver caindo: palavra
-    terminando decai; palavra cortada no meio para de repente com o nível alto.
+    A 60ms window, and it only flags when the energy is NOT falling: a word
+    ending decays; a word cut mid-way stops abruptly at a high level.
     """
-    # Lê com folga e fica com as últimas janelas: o mp4 sai alguns
-    # milissegundos mais longo que o pedido, e ancorar no valor pedido deixava
-    # a leitura com um ponto só — insuficiente para ver se a energia decai.
+    # Read with slack and keep the last windows: the mp4 comes out a few
+    # milliseconds longer than asked for, and anchoring on the requested value
+    # left the read with a single point — too few to see the energy decay.
     try:
         points = envelope(video_path, max(0.0, end - window * 3), window * 3)
     except (subprocess.CalledProcessError, FileNotFoundError, OSError):
@@ -124,10 +124,10 @@ def clips_mid_word(video_path: str, end: float, threshold_db: float = -25.0,
     if len(points) < 2:
         return False
     dbs = [db for _, db in points]
-    # Fala terminando decai; fala cortada para de repente ainda no nível alto.
-    # Medido: clip defeituoso fica em -31/-28/-31 dB (estável); os corretos
-    # ou terminam abaixo de -35 dB ou despencam mais de 10 dB na última
-    # janela ("importadas": -25.8 -> -39.4).
+    # Speech ending decays; speech cut off stops abruptly, still at high level.
+    # Measured: a defective clip sits at -31/-28/-31 dB (stable); the correct
+    # ones either end below -35 dB or plunge more than 10 dB in the last window
+    # ("importadas": -25.8 -> -39.4).
     if dbs[-1] <= threshold_db - 10.0:
-        return False                     # terminou em silêncio
-    return (dbs[0] - dbs[-1]) < 8.0      # não decaiu o bastante
+        return False                     # ended in silence
+    return (dbs[0] - dbs[-1]) < 8.0      # did not decay enough

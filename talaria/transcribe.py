@@ -1,7 +1,7 @@
-"""Transcrição automática: legenda do YouTube (rápido) ou Whisper local (fallback).
+"""Automatic transcription: YouTube captions (fast) or local Whisper (fallback).
 
-Saída: <project>/transcript.json  {"segments": [{start, end, text}]}
-       <project>/transcript.txt   (legível, com [mm:ss] por bloco, p/ curation)
+Output: <project>/transcript.json  {"segments": [{start, end, text}]}
+        <project>/transcript.txt   (readable, [mm:ss] per block, for curation)
 """
 import json
 
@@ -12,7 +12,7 @@ def _write_outputs(segments, project_dir):
     with open(layout.ensure_dir(layout.transcript(project_dir)), "w", encoding="utf-8") as f:
         json.dump({"segments": segments}, f, ensure_ascii=False, indent=2)
 
-    # versão legível em blocos de ~25s (1 parágrafo por bloco) p/ curation
+    # readable version in ~25s blocks (one paragraph each) for curation
     blocks, cur, start = [], [], None
     for s in segments:
         if start is None:
@@ -32,7 +32,7 @@ def _write_outputs(segments, project_dir):
 
 
 def from_youtube_captions(vtt_path, project_dir):
-    """Parseia um VTT já baixado. Retorna True se gerou segmentos."""
+    """Parses an already-downloaded VTT. Returns True if it produced segments."""
     segments = vtt_parse.parse_vtt(vtt_path)
     if not segments:
         return False
@@ -42,7 +42,7 @@ def from_youtube_captions(vtt_path, project_dir):
 
 
 def from_whisper(video_path, project_dir, model=None):
-    """Transcreve o vídeo com faster-whisper (fallback CUDA->CPU)."""
+    """Transcribes the video with faster-whisper (CUDA->CPU fallback)."""
     from faster_whisper import WhisperModel
 
     model = model or config.WHISPER_MODEL
@@ -58,7 +58,7 @@ def from_whisper(video_path, project_dir, model=None):
     seg_iter, _info = wm.transcribe(
         video_path, language=config.WHISPER_LANG, word_timestamps=True,
     )
-    # reagrupa por words p/ manter o mesmo estilo de segmento do VTT
+    # regroup by words to keep the same segment style as the VTT
     words = []
     for s in seg_iter:
         if s.words:
@@ -73,9 +73,10 @@ def from_whisper(video_path, project_dir, model=None):
 
 
 def transcribe(source, video_path, project_dir, model=None):
-    """Orquestra: se source é YouTube com legenda, usa ela; senão Whisper.
+    """Orchestrates: if source is YouTube with captions, use them; else Whisper.
 
-    source: URL original (ou path local). video_path: fonte.mp4 já baixado.
+    source: the original URL (or local path). video_path: the video.mp4 already
+    downloaded.
     """
     if acquire.detect_source(source) == "youtube":
         vtt = acquire.fetch_youtube_captions(source, project_dir, config.WHISPER_LANG)
