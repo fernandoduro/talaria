@@ -334,18 +334,18 @@ def approve(state: dict, clip: dict) -> dict:
     Re-approving the SAME slug is a time adjustment, not a duplicate: it replaces.
     """
     span = (float(clip["start"]), float(clip["end"]))
-    for i, ja in enumerate(state["approved"]):
-        if ja.get("slug") == clip.get("slug"):
+    for i, approved_clip in enumerate(state["approved"]):
+        if approved_clip.get("slug") == clip.get("slug"):
             state["approved"][i] = clip      # time adjustment
             return state
         # Zero threshold: between APPROVED clips any overlap already means a
         # stretch of video repeated in two clips. The 30% OVERLAP_THRESHOLD
         # exists to decide whether a proposal is "the same stretch" as something
         # burned — a different question, a different tolerance.
-        if overlaps(span, (float(ja["start"]), float(ja["end"])), threshold=0.0):
+        if overlaps(span, (float(approved_clip["start"]), float(approved_clip["end"])), threshold=0.0):
             raise ValueError(
                 f"clip {clip.get('slug')} overlaps approved clip "
-                f"{ja.get('slug')} ({ja['start']:.0f}-{ja['end']:.0f}s)"
+                f"{approved_clip.get('slug')} ({approved_clip['start']:.0f}-{approved_clip['end']:.0f}s)"
             )
     if len(state["approved"]) >= state["target"]:
         raise ValueError(f"target of {state['target']} clips already met")

@@ -497,3 +497,4 @@ function	_com_posts	_with_posts	global	fix-round-4 (verdicts audit): test_post_i
 class	TestPngsDoPost	TestPostPngs	global	fix-round-4 (verdicts audit): test_publish.py class name; do = 'of the'
 function	fcit	quote_font	global	fix-round-4 (verdicts audit): post_instagram.py render_card local holding _quote_font(); fcit abbreviates fonte citacao
 function	id_post	post_id	global	fix-round-4 (verdicts audit): published.record parameter; Portuguese word order, no keyword callers
+function	ja	approved_clip	manual	task-9: curation.approve() loop variable over state["approved"]; excluded from the identifier inventory by the <=2 char filter, the one Portuguese survivor of that class

@@ -788,3 +788,4 @@ installed	1	english
 campos	1	renamed	-> fields (manual); the identifier is only scripts/youtube_auth.py:48's local; every other "campos" is ordinary prose (including inside a couple of raised messages) - those stay
 flow	1	english	
 creds	1	english	
+ja	7	renamed	-> approved_clip (manual); curation.approve() loop variable, excluded from the inventory by the <=2 char filter
