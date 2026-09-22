@@ -134,8 +134,8 @@ class TestPngsDoPost(unittest.TestCase):
         for n in ("post_cit_x_10.png",):
             open(os.path.join(pasta, n), "w").close()
         pngs = publish._post_pngs(self.pd, "cit_x")
-        nomes = [os.path.basename(p) for p in pngs]
-        self.assertEqual(nomes, ["post_cit_x_1.png", "post_cit_x_2.png",
+        names = [os.path.basename(p) for p in pngs]
+        self.assertEqual(names, ["post_cit_x_1.png", "post_cit_x_2.png",
                                  "post_cit_x_10.png"])
 
 

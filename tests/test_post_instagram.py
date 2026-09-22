@@ -277,8 +277,8 @@ class TestCaptionDoPost(unittest.TestCase):
         escritos = post_instagram.write_captions(
             self.d, [("corte2", "Legenda do carrossel.")], "#Um")
         self.assertEqual(len(escritos), 1)
-        nomes = sorted(n for n in os.listdir(self.d) if n.endswith(".txt"))
-        self.assertEqual(nomes, ["post_corte2.txt"])
+        names = sorted(n for n in os.listdir(self.d) if n.endswith(".txt"))
+        self.assertEqual(names, ["post_corte2.txt"])
 
     def test_sem_legenda_avisa_e_grava_hashtags(self):
         # Mesmo contrato do clip — não some em silêncio.
