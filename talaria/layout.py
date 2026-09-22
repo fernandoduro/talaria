@@ -91,7 +91,7 @@ def end_card_mp4(pd: str) -> str:
     Fica na raiz de `publish/`, como a thumbnail: artefato do episódio, não
     de uma peça, e nunca é commitado (`projects/` inteiro é git-ignored).
     """
-    return os.path.join(pd, PUBLISH, "_card_encerramento.mp4")
+    return os.path.join(pd, PUBLISH, "_end_card.mp4")
 
 
 def episode_txt(pd: str) -> str:

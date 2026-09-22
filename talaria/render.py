@@ -274,7 +274,7 @@ def append_end_card(corte_path: str, project_dir: str) -> None:
 
     tmpdir = tempfile.mkdtemp(prefix="talaria_concat_")
     try:
-        saida = os.path.join(tmpdir, "concatenado.mp4")
+        saida = os.path.join(tmpdir, "concatenated.mp4")
         cmd = [
             "ffmpeg", "-y", "-v", "error",
             "-i", corte_path, "-i", card_path,
