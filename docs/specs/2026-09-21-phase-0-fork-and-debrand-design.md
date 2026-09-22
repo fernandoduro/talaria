@@ -352,3 +352,10 @@ rediscovered as surprises.
   package is ever handed to anyone.
 - **Phase 0's commit messages are English; the final fix wave's seven are
   Portuguese-bodied.** An imprecise instruction, not a decision. Cosmetic.
+- **`tests/test_txt_parse.py:61` is vacuous.** Found during Phase 1 planning:
+  its fixture contains no sound tag, so the assertion that sound tags are
+  stripped cannot fail. Deliberately not repaired inside Phase 1's translation
+  pass — a pre-existing weak test is worth its own change, especially since
+  strengthening it may reveal a real parser bug rather than merely a thin test.
+  Phase 1's classification artifact records the vacuity so the translation does
+  not preserve a property that was never there.
