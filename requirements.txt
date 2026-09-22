@@ -1,15 +1,15 @@
-# Talaria — dependências Python
-# Instalar num venv:  python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
-# (ffmpeg e ffprobe são dependências de SISTEMA — instalar via apt/brew, não aqui.
-#  ffmpeg também mede o envelope de áudio para ajustar o fim dos cortes: sem ele
-#  o pipeline roda, mas o fim volta a ser o da transcrição, que corta palavra.)
+# Talaria — Python dependencies
+# Install into a venv:  python3 -m venv .venv && . .venv/bin/activate && pip install -r requirements.txt
+# (ffmpeg and ffprobe are SYSTEM dependencies — install them via apt/brew, not here.
+#  ffmpeg also measures the audio envelope to adjust where clips end: without it
+#  the pipeline runs, but the end falls back to the transcript's, which cuts a word.)
 
-yt-dlp>=2024.1          # baixar vídeo/legenda de YouTube e Google Drive
-faster-whisper>=1.0     # transcrição local (cabe em GPUs de 4GB; fallback do YouTube)
-Pillow>=10.0            # medir largura de texto (quebra de legenda) e gerar thumbnail
+yt-dlp>=2024.1          # download video/subtitles from YouTube and Google Drive
+faster-whisper>=1.0     # local transcription (fits in 4GB GPUs; YouTube fallback)
+Pillow>=10.0            # measure text width (caption wrapping) and build the thumbnail
 
-# Publicação via API (comando publish)
-requests>=2.31             # Graph API do Instagram (HTTP puro)
-boto3>=1.28                # S3 temporário — a Graph API exige URL pública da mídia
+# Publishing via API (the publish command)
+requests>=2.31             # Instagram Graph API (plain HTTP)
+boto3>=1.28                # temporary S3 — the Graph API demands a public media URL
 google-api-python-client>=2.100   # YouTube Data API v3 (videos.insert)
-google-auth-oauthlib>=1.0  # fluxo OAuth2 único do scripts/youtube_auth.py
+google-auth-oauthlib>=1.0  # the one-off OAuth2 flow in scripts/youtube_auth.py

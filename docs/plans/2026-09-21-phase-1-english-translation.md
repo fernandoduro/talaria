@@ -793,10 +793,11 @@ Expected: `OK`. Record the count and put it in the README.
 
 ```bash
 cd /data/Code/talaria
-grep -rnP '[\x{00C0}-\x{00FF}]' --include='*.py' --include='*.md' \
-  talaria/ tests/ run.py scripts/ prompts/ README.md
+git ls-files -z | grep -zvE '^docs/' | xargs -0 grep -InP '[\x{00C0}-\x{00FF}]'
 ```
 Expected: empty. Portuguese cannot be written without accents, so this one check covers identifiers, prose and strings together. `docs/` is excluded — it records the originals.
+
+**The file list is `git ls-files`, not an extension list.** An earlier version of this step was scoped `--include='*.py' --include='*.md'`, and `.gitignore` and `requirements.txt` therefore went through all of Phase 1 untranslated, with `.gitignore` still ignoring `projetos/` while the code wrote to `projects/`. Whole file types were invisible to the criterion. Driving the list from the index covers `.gitignore`, `requirements.txt`, `.env.example`, the fixtures and any tracked text file added later; `grep -I` skips the fonts and images.
 
 One legitimate exception to judge, not to wave through: `PREFIXO_EPISODIO`'s `▶` is U+25B6, outside this range, so it will not match. If any hit turns out to be a deliberate non-Portuguese character, say which and why.
 
@@ -804,10 +805,10 @@ One legitimate exception to judge, not to wave through: `PREFIXO_EPISODIO`'s `�
 
 ```bash
 cd /data/Code/talaria
-grep -rniE '\b(que|nao|para|uma|dos|das|pelo|pela|sem|mais|ja|ao|aos|pra|nem|onde|quando|porque|entao|isso|este|esta|aquele|muito|entre|cada|todo|toda|seu|sua|dele|dela|foi|ser|ter|fazer|pode|deve|tem|sao|estao|com)\b' \
-  --include='*.py' --include='*.md' talaria/ tests/ run.py scripts/ prompts/ README.md
+git ls-files -z | grep -zvE '^docs/' | xargs -0 grep -IniE \
+  '\b(que|nao|para|uma|dos|das|pelo|pela|sem|mais|ja|ao|aos|pra|nem|onde|quando|porque|entao|isso|este|esta|aquele|muito|entre|cada|todo|toda|seu|sua|dele|dela|foi|ser|ter|fazer|pode|deve|tem|sao|estao|com)\b'
 ```
-Expected: only `.com` URL hits, roughly a dozen. Confirm each is a URL. `no` and `so` are deliberately absent from this pattern — they are ordinary English words. Read every other hit; do not widen the pattern to silence one.
+Expected: only `.com` URL hits, twenty of them (the widened file list adds `.env.example` and the Poppins licence to the dozen the `*.py`/`*.md` scoping saw). Confirm each is a URL. `no` and `so` are deliberately absent from this pattern — they are ordinary English words. Read every other hit; do not widen the pattern to silence one.
 
 - [ ] **Step 4: No Portuguese identifier survives, mapped or not**
 
@@ -858,11 +859,19 @@ catches.
 ```bash
 cd /data/Code/talaria
 awk -F'\t' 'NR>1{print $2}' docs/plans/phase-1-inputs/rename-map.tsv | while read old; do
-  hits=$(grep -rowE "\b$old\b" --include='*.py' --include='*.md' talaria/ tests/ run.py scripts/ prompts/ README.md | wc -l)
+  hits=$(git ls-files -z | grep -zvE '^docs/' | xargs -0 grep -IowE "\b$old\b" | wc -l)
   [ "$hits" != "0" ] && echo "SURVIVED: $old ($hits)"
 done
 ```
-Expected: empty.
+Same file list as steps 2 and 3, for the same reason — `projetos/` survived in `.gitignore` where this step could not see it.
+
+Expected: three survivors, each already carved out in the map's `note` column, and nothing else.
+
+- `data` (33) — the English word holding a dict in `texts.save`, `episode.save` and their tests; only the schedule-item JSON key became `date`.
+- `meta` (3) — the Portuguese common word in `utils.py`'s company-name allowlist, which is the point of that allowlist entry.
+- `cod` (1) — `.gitignore`'s `*.py[cod]` glob, not an identifier. Only visible since the file list widened.
+
+**A survivor's map note says what the old name must not become; it does not license the old name staying.** `fonte` printed here as `SURVIVED: fonte (3)` and was dismissed on the strength of the map's carve-out that "fonte means FONT and must not become source" — which is true and is not a verdict. Renaming it to `fnt` was the omission the note had been read as excusing.
 
 - [ ] **Step 6: Every classification pointer still points at an assertion**
 

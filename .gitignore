@@ -1,5 +1,5 @@
-# Saída gerada por projeto (vídeos-fonte, cortes, thumbs) — não versionar
-projetos/
+# Per-project generated output (source videos, clips, thumbs) — not versioned
+projects/
 
 # Python
 __pycache__/
@@ -8,9 +8,9 @@ __pycache__/
 .venv/
 venv/
 
-# Ambiente
+# Environment
 .env
 
-# Sistema
+# System
 .DS_Store
 *.log
