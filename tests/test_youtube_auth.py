@@ -39,15 +39,15 @@ class TestValidateClientSecret(unittest.TestCase):
 
     def test_refuses_invalid_json(self):
         with tempfile.TemporaryDirectory() as d:
-            path = _write(d, "nao e json {")
+            path = _write(d, "not json {")
             with self.assertRaises(SystemExit) as ctx:
                 youtube_auth.validate_client_secret(path)
-            self.assertIn("Baixe", str(ctx.exception))
+            self.assertIn("Download the file again", str(ctx.exception))
 
     def test_refuses_a_missing_file(self):
         with self.assertRaises(SystemExit) as ctx:
-            youtube_auth.validate_client_secret("/nao/existe.json")
-        self.assertIn("comando", str(ctx.exception))
+            youtube_auth.validate_client_secret("/does/not/exist.json")
+        self.assertIn("Check the path given", str(ctx.exception))
 
     def test_refuses_a_truncated_installed_block(self):
         with tempfile.TemporaryDirectory() as d:
@@ -55,7 +55,7 @@ class TestValidateClientSecret(unittest.TestCase):
             with self.assertRaises(SystemExit) as ctx:
                 youtube_auth.validate_client_secret(path)
             msg = str(ctx.exception)
-            self.assertIn("incompleto", msg)
+            self.assertIn("incomplete", msg)
             self.assertIn("client_secret", msg)
             self.assertIn("token_uri", msg)
 
@@ -72,11 +72,11 @@ class TestValidateClientSecret(unittest.TestCase):
 
 class TestMain(unittest.TestCase):
     def test_a_wrong_number_of_arguments_explains_the_usage(self):
-        for argv in ([], ["cs.json", "sobrando"]):
+        for argv in ([], ["cs.json", "extra"]):
             with self.subTest(argv=argv):
                 with self.assertRaises(SystemExit) as ctx:
                     youtube_auth.main(argv)
-                self.assertIn("uso:", str(ctx.exception))
+                self.assertIn("usage:", str(ctx.exception))
 
 
 if __name__ == "__main__":

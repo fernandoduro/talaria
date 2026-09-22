@@ -23,35 +23,35 @@ def validate_client_secret(path: str) -> dict:
     """
     if not os.path.exists(path):
         raise SystemExit(
-            f"{path} não existe. Confira o path passado na linha "
-            f"de comando."
+            f"{path} does not exist. Check the path given on the command "
+            f"line."
         )
     try:
         with open(path, encoding="utf-8") as f:
             data = json.load(f)
     except (json.JSONDecodeError, OSError) as e:
         raise SystemExit(
-            f"{path} não é um JSON legível: {e}. Baixe o arquivo de "
-            f"novo no Google Cloud Console."
+            f"{path} is not readable JSON: {e}. Download the file again "
+            f"from the Google Cloud Console."
         ) from None
     if not isinstance(data, dict) or "installed" not in data:
         if isinstance(data, dict):
-            part = f"tem: {', '.join(sorted(data)) or 'vazio'}"
+            part = f"it has: {', '.join(sorted(data)) or 'nothing'}"
         else:
-            part = "não é um objeto JSON"
+            part = "it is not a JSON object"
         raise SystemExit(
-            f"{path} não é um client Desktop ({part}). No Google "
-            f"Cloud Console, crie a credencial OAuth com tipo de aplicativo "
-            f"'Desktop app' e baixe o JSON dela."
+            f"{path} is not a Desktop client ({part}). In the Google "
+            f"Cloud Console, create the OAuth credential with application "
+            f"type 'Desktop app' and download its JSON."
         )
     installed = data["installed"]
     fields = installed if isinstance(installed, dict) else {}
     missing = [k for k in INSTALLED_KEYS if not fields.get(k)]
     if missing:
         raise SystemExit(
-            f"{path} tem o bloco 'installed' incompleto (falta "
-            f"{', '.join(missing)}). No Google Cloud Console, gere a "
-            f"credencial OAuth de novo e salve o JSON inteiro."
+            f"{path} has an incomplete 'installed' block (missing "
+            f"{', '.join(missing)}). In the Google Cloud Console, generate "
+            f"the OAuth credential again and save the whole JSON."
         )
     return installed
 
@@ -59,7 +59,7 @@ def validate_client_secret(path: str) -> dict:
 def main(argv: list) -> int:
     if len(argv) != 1:
         raise SystemExit(
-            "uso: python scripts/youtube_auth.py <client_secret.json>"
+            "usage: python scripts/youtube_auth.py <client_secret.json>"
         )
     path = argv[0]
     validate_client_secret(path)
@@ -73,11 +73,11 @@ def main(argv: list) -> int:
                                   prompt="consent")
     if not creds.refresh_token:
         raise SystemExit(
-            "o Google não devolveu refresh_token. Revogue o acesso deste app "
-            "em myaccount.google.com/permissions e rode de novo."
+            "Google did not return a refresh_token. Revoke this app's access "
+            "at myaccount.google.com/permissions and run again."
         )
     print()
-    print("Cole no .env:")
+    print("Paste into .env:")
     print()
     print(f"YT_CLIENT_SECRET_PATH={os.path.abspath(path)}")
     print(f"YT_REFRESH_TOKEN={creds.refresh_token}")
