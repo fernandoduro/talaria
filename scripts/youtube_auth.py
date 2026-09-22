@@ -28,29 +28,29 @@ def validate_client_secret(path: str) -> dict:
         )
     try:
         with open(path, encoding="utf-8") as f:
-            dados = json.load(f)
+            data = json.load(f)
     except (json.JSONDecodeError, OSError) as e:
         raise SystemExit(
             f"{path} não é um JSON legível: {e}. Baixe o arquivo de "
             f"novo no Google Cloud Console."
         ) from None
-    if not isinstance(dados, dict) or "installed" not in dados:
-        if isinstance(dados, dict):
-            parte = f"tem: {', '.join(sorted(dados)) or 'vazio'}"
+    if not isinstance(data, dict) or "installed" not in data:
+        if isinstance(data, dict):
+            part = f"tem: {', '.join(sorted(data)) or 'vazio'}"
         else:
-            parte = "não é um objeto JSON"
+            part = "não é um objeto JSON"
         raise SystemExit(
-            f"{path} não é um client Desktop ({parte}). No Google "
+            f"{path} não é um client Desktop ({part}). No Google "
             f"Cloud Console, crie a credencial OAuth com tipo de aplicativo "
             f"'Desktop app' e baixe o JSON dela."
         )
-    installed = dados["installed"]
-    campos = installed if isinstance(installed, dict) else {}
-    faltando = [k for k in INSTALLED_KEYS if not campos.get(k)]
-    if faltando:
+    installed = data["installed"]
+    fields = installed if isinstance(installed, dict) else {}
+    missing = [k for k in INSTALLED_KEYS if not fields.get(k)]
+    if missing:
         raise SystemExit(
             f"{path} tem o bloco 'installed' incompleto (falta "
-            f"{', '.join(faltando)}). No Google Cloud Console, gere a "
+            f"{', '.join(missing)}). No Google Cloud Console, gere a "
             f"credencial OAuth de novo e salve o JSON inteiro."
         )
     return installed

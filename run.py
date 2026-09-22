@@ -7,8 +7,8 @@ Fluxo por vídeo (rodado por um modelo de linguagem, com curation manual):
                   (ou acquire + transcribe, quando a transcrição vem do Whisper)
   2. [episode.json]: o gestor preenche os metadados do episódio
   3. brief      : compose o pacote de leitura (--cortes ou --materiais) p/ o modelo
-  4. curate      : estado da curation iterativa; --export gera moments.json
-  5. render     : gera os cortes 9:16 com legenda p/ as plataformas escolhidas
+  4. curate      : state da curation iterativa; --export gera moments.json
+  5. render     : gera os cortes 9:16 com legenda p/ as platforms escolhidas
   6. thumb      : gera a thumbnail (texts do JSON, flags sobrescrevem)
   7. post       : posts de citação p/ Instagram; --cortes compose o pacote,
                   --generate renderiza os PNGs a partir do posts.json
@@ -46,7 +46,7 @@ PROJECTS = os.path.join(ROOT, "projects")
 
 # O `.env` entra no environment antes de qualquer comando: os módulos de
 # publicação leem credencial de os.environ, e sem isto o arquivo preenchido
-# não chegava neles — o publish reclamava de variável faltando com a resposta
+# não chegava neles — o publish reclamava de variável missing com a response
 # aberta na tela do gestor.
 environment.load()
 
@@ -60,11 +60,11 @@ def project_dir(slug: str) -> str:
     move nada e não imprime nada.
     """
     pd = os.path.join(PROJECTS, slug)
-    movidos = layout.migrate(pd)
-    if movidos:
-        print(f"[layout] projeto reorganizado ({len(movidos)} itens):")
-        for origem, destino in movidos:
-            print(f"         {origem} -> {destino}")
+    moved = layout.migrate(pd)
+    if moved:
+        print(f"[layout] projeto reorganizado ({len(moved)} itens):")
+        for origin, destination in moved:
+            print(f"         {origin} -> {destination}")
     return pd
 
 
@@ -141,11 +141,11 @@ def cmd_thumb(args):
         except FileNotFoundError:
             base = {"badge": "", "headline_l1": "", "headline_l2": "",
                     "credits": "", "subtitle": ""}
-        for flag, campo in (("badge", "badge"), ("l1", "headline_l1"), ("l2", "headline_l2"),
+        for flag, field in (("badge", "badge"), ("l1", "headline_l1"), ("l2", "headline_l2"),
                             ("credits", "credits"), ("subtitle", "subtitle")):
-            valor = getattr(args, flag, "")
-            if valor:
-                base[campo] = valor
+            value = getattr(args, flag, "")
+            if value:
+                base[field] = value
 
         thumbnail.build_thumbnail(frame, layout.ensure_dir(layout.thumbnail(pd)), **base)
     finally:
@@ -178,10 +178,10 @@ def cmd_ingest(args):
         except Exception:  # noqa: BLE001
             print("[ingest] não consegui medir a duração; último segmento estimado.")
         segs = txt_parse.parse_txt(args.transcript, total_duration=dur)
-        transcricao_path = layout.ensure_dir(layout.transcript(pd))
-        with open(transcricao_path, "w", encoding="utf-8") as f:
+        transcript_path = layout.ensure_dir(layout.transcript(pd))
+        with open(transcript_path, "w", encoding="utf-8") as f:
             json.dump({"segments": segs}, f, ensure_ascii=False, indent=2)
-        print(f"[ingest] {len(segs)} segmentos -> {transcricao_path}")
+        print(f"[ingest] {len(segs)} segmentos -> {transcript_path}")
     else:
         print("[ingest] sem --transcript; rode 'transcribe' para usar o Whisper.")
 
@@ -211,28 +211,28 @@ def _segments(pd):
 
 
 def cmd_curate(args):
-    """Mostra o estado da curation e exporta moments.json quando fecha."""
+    """Mostra o state da curation e exporta moments.json quando fecha."""
     pd = project_dir(args.project)
-    ja_existia = os.path.exists(layout.curation(pd))
-    estado = curation.load(pd, target=args.target)
+    already_existed = os.path.exists(layout.curation(pd))
+    state = curation.load(pd, target=args.target)
 
     # Estado já gravado manda na target — --target só vale ao criar a curation.
-    # Sem este aviso, `curate --target 8` sobre um estado com target 5 seguia em
+    # Sem este aviso, `curate --target 8` sobre um state com target 5 seguia em
     # silêncio com a target antiga.
-    if ja_existia and estado["target"] != args.target:
-        print(f"[curate] aviso: estado gravado tem target {estado['target']}, "
+    if already_existed and state["target"] != args.target:
+        print(f"[curate] aviso: state gravado tem target {state['target']}, "
               f"ignorando --target {args.target}")
 
     if args.export:
         try:
-            path = curation.save_moments(pd, estado)
+            path = curation.save_moments(pd, state)
         except ValueError as e:   # nada aprovado ainda: error do operador, não bug
             sys.exit(f"[curate] {e}")
-        print(f"[curate] {len(estado['approved'])} cortes -> {path}")
+        print(f"[curate] {len(state['approved'])} cortes -> {path}")
         return
 
-    # Revalida o que já está aprovado: o estado pode ter sido gravado antes de
-    # uma regra nova existir (fim em frase completa, sobreposição entre
+    # Revalida o que já está aprovado: o state pode ter sido gravado antes de
+    # uma regra nova existir (end em frase completa, sobreposição entre
     # approved). Sem isto o problema só aparece no vídeo renderizado.
     segs = _segments(pd)
     if segs:
@@ -240,29 +240,29 @@ def cmd_curate(args):
             print("[curate] aviso: atribuição de falante inconsistente neste "
                   "episódio — protagonismo e abertura não foram checados; "
                   "confira no vídeo renderizado.")
-        for c in estado.get("approved", []):
+        for c in state.get("approved", []):
             ok, msgs = curation.validate_clip((c["start"], c["end"]), segs, {})
             if not ok:
                 print(f"[curate] !! {c.get('slug')}: {'; '.join(msgs)}")
             for a in curation.clip_warnings((c["start"], c["end"]), segs):
                 print(f"[curate] ?  {c.get('slug')}: {a}")
 
-    comp = curation.composition(estado)
-    print(f"[curate] rodada {estado['rounds']} | "
-          f"{len(estado['approved'])}/{estado['target']} aprovados | "
-          f"{len(estado['rejected'])} rejeitados")
+    comp = curation.composition(state)
+    print(f"[curate] rodada {state['rounds']} | "
+          f"{len(state['approved'])}/{state['target']} aprovados | "
+          f"{len(state['rejected'])} rejeitados")
     print("[curate] composição: " + ", ".join(f"{t}={n}" for t, n in comp.items()))
-    ausentes = curation.missing_kinds(estado)
-    if ausentes:
-        print(f"[curate] tipos ausentes: {', '.join(ausentes)}")
-    ms = curation.reasons(estado)
+    missing = curation.missing_kinds(state)
+    if missing:
+        print(f"[curate] tipos missing: {', '.join(missing)}")
+    ms = curation.reasons(state)
     if ms:
         print(f"[curate] motivos de rejeição acumulados: {'; '.join(ms)}")
-    if curation.is_closed(estado):
+    if curation.is_closed(state):
         print("[curate] target atingida — rode com --export para gerar moments.json")
     else:
-        print(f"[curate] faltam {curation.slots_left(estado)} cortes")
-    curation.save(pd, estado)
+        print(f"[curate] faltam {curation.slots_left(state)} cortes")
+    curation.save(pd, state)
 
 
 def cmd_post(args):
@@ -271,32 +271,32 @@ def cmd_post(args):
 
     if args.generate:
         try:
-            gerados = post_instagram.generate(pd)
+            generated = post_instagram.generate(pd)
         except (FileNotFoundError, ValueError) as e:
             sys.exit(str(e))
-        print(f"\n{len(gerados)} imagem(ns) em {layout.posts_png(pd)}/")
+        print(f"\n{len(generated)} imagem(ns) em {layout.posts_png(pd)}/")
         return
 
-    momentos_path = layout.moments(pd)
-    if not os.path.exists(momentos_path):
-        sys.exit(f"{momentos_path} não existe. Rode 'curate --export' antes.")
-    with open(momentos_path, encoding="utf-8") as f:
+    moments_path = layout.moments(pd)
+    if not os.path.exists(moments_path):
+        sys.exit(f"{moments_path} não existe. Rode 'curate --export' antes.")
+    with open(moments_path, encoding="utf-8") as f:
         moments = json.load(f)
 
     if args.clips:
         try:
-            querido = {int(n) for n in args.clips.split(",") if n.strip()}
+            wanted = {int(n) for n in args.clips.split(",") if n.strip()}
         except ValueError:
             sys.exit(f"--clips aceita números separados por vírgula "
                      f"(ex.: 1,3) — recebido {args.clips!r}")
-        escolhidos = [m for i, m in enumerate(moments, start=1) if i in querido]
-        if not escolhidos:
-            sys.exit(f"nenhum corte com os números {sorted(querido)} "
+        chosen = [m for i, m in enumerate(moments, start=1) if i in wanted]
+        if not chosen:
+            sys.exit(f"nenhum corte com os números {sorted(wanted)} "
                      f"(o episódio tem {len(moments)})")
     else:
-        escolhidos = moments
+        chosen = moments
 
-    out = brief.build_posts(pd, escolhidos)
+    out = brief.build_posts(pd, chosen)
     print(f"\n>>> Leia {out}, escolha as citações comigo e grave "
           f"{layout.posts(pd)}. Depois rode 'post --generate'.")
 
@@ -306,49 +306,49 @@ def cmd_publish(args):
     pd = project_dir(args.project)
     only = ([s.strip() for s in args.only.split(",") if s.strip()]
             if args.only else None)
-    plataformas = ([s.strip() for s in args.platform.split(",") if s.strip()]
+    platforms = ([s.strip() for s in args.platform.split(",") if s.strip()]
                    if args.platform else None)
     try:
-        resultados = publish.execute(pd, only=only, plataformas=plataformas)
+        results = publish.execute(pd, only=only, platforms=platforms)
     except (FileNotFoundError, ValueError, RuntimeError) as e:
         sys.exit(str(e))
 
-    if not resultados:
+    if not results:
         print(f"[publish] nada agendado para hoje "
               f"({schedule.today().isoformat()})")
         return
 
     today = schedule.today().isoformat()
-    for r in resultados:
+    for r in results:
         if r["date"] < today:
             # Mostra a data ORIGINAL: o gestor precisa ver que atrasou.
             print(f"[publish]    ({r['slug']} estava agendado para {r['date']})")
     for pl in ("youtube_shorts", "instagram_reels", "instagram_posts"):
-        do_pl = [r for r in resultados if r["platform"] == pl]
-        if not do_pl:
+        by_pl = [r for r in results if r["platform"] == pl]
+        if not by_pl:
             continue
-        ok = [r for r in do_pl if r["ok"]]
-        ruim = [r for r in do_pl if not r["ok"]]
-        linha = f"[publish] {pl}: {len(ok)} ok, {len(ruim)} falhou"
-        if ruim:
-            linha += " (" + "; ".join(f"{r['slug']}: {r['error']}"
-                                      for r in ruim) + ")"
-        print(linha)
+        ok = [r for r in by_pl if r["ok"]]
+        bad = [r for r in by_pl if not r["ok"]]
+        line = f"[publish] {pl}: {len(ok)} ok, {len(bad)} falhou"
+        if bad:
+            line += " (" + "; ".join(f"{r['slug']}: {r['error']}"
+                                      for r in bad) + ")"
+        print(line)
 
     # Peça no ar cujo registro falhou: o published.json não sabe dela, então
     # o próximo publish a mandaria de novo. É o aviso mais importante da
     # execução e sai por último, onde o gestor olha.
-    sem_registro = [r for r in resultados if r.get("record_failed")]
-    if sem_registro:
-        print(f"\n[publish] !! {len(sem_registro)} peça(s) NO AR e fora do "
+    no_record = [r for r in results if r.get("record_failed")]
+    if no_record:
+        print(f"\n[publish] !! {len(no_record)} peça(s) NO AR e fora do "
               f"{layout.published(pd)}:")
-        for r in sem_registro:
+        for r in no_record:
             print(f"[publish]    {r['platform']} {r['slug']} -> id {r['id']}"
                   f" ({r['url'] or 'sem url'})")
         print("[publish]    Acrescente esses ids ao published.json ANTES de "
               "rodar publish de novo, ou as peças saem duplicadas.")
 
-    if any(not r["ok"] for r in resultados) or sem_registro:
+    if any(not r["ok"] for r in results) or no_record:
         sys.exit(1)
 
 
@@ -363,14 +363,14 @@ def cmd_schedule(args):
     today = schedule.today()
     for item in items:
         pls = schedule.platforms_of(item)
-        feitos = [pl for pl in pls
+        done = [pl for pl in pls
                   if published.is_published(reg, pl, item["slug"])]
         d = schedule.date_of(item)
-        if len(feitos) == len(pls):
+        if len(done) == len(pls):
             status = "✓ publicado"
-        elif feitos:
-            faltam = [p for p in pls if p not in feitos]
-            status = f"parcial — falta {', '.join(faltam)}"
+        elif done:
+            missing = [p for p in pls if p not in done]
+            status = f"parcial — falta {', '.join(missing)}"
         elif d < today:
             status = "ATRASADO"
         elif d == today:
@@ -431,7 +431,7 @@ def main():
     g.add_argument("--clips", action="store_true", help="prompt de seleção de cortes")
     sp.set_defaults(func=cmd_brief)
 
-    sp = sub.add_parser("curate", help="estado da curadoria iterativa")
+    sp = sub.add_parser("curate", help="state da curadoria iterativa")
     add_common(sp)
     sp.add_argument("--target", type=int, default=5, help="quantos cortes aprovar")
     sp.add_argument("--export", action="store_true", help="gera moments.json")
@@ -452,7 +452,7 @@ def main():
                     help="slugs específicos, fora da data agendada "
                          "(ex.: corte1,cit_x) — não republica o que já foi")
     sp.add_argument("--platform", default="",
-                    help="publica só nestas plataformas (ex.: youtube_shorts) "
+                    help="publica só nestas platforms (ex.: youtube_shorts) "
                          "— o resto do corte segue pendente para depois")
     sp.set_defaults(func=cmd_publish)
 
