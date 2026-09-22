@@ -864,7 +864,37 @@ done
 ```
 Expected: empty.
 
-- [ ] **Step 5: Every `B` site has a derivation**
+- [ ] **Step 6: Every classification pointer still points at an assertion**
+
+```bash
+cd /data/Code/talaria
+python3 docs/plans/phase-1-inputs/check-assertion-pointers.py
+```
+
+Exit 0 and "0 stale" is the pass condition. The classification keys on
+`file:line`, and every task that edits a test file shifts those lines. Worse,
+Task 3 renamed nine test modules and left 33 rows pointing at files that no
+longer existed — missed by four fix rounds and two reviews, because nothing
+checked. A stale pointer silently detaches a `proves` statement from the
+assertion it describes, and the next task then re-derives the wrong
+expectation while believing it has guidance.
+
+- [ ] **Step 7: Every Portuguese test method name was renamed**
+
+```bash
+cd /data/Code/talaria
+grep -rhoE 'def test_[a-z0-9_]+' tests/*.py | sed 's/def //' | sort > /tmp/now.txt
+grep -oP '(?<=\t)test_[a-z0-9_]+' docs/plans/phase-1-inputs/test-name-snapshot.txt | sort > /tmp/then.txt
+comm -12 /tmp/then.txt /tmp/now.txt
+```
+
+Every name it prints survived the prose pass. Each must be one that was
+already English and deliberately left — state the list rather than assuming
+it. The snapshot holds all 388 names as they stood after Task 3; the large
+majority were Portuguese, and neither the accent check nor the function-word
+check can see any of them.
+
+- [ ] **Step 8: Every `B` site has a derivation**
 
 ```bash
 cd /data/Code/talaria
@@ -873,7 +903,7 @@ awk -F'\t' 'NR>1 && $4=="B" && $6=="" {print "B site with no derivation: " $1":"
 ```
 Expected: empty. A `B` site with no recorded derivation means an expectation was translated rather than measured — which is the one failure mode this plan exists to prevent.
 
-- [ ] **Step 6: The CLI is entirely English**
+- [ ] **Step 9: The CLI is entirely English**
 
 ```bash
 cd /data/Code/talaria
@@ -883,7 +913,7 @@ cd /data/Code/talaria
 ```
 Read the output. Every word the user sees must be English.
 
-- [ ] **Step 7: Commit, push, report**
+- [ ] **Step 10: Commit, push, report**
 
 ```bash
 cd /data/Code/talaria
