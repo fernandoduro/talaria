@@ -1,4 +1,4 @@
-"""Testes da agenda de publicação (schedule.json)."""
+"""Tests for the publishing schedule (schedule.json)."""
 import datetime as dt
 import json
 import os
@@ -9,7 +9,7 @@ from talaria import schedule, layout, published
 
 
 def _prepare(pd, moments=None, posts=None, items=None):
-    """Escreve as fontes e a agenda de um project de teste."""
+    """Writes the sources and the schedule of a test project."""
     if moments is not None:
         with open(layout.ensure_dir(layout.moments(pd)), "w", encoding="utf-8") as f:
             json.dump(moments, f)
@@ -29,7 +29,7 @@ class TestLoad(unittest.TestCase):
     def setUp(self):
         self.pd = tempfile.mkdtemp()
 
-    def test_agenda_valida_passa(self):
+    def test_a_valid_schedule_passes(self):
         _prepare(self.pd, MOMENTS, POSTS, [
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"date": "2026-08-25", "kind": "post", "slug": "citacao_x"},
@@ -37,41 +37,41 @@ class TestLoad(unittest.TestCase):
         items = schedule.load(self.pd)
         self.assertEqual(len(items), 2)
 
-    def test_sem_arquivo_explica_o_que_criar(self):
+    def test_a_missing_file_explains_what_to_create(self):
         with self.assertRaises(FileNotFoundError):
             schedule.load(self.pd)
 
-    def test_slug_de_corte_inexistente_aborta(self):
-        # Publicar o clip errado por slug digitado errado não tem correção.
+    def test_a_nonexistent_clip_slug_aborts(self):
+        # Publishing the wrong clip from a mistyped slug has no fix.
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"date": "2026-08-24", "kind": "clip", "slug": "corte99"}])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
         self.assertIn("corte99", str(ctx.exception))
 
-    def test_slug_de_post_inexistente_aborta(self):
+    def test_a_nonexistent_post_slug_aborts(self):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"date": "2026-08-24", "kind": "post", "slug": "nao_existe"}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
-    def test_data_impossivel_aborta(self):
-        # Valida a data REAL, não só o formato — 30 de fevereiro passa
-        # num regex e publicaria nunca.
+    def test_an_impossible_date_aborts(self):
+        # Validates the REAL date, not just the format — 30 February passes a
+        # regex and would never publish.
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"date": "2026-02-30", "kind": "clip", "slug": "corte1"}])
         with self.assertRaises(ValueError) as ctx:
             schedule.load(self.pd)
         self.assertIn("2026-02-30", str(ctx.exception))
 
-    def test_formato_de_data_errado_aborta(self):
+    def test_a_wrong_date_format_aborts(self):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"date": "24/08/2026", "kind": "clip", "slug": "corte1"}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
-    def test_slug_duplicado_aborta(self):
-        # Reagendamento é editar a data do item, não repetir o slug.
+    def test_a_duplicate_slug_aborts(self):
+        # Rescheduling means editing the item's date, not repeating the slug.
         _prepare(self.pd, MOMENTS, POSTS, [
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"date": "2026-08-26", "kind": "clip", "slug": "corte1"},
@@ -80,9 +80,9 @@ class TestLoad(unittest.TestCase):
             schedule.load(self.pd)
         self.assertIn("duas vezes", str(ctx.exception))
 
-    def test_corte_e_post_com_mesmo_slug_permitido(self):
-        # O post de citação herda o slug do clip que cita; agendar os dois
-        # não é repetição — são peças distintas, em platforms distintas.
+    def test_clip_and_post_sharing_a_slug_is_allowed(self):
+        # A quote post inherits the slug of the clip it quotes; scheduling both
+        # is not a repetition — they are distinct pieces, on distinct platforms.
         posts = [{"slug": "corte1", "cards": ["frase"], "caption": "leg"}]
         _prepare(self.pd, MOMENTS, posts, [
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
@@ -90,24 +90,24 @@ class TestLoad(unittest.TestCase):
         ])
         self.assertEqual(len(schedule.load(self.pd)), 2)
 
-    def test_dois_itens_no_mesmo_dia_permitido(self):
+    def test_two_items_on_the_same_day_is_allowed(self):
         _prepare(self.pd, MOMENTS, POSTS, [
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"date": "2026-08-24", "kind": "post", "slug": "citacao_x"},
         ])
         self.assertEqual(len(schedule.load(self.pd)), 2)
 
-    def test_tipo_desconhecido_aborta(self):
+    def test_an_unknown_kind_aborts(self):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"date": "2026-08-24", "kind": "reels", "slug": "corte1"}])
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
-    def test_slug_que_escapa_da_pasta_aborta(self):
-        # O slug vira name de arquivo em publish/. Com barra ou `..` ele sai
-        # da pasta do episódio: o publish acharia um mp4 de fora do project,
-        # passaria na pré-checagem e publicaria a peça errada — com o texto
-        # de fora virando descrição pública.
+    def test_a_slug_escaping_the_folder_aborts(self):
+        # The slug becomes a filename in publish/. With a slash or a `..` it
+        # leaves the episode folder: publish would find an mp4 from outside the
+        # project, pass the pre-check and publish the wrong piece — with the
+        # outside text becoming a public description.
         bad = "../../../outro/clip"
         _prepare(self.pd,
                  [{"slug": bad, "start": 1.0, "end": 70.0, "title": "T"}],
@@ -117,7 +117,7 @@ class TestLoad(unittest.TestCase):
             schedule.load(self.pd)
         self.assertIn("barra", str(ctx.exception))
 
-    def test_slug_com_barra_simples_tambem_aborta(self):
+    def test_a_slug_with_a_single_slash_also_aborts(self):
         bad = "pasta/clip"
         _prepare(self.pd,
                  [{"slug": bad, "start": 1.0, "end": 70.0, "title": "T"}],
@@ -126,9 +126,9 @@ class TestLoad(unittest.TestCase):
         with self.assertRaises(ValueError):
             schedule.load(self.pd)
 
-    def test_slug_normal_com_ponto_continua_valendo(self):
-        # Sanear não pode ficar restritivo demais: ponto e hífen são comuns
-        # em slug de clip ("corte1_faria-lima.v2") e não escapam de pasta.
+    def test_an_ordinary_slug_with_a_dot_still_works(self):
+        # Sanitising must not get too strict: dots and hyphens are common in a
+        # clip slug ("corte1_faria-lima.v2") and escape no folder.
         ok = "corte1_faria-lima.v2"
         _prepare(self.pd,
                  [{"slug": ok, "start": 1.0, "end": 70.0, "title": "T"}],
@@ -136,8 +136,8 @@ class TestLoad(unittest.TestCase):
                  [{"date": "2026-08-24", "kind": "clip", "slug": ok}])
         self.assertEqual(len(schedule.load(self.pd)), 1)
 
-    def test_carrossel_acima_de_10_aborta(self):
-        # Limite da Graph API é 10 imagens; a solução é editorial.
+    def test_a_carousel_over_10_aborts(self):
+        # The Graph API limit is 10 images; the fix is editorial.
         posts = [{"slug": "longo", "cards": ["c"] * 11, "caption": "x"}]
         _prepare(self.pd, MOMENTS, posts,
                  [{"date": "2026-08-24", "kind": "post", "slug": "longo"}])
@@ -154,36 +154,36 @@ class TestPending(unittest.TestCase):
             {"date": "2026-08-25", "kind": "post", "slug": "citacao_x"},
         ])
 
-    def test_corte_pendente_vale_por_duas_plataformas(self):
+    def test_a_pending_clip_counts_for_two_platforms(self):
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         self.assertEqual([(i["slug"], pl) for i, pl in pairs],
                          [("corte1", "youtube_shorts"),
                           ("corte1", "instagram_reels")])
 
-    def test_futuro_nao_entra(self):
+    def test_the_future_does_not_enter(self):
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 23))
         self.assertEqual(pairs, [])
 
-    def test_atrasado_continua_pendente(self):
-        # Esquecer de rodar ontem não perde a publicação.
+    def test_an_overdue_item_stays_pending(self):
+        # Forgetting to run yesterday does not lose the publication.
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 30))
         self.assertEqual(len(pairs), 3)  # clip (2 platforms) + post
 
-    def test_meio_publicado_retenta_so_o_que_faltou(self):
-        # YouTube passou, Instagram falhou → amanhã só o Instagram.
+    def test_half_published_retries_only_what_was_missing(self):
+        # YouTube went through, Instagram failed -> tomorrow only Instagram.
         published.record(self.pd, "youtube_shorts", "corte1", "a", "u")
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         self.assertEqual([(i["slug"], pl) for i, pl in pairs],
                          [("corte1", "instagram_reels")])
 
-    def test_tudo_publicado_devolve_vazio(self):
+    def test_everything_published_returns_empty(self):
         published.record(self.pd, "youtube_shorts", "corte1", "a", "u")
         published.record(self.pd, "instagram_reels", "corte1", "b", "u")
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         self.assertEqual(pairs, [])
 
-    def test_only_ignora_data_mas_nao_a_trava(self):
-        # Antecipar com --only funciona; republicar por --only NÃO.
+    def test_only_ignores_the_date_but_not_the_lock(self):
+        # Bringing forward with --only works; republishing via --only does NOT.
         published.record(self.pd, "instagram_posts", "citacao_x", "c", "u")
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 1),
                                     only=["corte1", "citacao_x"])
@@ -191,35 +191,35 @@ class TestPending(unittest.TestCase):
                          [("corte1", "youtube_shorts"),
                           ("corte1", "instagram_reels")])
 
-    def test_only_vazio_nao_vira_agenda_do_dia(self):
-        # `only=[]` é "filtre para nada", não "sem filtro": o chamador que
-        # compose a lista a partir de uma flag vazia pediria a agenda inteira
-        # sem querer, e publicaria o day inteiro achando que pediu um slug.
+    def test_an_empty_only_does_not_become_the_whole_day(self):
+        # `only=[]` means "filter to nothing", not "no filter": a caller that
+        # composes the list from an empty flag would ask for the whole schedule
+        # unintentionally, and publish the whole day believing it asked for one slug.
         self.assertEqual(
             schedule.pending(self.pd, day=dt.date(2026, 8, 30), only=[]), [])
 
-    def test_plataformas_restringe_o_que_sai(self):
-        # Enquanto o Instagram não está configurado, o clip inteiro ficaria
-        # parado: a pré-checagem cobra as credenciais das DUAS platforms.
-        # Restringir deixa o YouTube sair e o Reels seguir pending.
+    def test_platforms_restricts_what_goes_out(self):
+        # While Instagram is not configured the whole clip would stall: the
+        # pre-check demands credentials for BOTH platforms. Restricting lets
+        # YouTube go out and keeps the Reel pending.
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24),
                                     platforms=["youtube_shorts"])
         self.assertEqual([(i["slug"], pl) for i, pl in pairs],
                          [("corte1", "youtube_shorts")])
 
-    def test_plataforma_restrita_nao_marca_a_outra_como_publicada(self):
-        # O que não saiu continua pending — a trava é por (slug, platform).
+    def test_a_restricted_platform_does_not_mark_the_other_as_published(self):
+        # What did not go out stays pending — the lock is per (slug, platform).
         published.record(self.pd, "youtube_shorts", "corte1", "a", "u")
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         self.assertEqual([pl for _, pl in pairs], ["instagram_reels"])
 
-    def test_plataforma_desconhecida_aborta(self):
+    def test_an_unknown_platform_aborts(self):
         with self.assertRaises(ValueError) as ctx:
             schedule.pending(self.pd, day=dt.date(2026, 8, 24),
                                 platforms=["tiktok"])
         self.assertIn("tiktok", str(ctx.exception))
 
-    def test_only_com_slug_fora_da_agenda_aborta(self):
+    def test_only_with_a_slug_off_the_schedule_aborts(self):
         with self.assertRaises(ValueError) as ctx:
             schedule.pending(self.pd, day=dt.date(2026, 8, 24),
                                 only=["nao_agendado"])

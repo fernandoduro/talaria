@@ -1,4 +1,4 @@
-"""Testes do orquestrador de publicação."""
+"""Tests for the publishing orchestrator."""
 import json
 import os
 import tempfile
@@ -13,7 +13,7 @@ ENV_OK = {"IG_PAGE_TOKEN": "t", "IG_BUSINESS_ACCOUNT_ID": "1",
 
 
 def _project(pd, title="Titulo do Short"):
-    """Projeto completo: moments, posts, agenda e files em publish/."""
+    """A complete project: moments, posts, schedule and files in publish/."""
     moments = [{"slug": "corte1", "start": 1.0, "end": 70.0,
                  "title": title}]
     with open(layout.ensure_dir(layout.moments(pd)), "w", encoding="utf-8") as f:
@@ -26,7 +26,7 @@ def _project(pd, title="Titulo do Short"):
             {"date": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"date": "2026-08-24", "kind": "post", "slug": "cit_x"},
         ]}, f)
-    # peças renderizadas + captions
+    # rendered pieces + captions
     for folder, name in (("youtube_shorts", "corte1_short"),
                         ("instagram_reels", "corte1_reel")):
         base = os.path.join(layout.platform(pd, folder), name)
@@ -49,14 +49,14 @@ class TestPrecheck(unittest.TestCase):
         _project(self.pd)
 
     @mock.patch.dict("os.environ", ENV_OK)
-    def test_projeto_completo_passa(self):
+    def test_a_complete_project_passes(self):
         import datetime as dt
         from talaria import schedule
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         self.assertEqual(publish.precheck(self.pd, pairs), [])
 
     @mock.patch.dict("os.environ", ENV_OK)
-    def test_mp4_faltando_aponta_o_render(self):
+    def test_missing_mp4_points_at_render(self):
         import datetime as dt
         from talaria import schedule
         os.remove(os.path.join(layout.platform(self.pd, "youtube_shorts"),
@@ -66,7 +66,7 @@ class TestPrecheck(unittest.TestCase):
         self.assertTrue(any("render" in e for e in errors))
 
     @mock.patch.dict("os.environ", ENV_OK)
-    def test_corte_sem_titulo_aponta_a_curadoria(self):
+    def test_clip_without_a_title_points_at_curation(self):
         import datetime as dt
         from talaria import schedule
         _project(self.pd, title="")
@@ -75,7 +75,7 @@ class TestPrecheck(unittest.TestCase):
         self.assertTrue(any("title" in e and "curation" in e for e in errors))
 
     @mock.patch.dict("os.environ", ENV_OK)
-    def test_titulo_acima_de_100_aborta(self):
+    def test_title_over_100_aborts(self):
         import datetime as dt
         from talaria import schedule
         _project(self.pd, title="x" * 101)
@@ -84,7 +84,7 @@ class TestPrecheck(unittest.TestCase):
         self.assertTrue(any("100" in e for e in errors))
 
     @mock.patch.dict("os.environ", {}, clear=True)
-    def test_credencial_faltando_lista_as_variaveis(self):
+    def test_missing_credential_lists_the_variables(self):
         import datetime as dt
         from talaria import schedule
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
@@ -94,9 +94,9 @@ class TestPrecheck(unittest.TestCase):
             self.assertIn(var, text)
 
     @mock.patch.dict("os.environ", {**ENV_OK, "YT_PRIVACY": "unlised"})
-    def test_yt_privacy_invalido_reprova_antes_de_subir(self):
-        # Typo na privacy tem que aparecer ANTES do upload: descoberto
-        # depois, o vídeo já estaria no ar com a privacy errada.
+    def test_invalid_yt_privacy_fails_before_uploading(self):
+        # A typo in the privacy value has to surface BEFORE the upload: found
+        # afterwards, the video would already be live under the wrong privacy.
         import datetime as dt
         from talaria import schedule
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
@@ -104,14 +104,14 @@ class TestPrecheck(unittest.TestCase):
         self.assertTrue(any("YT_PRIVACY" in e for e in errors))
 
     @mock.patch.dict("os.environ", {**ENV_OK, "YT_PRIVACY": "unlisted"})
-    def test_yt_privacy_valido_passa(self):
+    def test_valid_yt_privacy_passes(self):
         import datetime as dt
         from talaria import schedule
         pairs = schedule.pending(self.pd, day=dt.date(2026, 8, 24))
         self.assertEqual(publish.precheck(self.pd, pairs), [])
 
     @mock.patch.dict("os.environ", ENV_OK)
-    def test_png_do_post_faltando_aponta_o_gerar(self):
+    def test_missing_post_png_points_at_generate(self):
         import datetime as dt
         from talaria import schedule
         folder = layout.posts_png(self.pd)
@@ -128,9 +128,9 @@ class TestPostPngs(unittest.TestCase):
         self.pd = tempfile.mkdtemp()
         _project(self.pd)
 
-    def test_carrossel_ordenado_numericamente(self):
+    def test_carousel_ordered_numerically(self):
         folder = layout.posts_png(self.pd)
-        # _10 depois de _2: ordenação NUMÉRICA, não alfabética
+        # _10 after _2: NUMERIC ordering, not alphabetical
         for n in ("post_cit_x_10.png",):
             open(os.path.join(folder, n), "w").close()
         pngs = publish._post_pngs(self.pd, "cit_x")
@@ -148,7 +148,7 @@ class TestExecute(unittest.TestCase):
         _project(self.pd)
         self.day = __import__("datetime").date(2026, 8, 24)
 
-    def test_publica_tudo_e_registra_cada_um(self, yt, ig):
+    def test_publishes_everything_and_records_each_one(self, yt, ig):
         yt.upload.return_value = {"id": "v1", "url": "https://yt/v1"}
         ig.publish_reel.return_value = {"id": "r1", "permalink": "https://ig/r1"}
         ig.publish_post.return_value = {"id": "p1", "permalink": "https://ig/p1"}
@@ -159,12 +159,12 @@ class TestExecute(unittest.TestCase):
         self.assertTrue(published.is_published(reg, "youtube_shorts", "corte1"))
         self.assertTrue(published.is_published(reg, "instagram_reels", "corte1"))
         self.assertTrue(published.is_published(reg, "instagram_posts", "cit_x"))
-        # título veio do moments.json, descrição do .txt
+        # the title came from moments.json, the description from the .txt
         args = yt.upload.call_args[0]
         self.assertEqual(args[1], "Titulo do Short")
         self.assertIn("Legenda do corte.", args[2])
 
-    def test_falha_numa_plataforma_nao_trava_as_outras(self, yt, ig):
+    def test_a_failure_on_one_platform_does_not_block_the_others(self, yt, ig):
         yt.upload.side_effect = RuntimeError("quota estourada")
         ig.publish_reel.return_value = {"id": "r1", "permalink": "u"}
         ig.publish_post.return_value = {"id": "p1", "permalink": "u"}
@@ -173,13 +173,13 @@ class TestExecute(unittest.TestCase):
         self.assertFalse(per_pl["youtube_shorts"])
         self.assertTrue(per_pl["instagram_reels"])
         self.assertTrue(per_pl["instagram_posts"])
-        # o que falhou NÃO entra no registro — retenta amanhã
+        # what failed does NOT enter the record — it retries tomorrow
         from talaria import published
         reg = published.load(self.pd)
         self.assertFalse(published.is_published(reg, "youtube_shorts", "corte1"))
 
-    def test_registro_e_imediato_nao_no_fim_do_lote(self, yt, ig):
-        # Se o processo morrer no item 2, o item 1 já está registrado.
+    def test_the_record_is_immediate_not_at_the_end_of_the_batch(self, yt, ig):
+        # If the process dies on item 2, item 1 is already recorded.
         from talaria import published
         state = {}
 
@@ -187,7 +187,7 @@ class TestExecute(unittest.TestCase):
             return {"id": "v1", "url": "u"}
 
         def reel_explode(*a, **k):
-            # neste ponto o YouTube JÁ deve estar registrado
+            # at this point YouTube must ALREADY be recorded
             reg = published.load(self.pd)
             state["yt_registrado"] = published.is_published(
                 reg, "youtube_shorts", "corte1")
@@ -199,11 +199,11 @@ class TestExecute(unittest.TestCase):
         publish.execute(self.pd, day=self.day)
         self.assertTrue(state["yt_registrado"])
 
-    def test_registro_que_falha_depois_do_ar_nao_vira_retentativa(self, yt, ig):
-        # O pior caso do módulo: o vídeo SUBIU e o registro falhou (disco
-        # cheio). Marcar ok=False mandaria o par pra fila de amanhã e o
-        # publicaria de novo — duplicata que não tem correção. Tem que sair
-        # como published, gritando que o registro precisa de conserto à mão.
+    def test_a_record_failing_after_going_live_is_not_a_retry(self, yt, ig):
+        # The module's worst case: the video WENT UP and the record failed
+        # (disk full). Marking ok=False would send the pair to tomorrow's queue
+        # and publish it again — a duplicate with no fix. It has to come out as
+        # published, shouting that the record needs repairing by hand.
         yt.upload.return_value = {"id": "v1", "url": "https://yt/v1"}
         ig.publish_reel.return_value = {"id": "r1", "permalink": "u"}
         ig.publish_post.return_value = {"id": "p1", "permalink": "u"}
@@ -212,19 +212,19 @@ class TestExecute(unittest.TestCase):
             results = publish.execute(self.pd, day=self.day)
 
         yt_r = [r for r in results if r["platform"] == "youtube_shorts"][0]
-        self.assertTrue(yt_r["ok"])           # está no ar: não é falha
+        self.assertTrue(yt_r["ok"])           # it is live: not a failure
         self.assertTrue(yt_r["record_failed"])
-        self.assertEqual(yt_r["id"], "v1")    # id para o conserto manual
+        self.assertEqual(yt_r["id"], "v1")    # id for the manual repair
         self.assertIn("disco cheio", yt_r["error"])
 
-    def test_publicacao_normal_nao_marca_registro_falhou(self, yt, ig):
+    def test_a_normal_publication_does_not_flag_record_failed(self, yt, ig):
         yt.upload.return_value = {"id": "v1", "url": "u"}
         ig.publish_reel.return_value = {"id": "r1", "permalink": "u"}
         ig.publish_post.return_value = {"id": "p1", "permalink": "u"}
         results = publish.execute(self.pd, day=self.day)
         self.assertTrue(all(not r.get("record_failed") for r in results))
 
-    def test_pre_checagem_reprovada_nao_publica_nada(self, yt, ig):
+    def test_a_failed_precheck_publishes_nothing(self, yt, ig):
         os.remove(os.path.join(layout.platform(self.pd, "youtube_shorts"),
                                "corte1_short.mp4"))
         with self.assertRaises(ValueError):
@@ -233,7 +233,7 @@ class TestExecute(unittest.TestCase):
         ig.publish_reel.assert_not_called()
         ig.publish_post.assert_not_called()
 
-    def test_nada_pendente_devolve_vazio(self, yt, ig):
+    def test_nothing_pending_returns_empty(self, yt, ig):
         future = __import__("datetime").date(2026, 8, 1)
         self.assertEqual(publish.execute(self.pd, day=future), [])
         yt.upload.assert_not_called()

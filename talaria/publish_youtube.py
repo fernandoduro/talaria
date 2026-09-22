@@ -1,9 +1,9 @@
-"""Upload de Shorts via YouTube Data API v3.
+"""Uploading Shorts through the YouTube Data API v3.
 
-OAuth2 com refresh token: a autorização (consentimento do dono do canal) é
-manual e única, via scripts/youtube_auth.py — o pipeline nunca abre browser.
-O upload custa ~1600 unidades da quota diária de 10k; no volume típico
-(poucos Shorts por semana) isso não encosta no limite.
+OAuth2 with a refresh token: authorisation (the channel owner's consent) is
+manual and one-off, via scripts/youtube_auth.py — the pipeline never opens a
+browser. An upload costs ~1600 units of the 10k daily quota; at the typical
+volume (a few Shorts a week) that nowhere near touches the limit.
 """
 from __future__ import annotations
 
@@ -16,21 +16,21 @@ from googleapiclient.http import MediaFileUpload
 
 SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
 
-# Categoria "People & Blogs" — o YouTube exige uma; é a de videocast.
+# Category "People & Blogs" — YouTube requires one; it is the videocast one.
 CATEGORY_ID = "22"
 
-# Privacidade aceita pelo YouTube. `unlisted` serve para conferir o Short no
-# canal antes de abrir ao público — útil na estreia e em teste de agenda.
+# Privacy values YouTube accepts. `unlisted` serves to check the Short on the
+# channel before opening it up — useful at a premiere and when testing a schedule.
 PRIVACY_VALUES = ("public", "unlisted", "private")
 DEFAULT_PRIVACY = "public"
 
 
 def privacy() -> str:
-    """Privacidade do Short, do `.env`. Sem a variável, publica público.
+    """The Short's privacy, from `.env`. Without the variable, public.
 
-    Valor inválido ABORTA em vez de cair no padrão: um typo em
-    `YT_PRIVACY=unlised` publicaria aberto justo quando se pediu o contrário,
-    e vídeo público não se despublica sem já ter sido visto.
+    An invalid value ABORTS rather than falling back to the default: a typo in
+    `YT_PRIVACY=unlised` would publish openly at exactly the moment the
+    opposite was asked for, and a public video cannot be unpublished unseen.
     """
     value = (os.environ.get("YT_PRIVACY") or "").strip().lower()
     if not value:
@@ -62,7 +62,7 @@ def _credentials() -> Credentials:
 
 
 def upload(video_path: str, title: str, description: str) -> dict:
-    """Sobe o vídeo (resumable) e devolve id e URL do Short."""
+    """Uploads the video (resumable) and returns the Short's id and URL."""
     service = build("youtube", "v3", credentials=_credentials())
     body = {
         "snippet": {"title": title, "description": description,

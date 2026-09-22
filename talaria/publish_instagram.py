@@ -1,9 +1,10 @@
-"""Publicação no Instagram via Graph API — Reels e posts do feed.
+"""Publishing to Instagram through the Graph API — Reels and feed posts.
 
-A Graph API não aceita upload binário: o container busca a mídia numa URL
-pública (storage_temp). Vídeo processa assíncrono — poll com timeout, e os
-finais ERROR/EXPIRED são falha explícita com o status literal na mensagem (sem
-isso o comando trava para sempre num vídeo rejeitado em silêncio).
+The Graph API accepts no binary upload: the container fetches the media from a
+public URL (storage_temp). Video processes asynchronously — poll with a timeout,
+and the ERROR/EXPIRED terminal states are an explicit failure carrying the
+literal status (without that the command hangs forever on a silently rejected
+video).
 """
 from __future__ import annotations
 
@@ -14,26 +15,26 @@ import requests
 
 from . import storage_temp
 
-# A Meta tem DOIS fluxos para publish no Instagram, com hosts distintos:
+# Meta has TWO flows for publishing to Instagram, on distinct hosts:
 #
-#   token EAAG... (login do Facebook)  -> graph.facebook.com, account Business
-#                                         vinculada a uma Página
-#   token IGAA... (login do Instagram) -> graph.instagram.com, account Business
-#                                         direta, sem Página no meio
+#   EAAG... token (Facebook login)  -> graph.facebook.com, Business account
+#                                      linked to a Page
+#   IGAA... token (Instagram login) -> graph.instagram.com, Business account
+#                                      directly, with no Page in between
 #
-# Os endpoints (`<account>/media`, `media_publish`, o poll de `status_code`) são
-# iguais nos dois; muda só o host. Mandar o token de um para o host do outro
-# devolve "Cannot parse access token", que não diz qual é o problema — daí
-# escolher pelo prefixo em vez de fixar um host.
+# The endpoints (`<account>/media`, `media_publish`, the `status_code` poll) are
+# the same on both; only the host changes. Sending one flow's token to the other
+# flow's host returns "Cannot parse access token", which does not say what the
+# problem is — hence choosing by prefix instead of pinning one host.
 GRAPH_FACEBOOK = "https://graph.facebook.com/v21.0"
 GRAPH_INSTAGRAM = "https://graph.instagram.com/v21.0"
 
 
 def host_for_token(token: str) -> str:
-    """O host que atende este token, pelo prefixo.
+    """The host that serves this token, chosen by prefix.
 
-    Prefixo desconhecido cai no Facebook, que era o padrão antes de existir
-    esta função: melhor a mensagem de error da API do que um palpite nosso.
+    An unknown prefix falls back to Facebook, which was the default before this
+    function existed: the API's own error message beats a guess of ours.
     """
     return GRAPH_INSTAGRAM if (token or "").startswith("IG") else GRAPH_FACEBOOK
 
@@ -59,17 +60,18 @@ def _credentials() -> tuple:
 
 
 def _call(method: str, path: str, **params) -> dict:
-    """GET/POST na Graph API; error vira exceção com a mensagem DA API.
+    """GET/POST on the Graph API; an error becomes an exception with the API's
+    own message.
 
-    O body de error do Graph vem em {"error": {"message": ...}} mesmo com
-    status 200 em alguns fluxos — por isso o body decide junto do status.
+    The Graph error body arrives as {"error": {"message": ...}} even with a 200
+    status in some flows — which is why the body decides alongside the status.
     """
     fn = requests.post if method == "post" else requests.get
     host = host_for_token(params.get("access_token", ""))
     r = fn(f"{host}/{path}", params=params, timeout=TIMEOUT_HTTP_S)
-    # Corpo que não é JSON (página de error de proxy num 502, response
-    # truncada) não pode estourar aqui: trocaria "Graph API: 502" por um
-    # JSONDecodeError que não diz o que houve, justo durante o incidente.
+    # A non-JSON body (a proxy error page on a 502, a truncated response) must
+    # not blow up here: it would trade "Graph API: 502" for a JSONDecodeError
+    # that says nothing about what happened, right in the middle of the incident.
     try:
         body = r.json() if r.content else {}
     except ValueError:
@@ -81,7 +83,7 @@ def _call(method: str, path: str, **params) -> dict:
 
 
 def _wait_for_processing(container_id: str, token: str) -> None:
-    """Poll até FINISHED. ERROR/EXPIRED e timeout são falha explícita."""
+    """Polls until FINISHED. ERROR/EXPIRED and timeout are explicit failures."""
     start = time.monotonic()
     while True:
         body = _call("get", container_id, fields="status_code",
@@ -111,7 +113,7 @@ def _publish_container(container_id: str, token: str, account: str) -> dict:
 
 
 def publish_reel(video_path: str, caption: str) -> dict:
-    """Sobe o vídeo, cria o container REELS, espera processar e publica."""
+    """Uploads the video, creates the REELS container, waits, and publishes."""
     token, account = _credentials()
     url = storage_temp.put(video_path)
     try:
@@ -121,33 +123,33 @@ def publish_reel(video_path: str, caption: str) -> dict:
         _wait_for_processing(body["id"], token)
         return _publish_container(body["id"], token, account)
     finally:
-        # Sucesso ou falha, o temporário sai do bucket.
+        # Success or failure, the temporary file leaves the bucket.
         storage_temp.remove(url)
 
 
 def publish_post(png_paths: list, caption: str) -> dict:
-    """Imagem única ou carrossel (2-10), conforme o número de PNGs.
+    """Single image or carousel (2-10), according to the number of PNGs.
 
-    O container de IMAGEM também processa assíncrono, ao contrário do que
-    esta função presumia: o `media_publish` respondeu "Media ID is not
-    available" porque o container ainda estava `IN_PROGRESS` (ficou FINISHED
-    ~3s depois). Todo container espera o `_wait_for_processing` antes de
-    publish, como o Reel já fazia — a diferença entre imagem e vídeo é
-    quanto tempo leva, não se há espera.
+    The IMAGE container also processes asynchronously, contrary to what this
+    function assumed: `media_publish` answered "Media ID is not available"
+    because the container was still `IN_PROGRESS` (it turned FINISHED ~3s
+    later). Every container waits on `_wait_for_processing` before publishing,
+    as the Reel already did — the difference between image and video is how
+    long it takes, not whether there is a wait.
 
-    No carrossel, cada child é um container próprio e o parent é criado só
-    depois de todos estarem prontos: parent montado sobre child `IN_PROGRESS`
-    falha do mesmo jeito, e aí sem dizer qual dos children era.
+    In a carousel each child is its own container and the parent is only created
+    once all of them are ready: a parent built over an `IN_PROGRESS` child fails
+    the same way, and then without saying which child it was.
 
-    O limite de 10 é validado na carga da agenda (schedule.load), antes
-    de chegar aqui.
+    The limit of 10 is validated when the schedule loads (schedule.load), before
+    reaching here.
     """
     token, account = _credentials()
     urls = []
     try:
-        # Um append por vez, não list comprehension: a comprehension só liga
-        # o name no end, então falha no meio deixaria o `finally` vendo []
-        # e os temporários já subidos ficariam órfãos no bucket.
+        # One append at a time, not a list comprehension: the comprehension
+        # only binds the name at the end, so a failure partway would leave
+        # `finally` seeing [] and already-uploaded temporaries orphaned.
         for p in png_paths:
             urls.append(storage_temp.put(p))
         if len(urls) == 1:

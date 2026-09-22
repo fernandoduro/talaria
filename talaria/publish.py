@@ -1,11 +1,12 @@
-"""Orquestrador da publicação: o que a agenda manda pro day, nas platforms.
+"""Publishing orchestrator: what the schedule calls for today, per platform.
 
-Pré-checagem completa ANTES do primeiro upload — o mesmo contrato do
-post_instagram.generate(), pelo mesmo reason: descobrir no item 3 que faltou
-renderizar, com os itens 1-2 já no ar, é o state que este módulo proíbe.
+A complete pre-check BEFORE the first upload — the same contract as
+post_instagram.generate(), for the same reason: finding out at the third item
+that a render was missing, with the first two already live, is the state this
+module forbids.
 
-Cada sucesso é registrado NA HORA em published.json; falha numa
-platform não trava as outras — o summary final account o que foi e o que não.
+Each success is recorded IMMEDIATELY in published.json; a failure on one
+platform does not block the others — the final summary counts both.
 """
 from __future__ import annotations
 
@@ -15,13 +16,13 @@ import re
 from . import (schedule, caption, layout, post_instagram, published,
                publish_instagram, publish_youtube)
 
-# Limites das platforms: validados aqui, antes de chamar a API.
+# Platform limits: validated here, before calling the API.
 YT_TITLE_MAX = 100
 YT_DESCRIPTION_MAX = 5000
 IG_CAPTION_MAX = 2200
 
-# Credenciais exigidas por platform — a pré-checagem só cobra as das
-# platforms que o day realmente usa.
+# Credentials required per platform — the pre-check only demands those of the
+# platforms the day actually uses.
 _CREDENTIALS = {
     "youtube_shorts": ("YT_CLIENT_SECRET_PATH", "YT_REFRESH_TOKEN"),
     "instagram_reels": ("IG_PAGE_TOKEN", "IG_BUSINESS_ACCOUNT_ID",
@@ -34,12 +35,12 @@ _MP4_SUFFIX = {"youtube_shorts": "_short.mp4", "instagram_reels": "_reel.mp4"}
 
 
 def _mp4(pd: str, platform: str, slug: str) -> str:
-    """Caminho do clip renderizado, com o slug saneado.
+    """Path of the rendered clip, with the slug sanitised.
 
-    O `schedule.load` já recusa slug com barra, mas o saneamento fica
-    aqui também: é o mesmo tratamento que os PNGs de post recebem, e a
-    consequência de um slug escapando da pasta é publish arquivo de fora do
-    project — cara demais para depender de uma única barreira.
+    `schedule.load` already refuses a slug with a slash, but the sanitising
+    stays here too: it is the same treatment the post PNGs get, and the
+    consequence of a slug escaping the folder is publishing a file from outside
+    the project — too expensive to rest on a single barrier.
     """
     return os.path.join(layout.platform(pd, platform),
                         post_instagram.file_slug(slug)
@@ -56,7 +57,7 @@ def _moments_by_slug(pd: str) -> dict:
 
 
 def _post_pngs(pd: str, slug: str) -> list:
-    """Os PNGs de um post, na ordem do carrossel (numérica, não alfabética)."""
+    """A post's PNGs, in carousel order (numeric, not alphabetical)."""
     fname = post_instagram.file_slug(slug)
     folder = layout.posts_png(pd)
     single = os.path.join(folder, f"post_{fname}.png")
@@ -80,11 +81,11 @@ def _post_txt(pd: str, slug: str) -> str:
 
 
 def precheck(pd: str, pairs: list) -> list:
-    """Erros que impediriam publish QUALQUER item do day. Lista vazia = ok.
+    """Errors that would stop ANY of the day's items. Empty list = ok.
 
-    Roda antes do primeiro upload: arquivo missing, título ausente/longo,
-    legenda acima do limite, credencial não definida. A mensagem sempre diz
-    qual comando ou arquivo resolve.
+    Runs before the first upload: missing file, absent or overlong title,
+    caption above the limit, undefined credential. The message always says
+    which command or file fixes it.
     """
     errors = []
     has_clip = any(item["kind"] == "clip" for item, _ in pairs)
@@ -142,8 +143,8 @@ def precheck(pd: str, pairs: list) -> list:
         if not os.environ.get(name):
             errors.append(f"variável {name} não definida no ambiente (.env)")
 
-    # Privacidade errada só apareceria depois do upload, com o vídeo já no ar
-    # sob a privacy que não se pediu.
+    # A wrong privacy value would only surface after the upload, with the video
+    # already live under a privacy nobody asked for.
     if any(pl == "youtube_shorts" for _, pl in pairs):
         try:
             publish_youtube.privacy()
@@ -153,7 +154,7 @@ def precheck(pd: str, pairs: list) -> list:
 
 
 def _publish_pair(pd: str, item: dict, pl: str, moments: dict) -> dict:
-    """Publica UM par (item, platform). Devolve {"id", "url"}."""
+    """Publishes ONE (item, platform) pair. Returns {"id", "url"}."""
     slug = item["slug"]
     if pl == "youtube_shorts":
         video = _mp4(pd, pl, slug)
@@ -171,24 +172,25 @@ def _publish_pair(pd: str, item: dict, pl: str, moments: dict) -> dict:
 
 def execute(pd: str, only: list = None, day=None,
              platforms: list = None) -> list:
-    """Publica os pairs pendentes do day. Devolve um resultado por par.
+    """Publishes the day's pending pairs. Returns one result per pair.
 
-    Pré-checagem reprovada aborta TUDO antes do primeiro upload. Depois dela,
-    cada par é independente: falha num não trava os outros (a exceção vira
-    resultado com ok=False), e cada sucesso record em published.json NA
-    HORA — processo morto no meio do lote não duplica nada amanhã.
+    A failed pre-check aborts EVERYTHING before the first upload. After it,
+    each pair is independent: a failure in one does not block the others (the
+    exception becomes a result with ok=False), and each success is recorded in
+    published.json IMMEDIATELY — a process killed mid-batch duplicates nothing
+    tomorrow.
 
-    São três desfechos, não dois. Publicar e registrar são passos separados,
-    e o que acontece entre eles importa:
+    There are three outcomes, not two. Publishing and recording are separate
+    steps, and what happens between them matters:
 
-    - `ok=False`             — não foi ao ar; volta na fila de amanhã.
-    - `ok=True`              — foi ao ar e ficou registrado.
+    - `ok=False`             — it did not go live; back in tomorrow's queue.
+    - `ok=True`              — it went live and was recorded.
     - `ok=True` +
-      `record_failed=True` — FOI AO AR e o registro falhou. Sai como
-                               published de propósito: marcar falha mandaria
-                               o par pra fila de amanhã e publicaria a peça
-                               de novo. O `id` vem no resultado para o gestor
-                               acrescentar ao published.json à mão.
+      `record_failed=True` — IT WENT LIVE and the record failed. It comes out
+                               as published on purpose: marking failure would
+                               send the pair to tomorrow's queue and publish
+                               the piece again. The `id` comes in the result
+                               so the manager can add it to published.json.
     """
     pairs = schedule.pending(pd, day=day, only=only,
                                 platforms=platforms)
@@ -208,16 +210,16 @@ def execute(pd: str, only: list = None, day=None,
         base = {"slug": slug, "platform": pl, "date": item["date"]}
         try:
             r = _publish_pair(pd, item, pl, moments)
-        except Exception as e:  # noqa: BLE001 — falha de UM par não trava o resto
+        except Exception as e:  # noqa: BLE001 — one pair failing blocks no other
             results.append({**base, "ok": False, "error": str(e)})
             print(f"[publish] !! {pl}: {slug}: {e}")
             continue
 
         url = r.get("url", "")
-        # Daqui pra baixo a peça JÁ ESTÁ NO AR. Falha do registro não pode
-        # virar ok=False: a pendência sai da ausência no published.json, então
-        # o par voltaria amanhã e publicaria de novo — a duplicata que não tem
-        # correção. Sai como published, com o id à mão para o conserto.
+        # From here down the piece IS ALREADY LIVE. A record failure cannot
+        # become ok=False: pending comes from absence in published.json, so the
+        # pair would return tomorrow and publish again — the duplicate that has
+        # no fix. It comes out as published, with the id at hand for the repair.
         try:
             published.record(pd, pl, slug, r["id"], url)
         except Exception as e:  # noqa: BLE001
