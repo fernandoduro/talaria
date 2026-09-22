@@ -823,14 +823,17 @@ So verify the claims mechanically instead:
 
 ```bash
 cd /data/Code/talaria
-# Every row verdicted `renamed` must have its old name ABSENT and its new
-# name PRESENT. This is what catches a verdict that claims work not done.
-awk -F'\t' 'NR>1 && $3=="renamed"{print $1"\t"$4}' \
-  docs/plans/phase-1-inputs/identifier-verdicts.tsv | while IFS=$'\t' read old note; do
-  n=$(grep -rowE "\b$old\b" --include='*.py' talaria/ tests/ run.py scripts/ 2>/dev/null | wc -l)
-  [ "$n" != "0" ] && echo "CLAIMS RENAMED BUT STILL PRESENT: $old ($n) — $note"
-done
+python3 docs/plans/phase-1-inputs/check-renamed-verdicts.py
 ```
+
+Exit 0 and "0 false 'renamed' verdict(s)" is the pass condition.
+
+That script is AST-based, and it has to be. A grep for the old word counts its
+legitimate appearances in Portuguese prose, which survive until the string pass
+— the first draft of this check fired on `arquivo` (67), `antes` (50) and
+`palavra` (41), all comments, and buried the two real failures among thirty
+false ones. The question is whether the old name is still an **identifier**,
+and only a parse can answer it.
 
 Then re-extract identifiers from the current tree by AST, exactly as
 `identifier-inventory.txt`'s header describes, and confirm every one is either
