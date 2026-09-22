@@ -12,7 +12,7 @@
 
 - Spec: `docs/specs/2026-09-21-phase-1-english-translation-design.md`. Read it before starting.
 - Phase 0 spec, for the verification lessons that shaped this plan: `docs/specs/2026-09-21-phase-0-fork-and-debrand-design.md`, section `## Verification lessons for Phases 1-4`.
-- Input artifact, already committed: `docs/plans/phase-1-inputs/content-assertion-sites.md` — 94 assertion sites across 75 tests.
+- Input artifact, already committed: `docs/plans/phase-1-inputs/content-assertion-sites.md` — 94 assertion sites across 75 tests, plus 13 width-dependent sites added in Task 2's fix round. See that file's `## Known gap in this enumeration` for why the original scan was incomplete.
 - Run tests as `.venv/bin/python -m unittest discover -s tests`. Never pytest. Never bare `python`.
 - **Baseline: `Ran 388 tests` / `OK`.** Every task ends here or better. A changed count is only acceptable where a task explicitly adds or removes a test, and it must say so.
 - Work on `main`, directly. The human has consented; do not branch or create a worktree.
@@ -116,7 +116,7 @@ Report the entry count per `kind`, and every entry where you chose a non-literal
 - Test: none — a reviewable document
 
 **Interfaces:**
-- Consumes: `docs/plans/phase-1-inputs/content-assertion-sites.md` (94 sites, 75 tests) and the rename map from Task 1.
+- Consumes: `docs/plans/phase-1-inputs/content-assertion-sites.md` (94 sites, 75 tests, plus 13 width-dependent additions) and the rename map from Task 1.
 - Produces: `assertion-classification.tsv` — columns `file`, `line`, `test`, `class`, `proves`, `derivation`. Tasks 4, 5 and 7 consult it for every site they touch.
 
 This is the safety-critical artifact of the phase. Phase 0 lost a test to a symmetric edit: `nossa` was a genuine near-miss for the old pattern and fails the new one at its first character, so the assertion passed for any input and proved nothing. That edit looked correct in review.

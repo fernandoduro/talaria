@@ -19,6 +19,30 @@ generates for a human to read?**
   record what the test proves and how the new expectation was obtained --
   by running the new code, not by translating the old string.
 
+## Known gap in this enumeration
+
+This list was produced by a **line-based** scan: it matched an assertion only
+when the accented text or a Portuguese keyword appeared on the same physical
+line as the `assert`. Two consequences, both found after the fact:
+
+- A multi-line assertion whose content sits on a continuation line was missed.
+  `tests/test_render.py:251` — `assertEqual(linhas, [...five-line split...])` —
+  is the clearest case, and it is the single most width-sensitive assertion in
+  the codebase.
+- The Portuguese-keyword list was hand-written, so any word not on it was
+  invisible. `linhas` was not on it, which hid every `r["linhas"]` assertion in
+  `test_post_instagram.py`.
+
+A re-extraction that joins logical statements by paren balance, and that
+matches every `old` name from the rename map rather than a hand-written list,
+found 13 width-dependent sites absent from the original 94. They were added in
+Task 2's fix round 1.
+
+The lesson is Phase 0's, recurring: the scan was thorough about the shape of
+assertion it was written for. If you extend this artifact, join statements
+before matching, and derive the word list from the rename map rather than from
+memory.
+
 A site can be B even when it looks trivial. `assertIn("legenda", msg)` is B:
 it pins a word in a user-facing error message, and the English message must
 be checked to genuinely contain the chosen word, not assumed to.
