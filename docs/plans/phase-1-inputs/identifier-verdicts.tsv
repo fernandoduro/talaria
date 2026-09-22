@@ -27,7 +27,7 @@ item	11	ambiguous	same spelling/sense in both languages
 video	11	ambiguous	same spelling/sense in both languages (video vs vídeo, unaccented already)
 msgs	11	abbreviation	
 destino	10	renamed	-> destination (global); target path local, layout.py/end_card.py
-reg	10	english	
+reg	10	english	published.py's local for the published-record dict; registra/registro_falhou/sem_registro were all renamed to record*, so a blank note here read as unexamined. It is the ordinary English abbreviation of register/record and stays; renaming it to rec buys nothing.
 blocks	9	english	
 segments	9	english	
 img	9	abbreviation	
@@ -161,7 +161,6 @@ estado_txt	2	renamed	-> state_txt (global); compound with estado, brief.py local
 transcript	2	english	
 curation	2	english	
 pat	2	abbreviation	
-orig	2	abbreviation	
 seconds	2	english	
 _sub	2	english	
 padrao	2	renamed	-> pattern (global); compiled regex Pattern local in publish.py; PADRAO constant already renamed uppercase, no collision
@@ -789,3 +788,14 @@ campos	1	renamed	-> fields (manual); the identifier is only scripts/youtube_auth
 flow	1	english	
 creds	1	english	
 ja	7	renamed	-> approved_clip (manual); curation.approve() loop variable, excluded from the inventory by the <=2 char filter
+fonte	3	renamed	-> fnt (manual); end_card.py:41's ImageFont local, the fifth site of the map's FONT carve-out and the one it never cleaned. The map's note says fonte must not become source, which is not licence to stay Portuguese. Excluded from the inventory as a mapped name, so it had no row here until the whole-branch review; Task 9 Step 5 did print SURVIVED: fonte (3).
+data	28	english	the English word holding a dict in texts.save, episode.save and their test helpers; only the schedule-item JSON key became date (rename-map.tsv:225). Row added so a map name still live as an identifier carries a verdict, not only a map note - the path fonte took.
+ctx	71	abbreviation	introduced by the translation (was contexto); unittest mock/patch context objects in the tests
+default	16	english	introduced by the translation (was padrao); keyword argument and local
+variant	3	english	introduced by the translation (was variante); fix_proper_nouns local
+old_path	2	english	introduced by the translation (was caminho_antigo); layout.migrate local
+RE_FILLER	2	english	introduced by the translation; the standalone-hesitation pattern in utils.py
+RE_FILLER_MID	2	english	introduced by the translation; comma-flanked discourse filler
+RE_FILLER_END	2	english	introduced by the translation; sentence-final discourse filler
+RE_FILLER_START	2	english	introduced by the translation; sentence-initial discourse filler
+_DISCOURSE_FILLER	4	english	introduced by the translation; the you know|i mean|like alternation shared by the three RE_FILLER_* patterns

@@ -839,7 +839,14 @@ cd /data/Code/talaria
 python3 docs/plans/phase-1-inputs/check-renamed-verdicts.py
 ```
 
-Exit 0 and "0 false 'renamed' verdict(s)" is the pass condition.
+Exit 0 and "0 unsupported verdict claim(s)" is the pass condition.
+
+The script asks three things, the third added after the review. A map entry
+whose old name is **still a live identifier** must carry a verdict row of its
+own: `fonte` was excluded from the inventory as a mapped name, so it had no row
+in the verdicts file, and the file that claims a verdict for all 789
+identifiers had nothing to say about the one Portuguese identifier left in the
+tree.
 
 That script is AST-based, and it has to be. A grep for the old word counts its
 legitimate appearances in Portuguese prose, which survive until the string pass

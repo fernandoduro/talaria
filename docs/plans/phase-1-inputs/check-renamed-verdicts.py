@@ -1,6 +1,7 @@
 """Every verdict of `renamed` must be true: the old name absent as an
 identifier, the new name present. Grep cannot do this -- the old word
-legitimately survives in Portuguese prose until the string pass."""
+legitimately survives in Portuguese prose until the string pass. And every map
+name still live as an identifier must carry a verdict row at all."""
 import ast, pathlib, sys, csv, collections
 
 idents = collections.Counter()
@@ -14,13 +15,31 @@ for f in list(pathlib.Path("talaria").glob("*.py")) + list(pathlib.Path("tests")
         elif isinstance(n, ast.keyword) and n.arg: idents[n.arg] += 1
 
 # The map is authoritative for what each old name became.
-new_for = {}
+new_for, kind_of = {}, {}
 with open("docs/plans/phase-1-inputs/rename-map.tsv") as fh:
     for row in csv.reader(fh, delimiter="\t"):
         if len(row) >= 3 and row[0] != "kind":
             new_for[row[1]] = row[2]
+            kind_of[row[1]] = row[0]
+
+verdicted = set()
+with open("docs/plans/phase-1-inputs/identifier-verdicts.tsv") as fh:
+    for row in csv.reader(fh, delimiter="\t"):
+        if row and row[0] != "identifier":
+            verdicted.add(row[0])
 
 bad = []
+
+# Half three: a map name still live as an identifier needs a verdict row of its
+# own. `fonte` had no row anywhere -- the inventory excludes names already in
+# the map, so the one site the map's carve-out did not cover was invisible to
+# the verdicts file, and Step 5's `SURVIVED: fonte` was dismissed against that
+# carve-out. A note saying what a name must NOT become is not a verdict.
+for old, count in sorted(idents.items()):
+    if old in new_for and count and old not in verdicted:
+        bad.append(f"NO VERDICT ROW for a surviving map name: {old} "
+                   f"({count}x, kind {kind_of[old]})")
+
 with open("docs/plans/phase-1-inputs/identifier-verdicts.tsv") as fh:
     for row in csv.reader(fh, delimiter="\t"):
         if len(row) < 4 or row[2] != "renamed":
@@ -52,5 +71,5 @@ with open("docs/plans/phase-1-inputs/identifier-verdicts.tsv") as fh:
                 bad.append(f"NEW NAME NEVER APPEARS: {old} -> {part} -- verdict says: {note}")
 
 for b in bad: print(b)
-print(f"\n{len(bad)} false 'renamed' verdict(s)")
+print(f"\n{len(bad)} unsupported verdict claim(s)")
 sys.exit(1 if bad else 0)

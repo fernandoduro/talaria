@@ -38,9 +38,9 @@ def compose_card() -> Image.Image:
     logo_h = int(logo.height * logo_w / logo.width)
     logo_r = logo.resize((logo_w, logo_h))
 
-    fonte = ImageFont.truetype(config.FONT, _HANDLE_SIZE)
+    fnt = ImageFont.truetype(config.FONT, _HANDLE_SIZE)
     d = ImageDraw.Draw(frame)
-    bbox = d.textbbox((0, 0), config.CARD_HANDLE, font=fonte)
+    bbox = d.textbbox((0, 0), config.CARD_HANDLE, font=fnt)
     handle_h = bbox[3] - bbox[1]
 
     # The logo + gap + @handle block is centred as one unit, not each piece
@@ -52,7 +52,7 @@ def compose_card() -> Image.Image:
 
     frame.paste(logo_r, ((config.FRAME_W - logo_w) // 2, top), logo_r)
     d.text(((config.FRAME_W - (bbox[2] - bbox[0])) // 2, top + logo_h + space),
-           config.CARD_HANDLE, font=fonte, fill=config.CARD_HANDLE_COLOR)
+           config.CARD_HANDLE, font=fnt, fill=config.CARD_HANDLE_COLOR)
 
     return frame
 
