@@ -1,59 +1,59 @@
-Você vai ler a transcrição de um episódio e propor trechos para virarem
-cortes verticais de 60 a 90 segundos (Shorts/Reels).
+You are going to read the transcript of an episode and propose stretches to
+become 60-to-90-second vertical clips (Shorts/Reels).
 
 ═══════════════════════════════════════════════════════════════
-1. O QUE FAZ UM BOM CORTE
+1. WHAT MAKES A GOOD CLIP
 ═══════════════════════════════════════════════════════════════
 
-Escreva aqui o critério editorial do seu canal. É a parte que mais importa e
-a que só o uso calibra. Alguns eixos que costumam valer a pena definir:
+Write your channel's editorial criteria here. It is the part that matters
+most and the part only use can calibrate. Some axes usually worth defining:
 
-- o que prende nos primeiros três segundos
-- que tipo de fala se sustenta fora do contexto do episódio
-- o que descartar (explicação técnica longa, anedota sem tese, número dito
-  com hesitação)
-
-═══════════════════════════════════════════════════════════════
-2. REGRAS DE FRONTEIRA
-═══════════════════════════════════════════════════════════════
-
-O código valida automaticamente, e o corte é recusado se falhar:
-
-- duração entre 60 e 90 segundos
-- início em fronteira de frase
-- fim em frase completa (não no meio de uma oração)
-- sem sobreposição com trecho já rejeitado
+- what holds attention in the first three seconds
+- what kind of speech stands up outside the episode's context
+- what to discard (a long technical explanation, an anecdote with no
+  thesis, a figure said with hesitation)
 
 ═══════════════════════════════════════════════════════════════
-3. TIPOS
+2. BOUNDARY RULES
 ═══════════════════════════════════════════════════════════════
 
-Classifique cada corte em um tipo: `historia`, `tese`, `conselho` ou
-`pessoal`. Defina aqui a composição desejada de uma rodada, se houver.
+The code validates these automatically, and the clip is refused if it fails:
+
+- duration between 60 and 90 seconds
+- start on a sentence boundary
+- end on a complete sentence (not mid-clause)
+- no overlap with an already rejected stretch
 
 ═══════════════════════════════════════════════════════════════
-4. MODO ITERATIVO
+3. KINDS
 ═══════════════════════════════════════════════════════════════
 
-A curadoria acontece em rodadas. Na primeira, proponha os cortes ordenados do
-mais forte ao mais fraco. Nas seguintes, proponha exatamente o número de
-vagas restantes.
-
-Trecho rejeitado fica queimado: não o reproponha, nem deslocado alguns
-segundos. Os motivos de rejeição acumulados são filtro — se dois cortes
-foram recusados pela mesma razão, não proponha um terceiro igual.
-
-Se o material bom acabar antes da meta, diga. Corte fraco publicado custa
-mais alcance do que corte bom rende.
+Classify each clip into one kind: `story`, `thesis`, `advice` or
+`personal`. Define the composition you want from a round here, if any.
 
 ═══════════════════════════════════════════════════════════════
-ESTADO DA RODADA
+4. ITERATIVE MODE
 ═══════════════════════════════════════════════════════════════
 
-{{CURADORIA}}
+Curation happens in rounds. In the first, propose the clips ordered from
+strongest to weakest. In the following ones, propose exactly the number of
+slots left.
+
+A rejected stretch stays burned: do not propose it again, not even shifted
+by a few seconds. The accumulated rejection reasons are a filter — if two
+clips were refused for the same reason, do not propose a third like them.
+
+If the good material runs out before the target, say so. A weak clip
+published costs more reach than a good clip earns.
 
 ═══════════════════════════════════════════════════════════════
-TRANSCRIÇÃO
+ROUND STATE
 ═══════════════════════════════════════════════════════════════
 
-{{TRANSCRICAO}}
+{{CURATION}}
+
+═══════════════════════════════════════════════════════════════
+TRANSCRIPT
+═══════════════════════════════════════════════════════════════
+
+{{TRANSCRIPT}}

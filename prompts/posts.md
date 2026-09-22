@@ -1,56 +1,59 @@
-Você vai ler a fala literal de cortes já aprovados e escolher, de cada um, a
-frase que funciona como citação publicada em imagem para o feed.
+You are going to read the literal speech of already approved clips and choose,
+from each one, the sentence that works as a quote published as an image in
+the feed.
 
 ═══════════════════════════════════════════════════════════════
-METADADOS DO EPISÓDIO
+EPISODE METADATA
 ═══════════════════════════════════════════════════════════════
 
-{{METADADOS}}
+{{METADATA}}
 
 ═══════════════════════════════════════════════════════════════
-1. A FRASE PRECISA SE SUSTENTAR SOZINHA
+1. THE SENTENCE HAS TO STAND ON ITS OWN
 ═══════════════════════════════════════════════════════════════
 
-A citação aparece sem o antes e sem o depois, para quem está rolando o feed e
-não conhece o programa. Escreva aqui o que o seu canal aceita e o que
-descarta. Alguns eixos comuns:
+The quote appears with no before and no after, for someone scrolling the feed
+who does not know the show. Write here what your channel accepts and what it
+discards. Some common axes:
 
-- depender do que veio antes ("por isso a gente mudou") não funciona: o
-  "isso" não existe para quem lê
-- número sem unidade ou período não funciona
-- pronome sem antecedente não funciona
-
-═══════════════════════════════════════════════════════════════
-2. CABER NÃO BASTA
-═══════════════════════════════════════════════════════════════
-
-Uma frase pode ser clara, caber no card e ainda assim não valer nada. Defina
-aqui a pergunta que você faz a cada candidata — algo como "quem não conhece a
-empresa ganha o quê com isso?".
+- depending on what came before ("that is why we changed") does not work:
+  the "that" does not exist for the reader
+- a figure with no unit or period does not work
+- a pronoun with no antecedent does not work
 
 ═══════════════════════════════════════════════════════════════
-3. CARD ÚNICO OU CARROSSEL
+2. FITTING IS NOT ENOUGH
 ═══════════════════════════════════════════════════════════════
 
-O card comporta cerca de 100 caracteres, bem menos do que parece. Não estime
-por contagem: proponha e deixe a validação medir na fonte real.
-
-Fala longa vira carrossel. Quebre onde houver gancho, de preferência em
-fronteira de frase. Um carrossel forte é um arco (a tensão e a virada), não
-uma frase fatiada.
+A sentence can be clear, fit the card and still be worth nothing. Define
+here the question you ask of every candidate — something like "what does
+someone who does not know the company gain from this?".
 
 ═══════════════════════════════════════════════════════════════
-4. VOCÊ ESCOLHE O RECORTE, NÃO REESCREVE A FALA
+3. SINGLE CARD OR CAROUSEL
 ═══════════════════════════════════════════════════════════════
 
-Publicar entre aspas, com nome e cargo embaixo, algo que a pessoa não disse é
-o pior erro desta etapa e não tem correção depois de publicado.
+The card holds about 100 characters, far less than it looks. Do not estimate
+by counting: propose, and let the validation measure in the real font.
 
-A legenda do post segue a mesma regra: ela só pode afirmar o que está dentro
-do recorte daquela peça. "Está no episódio" não é o mesmo que "está na peça".
+Long speech becomes a carousel. Break where there is a hook, preferably on a
+sentence boundary. A strong carousel is an arc (the tension and the turn),
+not one sentence sliced up.
 
 ═══════════════════════════════════════════════════════════════
-CORTES APROVADOS
+4. YOU CHOOSE THE EXCERPT, YOU DO NOT REWRITE THE SPEECH
 ═══════════════════════════════════════════════════════════════
 
-{{CORTES}}
+Publishing in quotation marks, with a name and a role underneath, something
+the person did not say is the worst error of this step and has no fix once
+published.
+
+The post's caption follows the same rule: it may only claim what is inside
+that piece's excerpt. "It is in the episode" is not the same as "it is in
+the piece".
+
+═══════════════════════════════════════════════════════════════
+APPROVED CLIPS
+═══════════════════════════════════════════════════════════════
+
+{{CLIPS}}

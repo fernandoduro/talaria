@@ -1,35 +1,36 @@
 # Prompts
 
-Prompts do pipeline, versionados para evoluírem com histórico.
+The pipeline's prompts, versioned so they evolve with a history.
 
-- `materiais.md` — título, descrição do YouTube e texto de thumb
-- `cortes.md` — seleção de trechos para Reels/Shorts
-- `posts.md` — escolha das citações para os posts de Instagram
+- `materials.md` — title, YouTube description and thumbnail text
+- `clips.md` — selecting stretches for Reels/Shorts
+- `posts.md` — choosing the quotes for the Instagram posts
 
-Os comandos `brief --materiais` e `brief --cortes` montam o pacote de leitura
-(prompt + metadados do episódio + transcrição) que o modelo consome em sessão.
-O `post --cortes` faz o mesmo com `posts.md`, entregando a fala dos cortes já
-aprovados em vez da transcrição inteira.
+The `brief --materials` and `brief --clips` commands assemble the reading
+packet (prompt + episode metadata + transcript) the model consumes in a
+session. `post --clips` does the same with `posts.md`, handing over the speech
+of the already approved clips instead of the whole transcript.
 
 ## Placeholders
 
-O `brief` substitui estes marcadores antes de entregar o pacote:
+`brief` substitutes these markers before handing over the packet:
 
-| Marcador | Onde | Conteúdo |
+| Marker | Where | Content |
 |---|---|---|
-| `{{METADADOS}}` | `materiais.md`, `posts.md` | metadados do `episodio.json` |
-| `{{TRANSCRICAO}}` | `materiais.md`, `cortes.md` | transcrição com `[mm:ss]` por segmento |
-| `{{CURADORIA}}` | `cortes.md` | estado da rodada: aprovados, rejeitados, motivos, vagas |
-| `{{CORTES}}` | `posts.md` | fala literal de cada corte aprovado que foi selecionado |
+| `{{METADATA}}` | `materials.md`, `posts.md` | metadata from `episode.json` |
+| `{{TRANSCRIPT}}` | `materials.md`, `clips.md` | transcript with `[mm:ss]` per segment |
+| `{{CURATION}}` | `clips.md` | round state: approved, rejected, reasons, slots left |
+| `{{CLIPS}}` | `posts.md` | literal speech of each approved clip that was selected |
 
-## Sobre estes arquivos
+## About these files
 
-Os prompts deste pacote são **esqueletos genéricos**: eles têm a estrutura e os
-placeholders que o código espera, mas não trazem critério editorial pronto.
-Cada canal precisa escrever o próprio — o que torna um corte bom, que tipo de
-citação funciona no feed, qual o tom da descrição. É esse conteúdo que faz a
-diferença no resultado, e ele se constrói com o uso.
+The prompts in this package are **generic skeletons**: they carry the
+structure and the placeholders the code expects, but they bring no
+ready-made editorial criteria. Every channel has to write its own — what
+makes a clip good, what kind of quote works in the feed, what tone the
+description takes. That content is what makes the difference in the result,
+and it is built through use.
 
-Ao ajustar um prompt, commite a mudança separadamente e registre o motivo na
-mensagem: o histórico é o que permite correlacionar mudança de prompt com
-mudança de resultado.
+When adjusting a prompt, commit the change separately and record the reason
+in the message: the history is what lets a change of prompt be correlated
+with a change of result.

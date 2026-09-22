@@ -52,10 +52,10 @@ def fill_template(template: str, transcript: str, metadata: str,
               curation: str = "", clips: str = "") -> str:
     """Replaces the prompt placeholders with the episode content."""
     return (template
-            .replace("{{TRANSCRICAO}}", transcript)
-            .replace("{{METADADOS}}", metadata)
-            .replace("{{CURADORIA}}", curation)
-            .replace("{{CORTES}}", clips))
+            .replace("{{TRANSCRIPT}}", transcript)
+            .replace("{{METADATA}}", metadata)
+            .replace("{{CURATION}}", curation)
+            .replace("{{CLIPS}}", clips))
 
 
 def readable_curation(state: dict) -> str:

@@ -1,41 +1,42 @@
-Você vai ler a transcrição de um episódio e produzir os materiais de
-publicação do vídeo longo: título, descrição e o texto da thumbnail.
+You are going to read the transcript of an episode and produce the publishing
+materials for the long video: title, description and the thumbnail text.
 
 ═══════════════════════════════════════════════════════════════
-METADADOS DO EPISÓDIO
+EPISODE METADATA
 ═══════════════════════════════════════════════════════════════
 
-{{METADADOS}}
+{{METADATA}}
 
-Os nomes próprios (empresa, convidados, cidade) vêm DESTES metadados, nunca
-da transcrição. A transcrição automática erra nome próprio, e o mesmo nome
-costuma aparecer com três ou quatro grafias diferentes no mesmo documento.
-
-═══════════════════════════════════════════════════════════════
-1. TÍTULO
-═══════════════════════════════════════════════════════════════
-
-Escreva aqui o que o título do seu canal precisa ter: formato, limite de
-caracteres, se leva o nome do convidado, se leva a cidade.
+Proper nouns (company, guests, city) come from THIS metadata, never from the
+transcript. Automatic transcription gets proper nouns wrong, and the same
+name usually turns up with three or four different spellings in one document.
 
 ═══════════════════════════════════════════════════════════════
-2. DESCRIÇÃO
+1. TITLE
 ═══════════════════════════════════════════════════════════════
 
-Escreva aqui o modelo de descrição do canal: o resumo do episódio, os links
-dos participantes, o texto institucional, as hashtags.
+Write here what your channel's title needs to carry: format, character
+limit, whether it takes the guest's name, whether it takes the city.
 
-Deixe claro o que é fixo (igual em todo episódio) e o que muda a cada um.
+═══════════════════════════════════════════════════════════════
+2. DESCRIPTION
+═══════════════════════════════════════════════════════════════
+
+Write the channel's description template here: the episode summary, the
+participants' links, the boilerplate, the hashtags.
+
+Make clear what is fixed (identical in every episode) and what changes
+with each one.
 
 ═══════════════════════════════════════════════════════════════
 3. THUMBNAIL
 ═══════════════════════════════════════════════════════════════
 
-A thumb tem duas linhas curtas. Defina aqui o que vai em cada uma e qual o
-limite de caracteres que cabe no template.
+The thumbnail has two short lines. Define here what goes in each and what
+character limit fits the template.
 
 ═══════════════════════════════════════════════════════════════
-TRANSCRIÇÃO
+TRANSCRIPT
 ═══════════════════════════════════════════════════════════════
 
-{{TRANSCRICAO}}
+{{TRANSCRIPT}}

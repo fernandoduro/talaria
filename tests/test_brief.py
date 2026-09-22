@@ -39,22 +39,22 @@ class TestBrief(unittest.TestCase):
         self.assertIn("Teresa", m)
 
     def test_replaces_the_transcript_placeholder(self):
-        tpl = "PROMPT HERE\n\n{{TRANSCRICAO}}\n"
+        tpl = "PROMPT HERE\n\n{{TRANSCRIPT}}\n"
         out = brief.fill_template(tpl, transcript="XYZZY", metadata="")
         self.assertIn("XYZZY", out)
-        self.assertNotIn("{{TRANSCRICAO}}", out)
+        self.assertNotIn("{{TRANSCRIPT}}", out)
 
     def test_replaces_the_metadata_placeholder(self):
-        tpl = "PROMPT\n{{METADADOS}}\n"
+        tpl = "PROMPT\n{{METADATA}}\n"
         out = brief.fill_template(tpl, transcript="", metadata="DATA")
         self.assertIn("DATA", out)
-        self.assertNotIn("{{METADADOS}}", out)
+        self.assertNotIn("{{METADATA}}", out)
 
     def test_replaces_the_curation_placeholder(self):
-        tpl = "PROMPT\n{{CURADORIA}}\n"
+        tpl = "PROMPT\n{{CURATION}}\n"
         out = brief.fill_template(tpl, transcript="", metadata="", curation="STATE")
         self.assertIn("STATE", out)
-        self.assertNotIn("{{CURADORIA}}", out)
+        self.assertNotIn("{{CURATION}}", out)
 
     def test_absent_placeholder_does_not_break(self):
         out = brief.fill_template("no placeholder", transcript="X", metadata="Y")
