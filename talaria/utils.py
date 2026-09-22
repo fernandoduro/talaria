@@ -111,28 +111,27 @@ def _expand_contractions(t: str) -> str:
     return t
 
 
-# Trocas fonéticas que a transcrição automática faz em name próprio. A mesma
-# company sai como Zarvik, Zarvic, Zarvyk e Zlarvik — varia no y/i, no c/k, e
-# no `l` que a transcrição insere.
+# Phonetic swaps automatic transcription makes on proper nouns. The same
+# company comes back as Kestril, Cestril, Kestryl and Keztril — c/k, s/z,
+# f/ph and i/y are the axes that actually vary in English.
 _PHONETIC_EQUIVALENTS = [
-    ("y", "[yieu]"),
-    ("i", "[yieu]"),
-    ("e", "[yiea]"),
-    ("o", "[oua]"),
-    ("u", "[oua]"),
+    ("c", "[ck]"),
+    ("k", "[ck]"),
+    ("q", "[ckq]"),
     ("s", "[sz]"),
     ("z", "[sz]"),
-    ("c", "[ckq]"),
-    ("k", "[ckq]"),
+    ("f", "(?:f|ph)"),
+    ("i", "[iy]"),
+    ("y", "[iy]"),
 ]
 
 
 def _phonetic_pattern(name: str) -> str:
-    """Regex que casa o name e suas variantes de transcrição.
+    """Regex matching the name and its transcription variants.
 
-    Só as letras internas viram char_class de caractere; consoante fora da tabela
-    entra literal, para o padrão não ficar frouxo a ponto de casar palavra
-    comum ("zarpa" não pode virar "Zarvik").
+    Only table letters become character classes; every other letter stays
+    literal, so the pattern cannot loosen far enough to swallow a real word
+    ("kestrel" must not become "Kestril").
     """
     parts = []
     for ch in name.lower():
@@ -142,17 +141,17 @@ def _phonetic_pattern(name: str) -> str:
                 break
         else:
             parts.append(re.escape(ch))
-    # 'l' extra no meio ("Zlarvik" para "Zarvik") é error comum de transcrição.
-    return parts[0] + "l?" + "".join(parts[1:])
+    return "".join(parts)
 
 
-# Nomes de company que também são palavra do português. Reescrever a caixa
-# deles estraga a frase, então ficam de fora da correção. Lista curta e
-# explícita: adivinhar "é palavra comum?" sem dicionário erra mais do que
-# acerta, e um name missing aqui só perde a capitalização automática.
+# Company names that are also ordinary English words. Recasing them damages
+# the sentence, so they stay out of the correction. Short and explicit list:
+# guessing "is this a common word?" without a dictionary errs more often than
+# it helps, and a name missing here only loses automatic capitalisation.
 _COMMON_WORDS = {
-    "matriz", "acho", "praia", "ponte", "campo", "norte", "sul", "vida",
-    "casa", "porto", "rede", "ideia", "meta", "alma", "onda", "raiz",
+    "apple", "orange", "amazon", "oracle", "square", "stripe", "slack",
+    "meta", "shell", "sun", "gap", "target", "chase", "visa", "delta",
+    "arc", "bolt", "lime",
 }
 
 
@@ -161,16 +160,14 @@ def _is_common_word(name: str) -> bool:
 
 
 def fix_proper_nouns(txt: str, names: list) -> str:
-    """Reescreve name próprio na grafia oficial vinda do episode.json.
+    """Rewrite proper nouns to the official spelling from episode.json.
 
-    A transcrição erra name próprio e a legenda é queimada no vídeo — sem isto
-    o error vai ao ar (Zarvic/Zlarvik no lugar de Zarvik).
+    Transcription errs on proper nouns and the caption is burned into the
+    video, so an uncorrected name ships (Cestril/Kestryl for Kestril).
 
-    Só entra name INVENTADO: quando a company se chama "Matriz" ou "Acho", a
-    transcrição acerta sozinha e reescrever estragaria a frase ("a matriz de
-    risco" viraria "a Matriz de risco"). O teste é a própria grafia oficial
-    aparecer no texto — aí o padrão fonético não tem o que consertar e só faria
-    estrago.
+    Only INVENTED names are corrected: a company called "Delta" or "Shell" is
+    already transcribed right, and recasing it would damage the sentence ("the
+    delta of the risk" turning into "the Delta of the risk").
     """
     for name in names or []:
         name = str(name).strip()
@@ -179,14 +176,13 @@ def fix_proper_nouns(txt: str, names: list) -> str:
         pat = re.compile(rf"\b{_phonetic_pattern(name)}\b", re.IGNORECASE)
 
         def _sub(m, name=name):
-            # Grafia já correta (ou só diferindo por caixa): não mexe.
+            # Already the official spelling apart from case: leave it.
             return name if m.group(0).lower() != name.lower() else m.group(0)
 
         matches = pat.findall(txt)
-        # Nenhuma variante errada: só o próprio name, talvez em caixa baixa.
-        # Aí a única coisa a fazer é acertar a caixa — e mesmo isso fica de
-        # fora quando o name é palavra do idioma ("a matriz de risco"), que a
-        # transcrição escreveu certo e virar "a Matriz" estragaria.
+        # No wrong variant, only the name itself, perhaps lowercase: the case
+        # is all there is to fix, and even that stays out when the name is an
+        # ordinary word ("a shell company").
         if matches and all(a.lower() == name.lower() for a in matches):
             if not _is_common_word(name):
                 txt = re.sub(rf"\b{re.escape(name)}\b", name, txt,

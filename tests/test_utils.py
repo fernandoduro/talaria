@@ -45,53 +45,56 @@ class TestMmss(unittest.TestCase):
 
 
 class TestFixProperNouns(unittest.TestCase):
-    """A legenda tem que grafar name próprio como o episode.json manda.
+    """The caption is burned into the video: a mis-heard name ships forever.
 
-    A transcrição automática erra name próprio: a mesma company aparece como
-    Zarvik, Zarvic, Zarvyk e Zarvyc no mesmo documento. Sem correção, a
-    legenda queimada leva o error para o vídeo published.
+    Automatic transcription errs on proper nouns: the same company comes back
+    as Kestril, Cestril, Kestryl and Keztril in one document, and the official
+    spelling is the one the episode metadata carries.
     """
 
-    def test_corrige_variantes_foneticas(self):
-        for wrong in ("Zarvic", "Zarvyk", "Zarvyc"):
+    def test_variant_round_trips_to_official_spelling(self):
+        for variant in ("Cestril", "Kestryl", "Keztril"):
             self.assertEqual(
-                utils.fix_proper_nouns(f"a gente montou a {wrong}, né", ["Zarvik"]),
-                "a gente montou a Zarvik, né")
+                utils.fix_proper_nouns(f"we built {variant} in a garage", ["Kestril"]),
+                "we built Kestril in a garage", msg=variant)
 
     def test_preserva_grafia_correta(self):
         self.assertEqual(utils.fix_proper_nouns("a Zarvik hoje", ["Zarvik"]),
                          "a Zarvik hoje")
 
-    def test_nao_altera_palavra_comum_parecida(self):
-        """Correção não pode atropelar palavra do idioma."""
-        txt = "zarpa origin foi essa"
-        self.assertEqual(utils.fix_proper_nouns(txt, ["Zarvik"]), txt)
+    def test_near_miss_dictionary_word_is_left_alone(self):
+        """A real word matching the pattern partway must survive it.
+
+        "kestrel" matches the first five elements of [ck]e[sz]tr[iy]l ("kestr")
+        and diverges at the sixth character, e against [iy].
+        """
+        txt = "the kestrel circled the field"
+        self.assertEqual(utils.fix_proper_nouns(txt, ["Kestril"]), txt)
 
     def test_sem_nomes_nao_faz_nada(self):
         self.assertEqual(utils.fix_proper_nouns("texto qualquer", []), "texto qualquer")
 
-    def test_respeita_fronteira_de_palavra(self):
-        self.assertEqual(utils.fix_proper_nouns("Zarvikzinho", ["Zarvik"]), "Zarvikzinho")
+    def test_word_boundary_is_respected(self):
+        self.assertEqual(utils.fix_proper_nouns("Kestrilish", ["Kestril"]), "Kestrilish")
 
-    def test_nao_altera_nome_que_e_palavra_do_idioma(self):
-        """Cliente chamado 'Matriz' ou 'Acho' não pode reescrever a frase.
+    def test_name_that_is_a_common_word_is_left_alone(self):
+        """A client called "Delta" or "Meta" must not have the sentence rewritten.
 
-        A correção existe para name que a transcrição ERRA. Quando o name é
-        palavra comum, a transcrição acerta e mexer só estraga.
+        The correction exists for names transcription gets WRONG. When the name
+        is an ordinary word, transcription already spells it right and
+        capitalising it damages the sentence.
         """
-        self.assertEqual(utils.fix_proper_nouns("a matriz de risco", ["Matriz"]),
-                         "a matriz de risco")
-        self.assertEqual(utils.fix_proper_nouns("eu acho que sim", ["Acho"]),
-                         "eu acho que sim")
-        self.assertEqual(utils.fix_proper_nouns("na praia hoje", ["Praia"]),
-                         "na praia hoje")
+        self.assertEqual(utils.fix_proper_nouns("the delta of the risk", ["Delta"]),
+                         "the delta of the risk")
+        self.assertEqual(utils.fix_proper_nouns("meta was the point", ["Meta"]),
+                         "meta was the point")
+        self.assertEqual(utils.fix_proper_nouns("a shell company", ["Shell"]),
+                         "a shell company")
 
-    def test_capitaliza_nome_em_caixa_baixa(self):
-        """Transcrição write marca em minúscula; a legenda deve capitalizar."""
-        self.assertEqual(utils.fix_proper_nouns("o quibralux e o quadro", ["Quibralux"]),
-                         "o Quibralux e o quadro")
-        self.assertEqual(utils.fix_proper_nouns("a zarvik hoje", ["Zarvik"]),
-                         "a Zarvik hoje")
+    def test_lowercase_occurrence_is_capitalised(self):
+        """Transcription writes the name lowercase; the caption must capitalise."""
+        self.assertEqual(utils.fix_proper_nouns("at kestril today", ["Kestril"]),
+                         "at Kestril today")
 
     def test_ainda_corrige_nome_inventado(self):
         """O caso que motivou a função continua funcionando."""
