@@ -26,6 +26,21 @@ answer is not a longer keyword list — it is this inventory: a finite,
 enumerable set where every member gets a verdict, so completeness is checkable
 rather than asserted.
 
+## A second gap in this inventory
+
+It also excluded identifiers of **two characters or fewer**, on the assumption
+that they are all conventional abbreviations. Almost true: of the 60 such names
+this codebase defines, 59 are English or conventional (`pd` project_dir, `ep`
+episode, `ig` instagram, `yt` youtube, `pl` platform, `cs` client_secret,
+`ff` ffmpeg, `wm` watermark, plus loop and coordinate variables). One was not —
+`ja`, Portuguese for "already", a loop variable over approved clips in
+`curation.py`. It survived the whole of Phase 1 because of this filter and was
+found only by the final acceptance run.
+
+Two exclusions, two escapes. If you extend this inventory, do not filter by
+length — filter by whether the name is English, which is the only question that
+matters.
+
 ## How to triage
 
 For each identifier, decide: is it an English word, a standard abbreviation, or
