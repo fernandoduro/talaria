@@ -291,3 +291,30 @@ will incidentally fix, since it rewrites those comments anyway.
   looser pattern.
 - **The map's size invites skimming.** 145 entries reviewed as a list is the
   point; reviewing it as a diff defeats the approach.
+
+
+## Known issues carried past Phase 1
+
+- **`SUSPECT_ATTRIBUTION_THRESHOLD` no longer describes a measured base rate.**
+  It is 0.30, tuned against how often `a gente` and `nosso*` appear in
+  Portuguese speech. The English marker set opens with bare `we|our|us`, which
+  is more frequent, and a correctly-attributed three-segment fixture already
+  measures a host first-person fraction of 1.0 against it — so
+  `attribution_trustworthy` may now warn on every episode, and a warning that
+  always fires trains the operator to ignore it.
+
+  Left at 0.30 deliberately rather than replaced by a guess: re-deriving the
+  fraction needs a real English transcript with known-good speaker labels, and
+  none exists in this repository. The mismatch is recorded at the constant. Two
+  candidate fixes when a transcript exists: measure and set a real threshold,
+  or narrow the marker set to own-company phrases (`my company`, `our team`)
+  so the base rate is comparable to the Portuguese set's.
+
+  This is advisory output, not a correctness bug — the function feeds a warning
+  the operator reads, not a decision the pipeline acts on.
+
+- **`tests/test_txt_parse.py`'s sound-tag test was strengthened, not carried
+  forward.** Phase 0 recorded it as vacuous (its fixture contained no sound
+  tag, so the assertion could not fail). Task 6 gave it a real fixture and
+  verified it failing first, so the Phase 0 carried-forward entry is now
+  closed.
