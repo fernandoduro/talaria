@@ -22,7 +22,7 @@ def _project(pd, title="Titulo do Short"):
         json.dump({"posts": [{"slug": "cit_x", "cards": ["a", "b"],
                               "legenda": "leg"}]}, f)
     with open(layout.ensure_dir(layout.schedule(pd)), "w", encoding="utf-8") as f:
-        json.dump({"agenda": [
+        json.dump({"schedule": [
             {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"data": "2026-08-24", "kind": "post", "slug": "cit_x"},
         ]}, f)
@@ -155,7 +155,7 @@ class TestExecutar(unittest.TestCase):
         resultados = publish.execute(self.pd, dia=self.dia)
         self.assertEqual([r["ok"] for r in resultados], [True, True, True])
         from talaria import published
-        reg = published.carrega(self.pd)
+        reg = published.load(self.pd)
         self.assertTrue(published.is_published(reg, "youtube_shorts", "corte1"))
         self.assertTrue(published.is_published(reg, "instagram_reels", "corte1"))
         self.assertTrue(published.is_published(reg, "instagram_posts", "cit_x"))
@@ -175,7 +175,7 @@ class TestExecutar(unittest.TestCase):
         self.assertTrue(por_pl["instagram_posts"])
         # o que falhou NÃO entra no registro — retenta amanhã
         from talaria import published
-        reg = published.carrega(self.pd)
+        reg = published.load(self.pd)
         self.assertFalse(published.is_published(reg, "youtube_shorts", "corte1"))
 
     def test_registro_e_imediato_nao_no_fim_do_lote(self, yt, ig):
@@ -188,7 +188,7 @@ class TestExecutar(unittest.TestCase):
 
         def reel_explode(*a, **k):
             # neste ponto o YouTube JÁ deve estar registrado
-            reg = published.carrega(self.pd)
+            reg = published.load(self.pd)
             estado["yt_registrado"] = published.is_published(
                 reg, "youtube_shorts", "corte1")
             raise RuntimeError("boom")

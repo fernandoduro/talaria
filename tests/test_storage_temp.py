@@ -68,7 +68,7 @@ class TestRemove(unittest.TestCase):
     @mock.patch("talaria.storage_temp.boto3")
     def test_remove_em_url_path_style(self, boto3_mock):
         # R2 e MinIO assinam no formato /bucket/key, não bucket.host/key. Sem
-        # tirar o bucket do caminho, o delete apontava para uma key que não
+        # tirar o bucket do path, o delete apontava para uma key que não
         # existe e falhava calado — o arquivo ficava público até expirar.
         s3 = boto3_mock.client.return_value
         storage_temp.remove(
@@ -82,7 +82,7 @@ class TestRemove(unittest.TestCase):
     def test_bucket_com_nome_do_prefixo_nao_corta_demais(self, boto3_mock):
         # Bucket chamado igual ao PREFIX: na URL da AWS o bucket está no
         # HOST, e a key já começa em 'tmp-publish/'. Decidir pelo texto do
-        # caminho cortaria o prefixo real e apagaria nada — o mesmo silêncio
+        # path cortaria o prefixo real e apagaria nada — o mesmo silêncio
         # que a correção do path-style veio resolver.
         s3 = boto3_mock.client.return_value
         storage_temp.remove(

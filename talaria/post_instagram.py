@@ -67,8 +67,8 @@ def validate_card(texto: str) -> dict:
     return {"fits": True, "lines": n, "reason": ""}
 
 
-def _truetype(caminho, tamanho):
-    return ImageFont.truetype(caminho, tamanho)
+def _truetype(path, tamanho):
+    return ImageFont.truetype(path, tamanho)
 
 
 def episode_author(project_dir: str, who: str = "") -> dict:
@@ -182,13 +182,13 @@ def file_slug(slug: str) -> str:
     return limpo or "post"
 
 
-def carrega(project_dir: str) -> list:
+def load(project_dir: str) -> list:
     """Lê o posts.json do project."""
     path = layout.posts(project_dir)
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"{path} não existe. Rode 'python run.py post --project <slug> "
-            f"--cortes <n,n>' e escolha as citações em sessão antes de gerar."
+            f"--clips <n,n>' e escolha as citações em sessão antes de gerar."
         )
     with open(path, encoding="utf-8") as f:
         return (json.load(f) or {}).get("posts") or []
@@ -201,7 +201,7 @@ def generate(project_dir: str) -> list:
     metade numa pasta de publicação é pior que error na hora — o gestor pode
     publish o card 1 de um carrossel que nunca teve card 2.
     """
-    posts = carrega(project_dir)
+    posts = load(project_dir)
     if not posts:
         raise ValueError(f"{layout.posts(project_dir)} não tem nenhum post")
 

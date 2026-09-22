@@ -66,7 +66,7 @@ class TestEscreve(unittest.TestCase):
 
     def test_nome_base_do_carrossel_vem_de_quem_chama(self):
         # O .txt do carrossel usa o slug do post, não o name do card.
-        # Quem chama passa o caminho-base; write() só troca a extensão.
+        # Quem chama passa o path-base; write() só troca a extensão.
         base = os.path.join(self.d, "post_corte2.png")
         out = caption.write(base, "legenda do carrossel")
         self.assertTrue(out.endswith("post_corte2.txt"))

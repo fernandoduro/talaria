@@ -1,6 +1,6 @@
 """Obtém o vídeo-fonte a partir de arquivo local, link do YouTube ou do Drive.
 
-Salva sempre em <project>/fonte/video.mp4 (ver layout.video) e retorna o caminho.
+Salva sempre em <project>/fonte/video.mp4 (ver layout.video) e retorna o path.
 """
 from __future__ import annotations
 
@@ -38,7 +38,7 @@ def _ytdlp(args, capture=False):
 
 
 def acquire(src: str, project_dir: str) -> str:
-    """Baixa/copia o vídeo para layout.video(project_dir) e retorna o caminho."""
+    """Baixa/copia o vídeo para layout.video(project_dir) e retorna o path."""
     dest = layout.ensure_dir(layout.video(project_dir))
     kind = detect_source(src)
 

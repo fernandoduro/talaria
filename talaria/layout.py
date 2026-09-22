@@ -18,16 +18,16 @@ from __future__ import annotations
 
 import os
 
-SOURCE = "fonte"
+SOURCE = "source"
 DECISIONS = "decisions"
 BRIEFS = "briefs"
 PUBLISH = "publish"
 
 
-def ensure_dir(caminho: str) -> str:
-    """Cria a pasta do arquivo, se preciso. Devolve o próprio caminho."""
-    os.makedirs(os.path.dirname(os.path.abspath(caminho)), exist_ok=True)
-    return caminho
+def ensure_dir(path: str) -> str:
+    """Cria a pasta do arquivo, se preciso. Devolve o próprio path."""
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    return path
 
 
 def episode(pd: str) -> str:
@@ -77,7 +77,7 @@ def published(pd: str) -> str:
 
 
 def brief(pd: str, kind: str) -> str:
-    """kind: 'materiais' | 'cortes' | 'posts'."""
+    """kind: 'materials' | 'clips' | 'posts'."""
     return os.path.join(pd, BRIEFS, f"{kind}.md")
 
 
@@ -115,15 +115,15 @@ def posts_png(pd: str) -> str:
 # Posição antiga -> nova. O prefixo do name antigo era necessário quando tudo
 # ficava na mesma pasta; dentro da subpasta ele vira redundância.
 _MIGRATION = [
-    ("fonte.mp4", video),
+    ("source.mp4", video),
     ("transcript.json", transcript),
     ("transcript.txt", transcript_txt),
     ("curation.json", curation),
     ("moments.json", moments),
     ("texts.json", texts),
     ("posts.json", posts),
-    ("brief_materiais.md", lambda pd: brief(pd, "materiais")),
-    ("brief_cortes.md", lambda pd: brief(pd, "cortes")),
+    ("brief_materiais.md", lambda pd: brief(pd, "materials")),
+    ("brief_cortes.md", lambda pd: brief(pd, "clips")),
     ("brief_posts.md", lambda pd: brief(pd, "posts")),
     ("thumbnail.jpg", thumbnail),
 ]
@@ -150,8 +150,8 @@ def _check_dirs(pd: str) -> None:
     migrado.
     """
     for name in (SOURCE, DECISIONS, BRIEFS, PUBLISH):
-        caminho = os.path.join(pd, name)
-        if os.path.exists(caminho) and not os.path.isdir(caminho):
+        path = os.path.join(pd, name)
+        if os.path.exists(path) and not os.path.isdir(path):
             raise RuntimeError(
                 f"'{name}' precisa ser uma pasta, mas é um arquivo em {pd}. "
                 f"Renomeie ou remova esse arquivo e rode de novo."
@@ -241,9 +241,9 @@ def migrate(pd: str) -> list:
             os.rmdir(origem)
 
     for name in _JUNK:
-        caminho = os.path.join(pd, name)
-        if os.path.exists(caminho):
-            os.remove(caminho)
+        path = os.path.join(pd, name)
+        if os.path.exists(path):
+            os.remove(path)
             movidos.append((name, "(removido)"))
 
     return movidos

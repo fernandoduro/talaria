@@ -25,7 +25,7 @@ def load(project_dir: str) -> dict:
 
 
 def save(project_dir: str, data: dict) -> str:
-    """Grava o texts.json do project e devolve o caminho escrito."""
+    """Grava o texts.json do project e devolve o path escrito."""
     path = layout.ensure_dir(layout.texts(project_dir))
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)

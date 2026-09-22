@@ -36,7 +36,7 @@ _MP4_SUFFIX = {"youtube_shorts": "_short.mp4", "instagram_reels": "_reel.mp4"}
 def _mp4(pd: str, platform: str, slug: str) -> str:
     """Caminho do clip renderizado, com o slug saneado.
 
-    O `schedule.carrega` já recusa slug com barra, mas o saneamento fica
+    O `schedule.load` já recusa slug com barra, mas o saneamento fica
     aqui também: é o mesmo tratamento que os PNGs de post recebem, e a
     consequência de um slug escapando da pasta é publish arquivo de fora do
     project — cara demais para depender de uma única barreira.
@@ -98,7 +98,7 @@ def precheck(pd: str, pares: list) -> list:
                 erros.append(f"{slug} ({pl}): {video} não existe — "
                              f"rode 'render' antes")
                 continue
-            txt = caption.caminho(video)
+            txt = caption.txt_path(video)
             if not os.path.exists(txt):
                 erros.append(f"{slug} ({pl}): {txt} não existe — "
                              f"regere o corte com 'render'")
@@ -159,10 +159,10 @@ def _publish_pair(pd: str, item: dict, pl: str, moments: dict) -> dict:
         video = _mp4(pd, pl, slug)
         m = moments[slug]
         return publish_youtube.upload(video, m["title"],
-                                      _read(caption.caminho(video)))
+                                      _read(caption.txt_path(video)))
     if pl == "instagram_reels":
         video = _mp4(pd, pl, slug)
-        r = publish_instagram.publish_reel(video, _read(caption.caminho(video)))
+        r = publish_instagram.publish_reel(video, _read(caption.txt_path(video)))
         return {"id": r["id"], "url": r.get("permalink", "")}
     pngs = _post_pngs(pd, slug)
     r = publish_instagram.publish_post(pngs, _read(_post_txt(pd, slug)))

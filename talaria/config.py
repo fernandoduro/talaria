@@ -19,13 +19,13 @@ _FONTS_DIR = os.path.join(_ROOT, "assets", "fonts")
 
 
 def _bundled_font(name: str) -> str:
-    caminho = os.path.join(_FONTS_DIR, name)
-    if not os.path.exists(caminho):
+    path = os.path.join(_FONTS_DIR, name)
+    if not os.path.exists(path):
         raise FileNotFoundError(
             f"fonte {name} não encontrada em assets/fonts — o arquivo é "
             f"versionado; restaure com 'git checkout assets/fonts/{name}'."
         )
-    return caminho
+    return path
 
 
 FONT = _bundled_font("DejaVuSans-Bold.ttf")
@@ -33,7 +33,7 @@ FONT = _bundled_font("DejaVuSans-Bold.ttf")
 # ---------------------------------------------------------------------------
 # Backend de legenda — detectado em runtime.
 #
-# 'drawtext' é o caminho padrão, mas exige ffmpeg compilado com
+# 'drawtext' é o path padrão, mas exige ffmpeg compilado com
 # libfreetype. Builds mínimas (ex.: Homebrew no macOS) não têm o filtro; nesse
 # caso caímos para 'overlay': legendas rasterizadas em PNG com Pillow e
 # sobrepostas com overlay+enable. Mesmo resultado visual, sem depender de libs

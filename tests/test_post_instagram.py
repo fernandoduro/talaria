@@ -229,7 +229,7 @@ class TestGerar(unittest.TestCase):
             self.assertIn("esperava texto", str(ctx.exception))
 
     def test_slug_com_barra_nao_escapa_da_pasta_de_saida(self):
-        """Slug é digitado à mão no posts.json — não pode virar caminho.
+        """Slug é digitado à mão no posts.json — não pode virar path.
 
         Sem saneamento, `../fora` cria diretório lixo e `../../..` quebra com
         FileNotFoundError obscuro do Pillow, em vez de generate o arquivo.

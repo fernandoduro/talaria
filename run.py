@@ -48,7 +48,7 @@ PROJECTS = os.path.join(ROOT, "projects")
 # publicação leem credencial de os.environ, e sem isto o arquivo preenchido
 # não chegava neles — o publish reclamava de variável faltando com a resposta
 # aberta na tela do gestor.
-environment.carrega()
+environment.load()
 
 
 def project_dir(slug: str) -> str:
@@ -196,8 +196,8 @@ def cmd_brief(args):
     pd = project_dir(args.project)
     # --cortes e --materiais são mutuamente exclusivas (ver add_mutually_exclusive_group);
     # sem nenhuma das duas, o default é 'materiais'.
-    kind = "cortes" if args.cortes else "materiais"
-    out = brief.montar(pd, kind)
+    kind = "clips" if args.clips else "materials"
+    out = brief.build(pd, kind)
     print(f"[brief] {kind} -> {out}")
 
 
@@ -283,12 +283,12 @@ def cmd_post(args):
     with open(momentos_path, encoding="utf-8") as f:
         moments = json.load(f)
 
-    if args.cortes:
+    if args.clips:
         try:
-            querido = {int(n) for n in args.cortes.split(",") if n.strip()}
+            querido = {int(n) for n in args.clips.split(",") if n.strip()}
         except ValueError:
-            sys.exit(f"--cortes aceita números separados por vírgula "
-                     f"(ex.: 1,3) — recebido {args.cortes!r}")
+            sys.exit(f"--clips aceita números separados por vírgula "
+                     f"(ex.: 1,3) — recebido {args.clips!r}")
         escolhidos = [m for i, m in enumerate(moments, start=1) if i in querido]
         if not escolhidos:
             sys.exit(f"nenhum corte com os números {sorted(querido)} "
@@ -315,12 +315,12 @@ def cmd_publish(args):
 
     if not resultados:
         print(f"[publish] nada agendado para hoje "
-              f"({schedule.hoje().isoformat()})")
+              f"({schedule.today().isoformat()})")
         return
 
-    hoje = schedule.hoje().isoformat()
+    today = schedule.today().isoformat()
     for r in resultados:
-        if r["data"] < hoje:
+        if r["data"] < today:
             # Mostra a data ORIGINAL: o gestor precisa ver que atrasou.
             print(f"[publish]    ({r['slug']} estava agendado para {r['data']})")
     for pl in ("youtube_shorts", "instagram_reels", "instagram_posts"):
@@ -356,12 +356,12 @@ def cmd_schedule(args):
     """Mostra a agenda com o status de cada item, sem publish nada."""
     pd = project_dir(args.project)
     try:
-        agenda = schedule.carrega(pd)
-        reg = published.carrega(pd)
+        items = schedule.load(pd)
+        reg = published.load(pd)
     except (FileNotFoundError, ValueError, RuntimeError) as e:
         sys.exit(str(e))
-    hoje = schedule.hoje()
-    for item in agenda:
+    today = schedule.today()
+    for item in items:
         pls = schedule.platforms_of(item)
         feitos = [pl for pl in pls
                   if published.is_published(reg, pl, item["slug"])]
@@ -371,9 +371,9 @@ def cmd_schedule(args):
         elif feitos:
             faltam = [p for p in pls if p not in feitos]
             status = f"parcial — falta {', '.join(faltam)}"
-        elif d < hoje:
+        elif d < today:
             status = "ATRASADO"
-        elif d == hoje:
+        elif d == today:
             status = "pendente hoje"
         else:
             status = "futuro"
@@ -426,9 +426,9 @@ def main():
     sp = sub.add_parser("brief", help="monta o pacote de leitura para o modelo")
     add_common(sp)
     g = sp.add_mutually_exclusive_group()
-    g.add_argument("--materiais", action="store_true",
+    g.add_argument("--materials", action="store_true",
                    help="prompt de título/descrição (default)")
-    g.add_argument("--cortes", action="store_true", help="prompt de seleção de cortes")
+    g.add_argument("--clips", action="store_true", help="prompt de seleção de cortes")
     sp.set_defaults(func=cmd_brief)
 
     sp = sub.add_parser("curate", help="estado da curadoria iterativa")
@@ -439,7 +439,7 @@ def main():
 
     sp = sub.add_parser("post", help="posts de citação para Instagram")
     add_common(sp)
-    sp.add_argument("--cortes", default="",
+    sp.add_argument("--clips", default="",
                     help="números dos cortes, ex.: 1,3 (vazio = todos)")
     sp.add_argument("--generate", action="store_true",
                     help="renderiza a partir do posts.json")
@@ -456,7 +456,7 @@ def main():
                          "— o resto do corte segue pendente para depois")
     sp.set_defaults(func=cmd_publish)
 
-    sp = sub.add_parser("agenda", help="mostra a agenda e o status de cada item")
+    sp = sub.add_parser("schedule", help="mostra a agenda e o status de cada item")
     add_common(sp)
     sp.set_defaults(func=cmd_schedule)
 

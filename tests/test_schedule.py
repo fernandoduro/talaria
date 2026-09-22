@@ -18,7 +18,7 @@ def _prepare(pd, moments=None, posts=None, agenda=None):
             json.dump({"posts": posts}, f)
     if agenda is not None:
         with open(layout.ensure_dir(layout.schedule(pd)), "w", encoding="utf-8") as f:
-            json.dump({"agenda": agenda}, f)
+            json.dump({"schedule": agenda}, f)
 
 
 MOMENTS = [{"slug": "corte1", "start": 1.0, "end": 70.0, "title": "T"}]
@@ -34,26 +34,26 @@ class TestCarrega(unittest.TestCase):
             {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"data": "2026-08-25", "kind": "post", "slug": "citacao_x"},
         ])
-        agenda = schedule.carrega(self.pd)
+        agenda = schedule.load(self.pd)
         self.assertEqual(len(agenda), 2)
 
     def test_sem_arquivo_explica_o_que_criar(self):
         with self.assertRaises(FileNotFoundError):
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
 
     def test_slug_de_corte_inexistente_aborta(self):
         # Publicar o clip errado por slug digitado errado não tem correção.
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"data": "2026-08-24", "kind": "clip", "slug": "corte99"}])
         with self.assertRaises(ValueError) as ctx:
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
         self.assertIn("corte99", str(ctx.exception))
 
     def test_slug_de_post_inexistente_aborta(self):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"data": "2026-08-24", "kind": "post", "slug": "nao_existe"}])
         with self.assertRaises(ValueError):
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
 
     def test_data_impossivel_aborta(self):
         # Valida a data REAL, não só o formato — 30 de fevereiro passa
@@ -61,14 +61,14 @@ class TestCarrega(unittest.TestCase):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"data": "2026-02-30", "kind": "clip", "slug": "corte1"}])
         with self.assertRaises(ValueError) as ctx:
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
         self.assertIn("2026-02-30", str(ctx.exception))
 
     def test_formato_de_data_errado_aborta(self):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"data": "24/08/2026", "kind": "clip", "slug": "corte1"}])
         with self.assertRaises(ValueError):
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
 
     def test_slug_duplicado_aborta(self):
         # Reagendamento é editar a data do item, não repetir o slug.
@@ -77,7 +77,7 @@ class TestCarrega(unittest.TestCase):
             {"data": "2026-08-26", "kind": "clip", "slug": "corte1"},
         ])
         with self.assertRaises(ValueError) as ctx:
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
         self.assertIn("duas vezes", str(ctx.exception))
 
     def test_corte_e_post_com_mesmo_slug_permitido(self):
@@ -88,20 +88,20 @@ class TestCarrega(unittest.TestCase):
             {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"data": "2026-08-25", "kind": "post", "slug": "corte1"},
         ])
-        self.assertEqual(len(schedule.carrega(self.pd)), 2)
+        self.assertEqual(len(schedule.load(self.pd)), 2)
 
     def test_dois_itens_no_mesmo_dia_permitido(self):
         _prepare(self.pd, MOMENTS, POSTS, [
             {"data": "2026-08-24", "kind": "clip", "slug": "corte1"},
             {"data": "2026-08-24", "kind": "post", "slug": "citacao_x"},
         ])
-        self.assertEqual(len(schedule.carrega(self.pd)), 2)
+        self.assertEqual(len(schedule.load(self.pd)), 2)
 
     def test_tipo_desconhecido_aborta(self):
         _prepare(self.pd, MOMENTS, POSTS,
                  [{"data": "2026-08-24", "kind": "reels", "slug": "corte1"}])
         with self.assertRaises(ValueError):
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
 
     def test_slug_que_escapa_da_pasta_aborta(self):
         # O slug vira name de arquivo em publish/. Com barra ou `..` ele sai
@@ -114,7 +114,7 @@ class TestCarrega(unittest.TestCase):
                  POSTS,
                  [{"data": "2026-08-24", "kind": "clip", "slug": mau}])
         with self.assertRaises(ValueError) as ctx:
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
         self.assertIn("barra", str(ctx.exception))
 
     def test_slug_com_barra_simples_tambem_aborta(self):
@@ -124,7 +124,7 @@ class TestCarrega(unittest.TestCase):
                  POSTS,
                  [{"data": "2026-08-24", "kind": "clip", "slug": mau}])
         with self.assertRaises(ValueError):
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
 
     def test_slug_normal_com_ponto_continua_valendo(self):
         # Sanear não pode ficar restritivo demais: ponto e hífen são comuns
@@ -134,7 +134,7 @@ class TestCarrega(unittest.TestCase):
                  [{"slug": ok, "start": 1.0, "end": 70.0, "title": "T"}],
                  POSTS,
                  [{"data": "2026-08-24", "kind": "clip", "slug": ok}])
-        self.assertEqual(len(schedule.carrega(self.pd)), 1)
+        self.assertEqual(len(schedule.load(self.pd)), 1)
 
     def test_carrossel_acima_de_10_aborta(self):
         # Limite da Graph API é 10 imagens; a solução é editorial.
@@ -142,7 +142,7 @@ class TestCarrega(unittest.TestCase):
         _prepare(self.pd, MOMENTS, posts,
                  [{"data": "2026-08-24", "kind": "post", "slug": "longo"}])
         with self.assertRaises(ValueError) as ctx:
-            schedule.carrega(self.pd)
+            schedule.load(self.pd)
         self.assertIn("quebre", str(ctx.exception))
 
 

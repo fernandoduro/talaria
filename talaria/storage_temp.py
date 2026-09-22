@@ -44,15 +44,15 @@ def _client():
                         config=Config(signature_version="s3v4"))
 
 
-def sobe(caminho: str) -> str:
+def sobe(path: str) -> str:
     """Sobe o arquivo e devolve a URL assinada que o Instagram vai buscar.
 
     O uuid no name evita colisão entre publicações simultâneas do mesmo slug
     (retry manual em outra janela, por exemplo).
     """
     s3 = _client()
-    key = f"{PREFIX}{uuid.uuid4().hex}_{os.path.basename(caminho)}"
-    s3.upload_file(caminho, _bucket(), key)
+    key = f"{PREFIX}{uuid.uuid4().hex}_{os.path.basename(path)}"
+    s3.upload_file(path, _bucket(), key)
     return s3.generate_presigned_url(
         "get_object",
         Params={"Bucket": _bucket(), "Key": key},
@@ -73,8 +73,8 @@ def remove(url: str) -> None:
         key = unquote(partes.path.lstrip("/"))
         # Onde o bucket aparece depende do estilo da URL: a AWS usa
         # virtual-hosted (`bucket.host/key`) e o R2/MinIO usam path-style
-        # (`host/bucket/key`). Quem decide é o HOST, não o texto do caminho —
-        # olhar só o caminho erra quando o bucket se chama como o PREFIX
+        # (`host/bucket/key`). Quem decide é o HOST, não o texto do path —
+        # olhar só o path erra quando o bucket se chama como o PREFIX
         # ("tmp-publish"), cortando o prefixo real da key. Nos dois casos o
         # delete miraria objeto inexistente e falharia calado, deixando a
         # mídia acessível pela URL até expirar.

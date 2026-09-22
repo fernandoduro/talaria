@@ -32,7 +32,7 @@ def _clean_value(valor: str) -> str:
     return valor
 
 
-def carrega(caminho: str = None) -> int:
+def load(path: str = None) -> int:
     """Põe no environment o que estiver no `.env`. Devolve quantas entraram.
 
     O que já está no environment VENCE o arquivo: `IG_PAGE_TOKEN=x python run.py`
@@ -43,12 +43,12 @@ def carrega(caminho: str = None) -> int:
     honesto, e uma string vazia faria a checagem de credencial passar para a
     API recusar depois, com mensagem pior.
     """
-    caminho = caminho or DEFAULT_PATH
-    if not os.path.exists(caminho):
+    path = path or DEFAULT_PATH
+    if not os.path.exists(path):
         return 0
 
     postas = 0
-    with open(caminho, encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         for linha in f:
             linha = linha.strip()
             if not linha or linha.startswith("#") or "=" not in linha:

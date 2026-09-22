@@ -15,9 +15,9 @@ class TestCaminhos(unittest.TestCase):
                          os.path.join(self.d, "episode.json"))
 
     def test_fonte_agrupada(self):
-        self.assertTrue(layout.video(self.d).endswith("fonte/video.mp4"))
-        self.assertTrue(layout.transcript(self.d).endswith("fonte/transcript.json"))
-        self.assertTrue(layout.transcript_txt(self.d).endswith("fonte/transcript.txt"))
+        self.assertTrue(layout.video(self.d).endswith("source/video.mp4"))
+        self.assertTrue(layout.transcript(self.d).endswith("source/transcript.json"))
+        self.assertTrue(layout.transcript_txt(self.d).endswith("source/transcript.txt"))
 
     def test_decisoes_agrupadas(self):
         for f in (layout.curation(self.d), layout.moments(self.d),
@@ -25,7 +25,7 @@ class TestCaminhos(unittest.TestCase):
             self.assertIn("/decisions/", f)
 
     def test_briefs_por_tipo(self):
-        self.assertTrue(layout.brief(self.d, "cortes").endswith("briefs/cortes.md"))
+        self.assertTrue(layout.brief(self.d, "clips").endswith("briefs/clips.md"))
         self.assertTrue(layout.brief(self.d, "posts").endswith("briefs/posts.md"))
 
     def test_publicaveis_agrupados(self):
@@ -40,7 +40,7 @@ class TestCaminhos(unittest.TestCase):
 
 
 class TestMigracao(unittest.TestCase):
-    ANTIGOS = ["fonte.mp4", "transcript.json", "transcript.txt",
+    ANTIGOS = ["source.mp4", "transcript.json", "transcript.txt",
                "curation.json", "moments.json", "texts.json", "posts.json",
                "brief_materiais.md", "brief_cortes.md", "brief_posts.md",
                "thumbnail.jpg", "_thumb_frame.jpg", "episode.json"]
@@ -63,7 +63,7 @@ class TestMigracao(unittest.TestCase):
         self.assertTrue(os.path.exists(layout.video(d)))
         self.assertTrue(os.path.exists(layout.transcript(d)))
         self.assertTrue(os.path.exists(layout.moments(d)))
-        self.assertTrue(os.path.exists(layout.brief(d, "cortes")))
+        self.assertTrue(os.path.exists(layout.brief(d, "clips")))
         self.assertTrue(os.path.exists(layout.thumbnail(d)))
         self.assertTrue(os.path.exists(
             os.path.join(layout.platform(d, "youtube_shorts"), "x.mp4")))
@@ -89,7 +89,7 @@ class TestMigracao(unittest.TestCase):
         d = self._projeto_antigo()
         layout.migrate(d)
         na_raiz = {n for n in os.listdir(d) if not n.startswith(".")}
-        self.assertEqual(na_raiz, {"episode.json", "fonte", "decisions",
+        self.assertEqual(na_raiz, {"episode.json", "source", "decisions",
                                    "briefs", "publish"})
 
     def test_e_idempotente(self):
@@ -175,7 +175,7 @@ class TestMigracaoDefensiva(unittest.TestCase):
         os.makedirs(os.path.join(d, layout.SOURCE))
         with open(layout.video(d), "w") as f:
             f.write("X" * 15)                     # stub na posição nova
-        with open(os.path.join(d, "fonte.mp4"), "w") as f:
+        with open(os.path.join(d, "source.mp4"), "w") as f:
             f.write("V" * 30000)                  # vídeo real na antiga
 
         movidos = layout.migrate(d)
@@ -214,7 +214,7 @@ class TestMigracaoDefensiva(unittest.TestCase):
         """Migração parcial: rodar de novo termina o serviço, sem perder nada."""
         import shutil as _sh
         d = tempfile.mkdtemp()
-        nomes = ("fonte.mp4", "moments.json", "curation.json", "texts.json",
+        nomes = ("source.mp4", "moments.json", "curation.json", "texts.json",
                  "brief_cortes.md", "thumbnail.jpg")
         for n in nomes:
             with open(os.path.join(d, n), "w", encoding="utf-8") as f:

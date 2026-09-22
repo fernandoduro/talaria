@@ -13,7 +13,7 @@ class TestCarrega(unittest.TestCase):
 
     def test_sem_arquivo_devolve_vazio(self):
         # Projeto que nunca publicou: registro vazio, sem error.
-        self.assertEqual(published.carrega(self.pd), {})
+        self.assertEqual(published.load(self.pd), {})
 
     def test_corrompido_aborta_fail_closed(self):
         # JSON inválido NUNCA vira "nada published" — republicaria tudo.
@@ -21,7 +21,7 @@ class TestCarrega(unittest.TestCase):
         with open(path, "w", encoding="utf-8") as f:
             f.write("{metade de um json")
         with self.assertRaises(RuntimeError) as ctx:
-            published.carrega(self.pd)
+            published.load(self.pd)
         self.assertIn("corrompido", str(ctx.exception))
 
 
@@ -32,7 +32,7 @@ class TestRegistra(unittest.TestCase):
     def test_grava_na_hora_e_rele(self):
         published.record(self.pd, "youtube_shorts", "corte1", "abc123",
                            "https://youtube.com/shorts/abc123")
-        reg = published.carrega(self.pd)
+        reg = published.load(self.pd)
         self.assertEqual(len(reg["youtube_shorts"]), 1)
         r = reg["youtube_shorts"][0]
         self.assertEqual(r["slug"], "corte1")
@@ -42,7 +42,7 @@ class TestRegistra(unittest.TestCase):
     def test_acumula_sem_perder_os_anteriores(self):
         published.record(self.pd, "youtube_shorts", "corte1", "a", "u1")
         published.record(self.pd, "instagram_reels", "corte1", "b", "u2")
-        reg = published.carrega(self.pd)
+        reg = published.load(self.pd)
         self.assertEqual(len(reg["youtube_shorts"]), 1)
         self.assertEqual(len(reg["instagram_reels"]), 1)
 

@@ -6,7 +6,7 @@ copia e cola no campo de legenda do Instagram ou do YouTube.
 A descrição vem de who chama (`post_caption` do clip, `legenda` do post) e as
 hashtags do `texts.json`, que valem para o episódio inteiro. Montar isso aqui,
 e não em cada chamador, é o mesmo reason do `layout.py` ser a autoridade única
-sobre caminho: `render` e `post_instagram` precisam do formato idêntico, e duas
+sobre path: `render` e `post_instagram` precisam do formato idêntico, e duas
 cópias divergem na primeira mudança.
 
 O único bloco que difere por platform é a chamada para o episódio completo:
@@ -110,24 +110,24 @@ def compose_episode(title: str | None, description: str | None,
     return SEPARATOR.join(p for p in partes if p)
 
 
-def caminho(caminho_peca: str) -> str:
+def txt_path(caminho_peca: str) -> str:
     """Caminho do `.txt` irmão de uma peça, trocando a extensão.
 
-    Recebe o caminho da peça já resolvido pelo `layout` em vez de montar um
-    novo, para não reintroduzir caminho por literal fora do `layout.py`.
+    Recebe o path da peça já resolvido pelo `layout` em vez de montar um
+    novo, para não reintroduzir path por literal fora do `layout.py`.
     """
     raiz, _ = os.path.splitext(caminho_peca)
     return raiz + ".txt"
 
 
 def write(caminho_peca: str, texto: str) -> str:
-    """Grava o caption ao lado da peça e devolve o caminho escrito.
+    """Grava o caption ao lado da peça e devolve o path escrito.
 
     Sobrescreve o que houver: regerar um clip tem que atualizar o caption, não
     acumular versão antiga ao lado (o mesmo contrato do `.mp4`, que também é
     reescrito no lugar).
     """
-    destino = caminho(caminho_peca)
+    destino = txt_path(caminho_peca)
     os.makedirs(os.path.dirname(os.path.abspath(destino)), exist_ok=True)
     with open(destino, "w", encoding="utf-8") as f:
         f.write(texto)

@@ -25,7 +25,7 @@ PLATFORMS = {
 CAROUSEL_MAX = 10
 
 
-def hoje() -> dt.date:
+def today() -> dt.date:
     """A data corrente no fuso configurado — nunca a data ingênua da máquina."""
     return dt.datetime.now(ZoneInfo(config.PUBLISH_TZ)).date()
 
@@ -51,19 +51,19 @@ def moments(pd: str) -> list:
         return json.load(f)
 
 
-def carrega(pd: str) -> list:
+def load(pd: str) -> list:
     """Lê e validate a agenda. Qualquer item inválido aborta a carga inteira."""
     path = layout.schedule(pd)
     if not os.path.exists(path):
         raise FileNotFoundError(
             f"{path} não existe. Escreva a agenda de publicação: "
-            f'{{"agenda": [{{"data": "YYYY-MM-DD", "kind": "clip|post", '
+            f'{{"schedule": [{{"data": "YYYY-MM-DD", "kind": "clip|post", '
             f'"slug": "..."}}]}}'
         )
     with open(path, encoding="utf-8") as f:
-        agenda = (json.load(f) or {}).get("agenda") or []
+        agenda = (json.load(f) or {}).get("schedule") or []
     if not agenda:
-        raise ValueError(f"{path} não tem nenhum item em 'agenda'")
+        raise ValueError(f"{path} não tem nenhum item em 'schedule'")
 
     # Fontes carregadas sob demanda: agenda só de posts não exige moments.json.
     cortes = posts = None
@@ -114,7 +114,7 @@ def carrega(pd: str) -> list:
                 )
         else:
             if posts is None:
-                posts = {p.get("slug"): p for p in post_instagram.carrega(pd)}
+                posts = {p.get("slug"): p for p in post_instagram.load(pd)}
             if slug not in posts:
                 raise ValueError(
                     f"{onde}: não está em {layout.posts(pd)} — "
@@ -155,7 +155,7 @@ def pending(pd: str, dia: dt.date = None, only: list = None,
     Atrasado (data < dia, não published) continua pending: esquecer de rodar
     ontem não pode perder a publicação.
     """
-    dia = dia or hoje()
+    dia = dia or today()
     if plataformas is not None:
         conhecidas = {p for pls in PLATFORMS.values() for p in pls}
         estranhas = sorted(set(plataformas) - conhecidas)
@@ -164,7 +164,7 @@ def pending(pd: str, dia: dt.date = None, only: list = None,
                 f"plataforma desconhecida: {', '.join(estranhas)} — "
                 f"use {', '.join(sorted(conhecidas))}"
             )
-    agenda = carrega(pd)
+    agenda = load(pd)
     if only is not None:
         desconhecidos = sorted(set(only) - {i["slug"] for i in agenda})
         if desconhecidos:
@@ -176,7 +176,7 @@ def pending(pd: str, dia: dt.date = None, only: list = None,
     else:
         agenda = [i for i in agenda if date_of(i) <= dia]
 
-    reg = published.carrega(pd)
+    reg = published.load(pd)
     pares = []
     for item in agenda:
         for pl in platforms_of(item):

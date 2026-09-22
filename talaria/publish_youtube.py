@@ -44,9 +44,9 @@ def privacy() -> str:
 
 
 def _credentials() -> Credentials:
-    caminho = os.environ.get("YT_CLIENT_SECRET_PATH", "")
+    path = os.environ.get("YT_CLIENT_SECRET_PATH", "")
     refresh = os.environ.get("YT_REFRESH_TOKEN", "")
-    faltam = [n for n, v in (("YT_CLIENT_SECRET_PATH", caminho),
+    faltam = [n for n, v in (("YT_CLIENT_SECRET_PATH", path),
                              ("YT_REFRESH_TOKEN", refresh)) if not v]
     if faltam:
         raise RuntimeError(
@@ -54,7 +54,7 @@ def _credentials() -> Credentials:
             f"'python scripts/youtube_auth.py <client_secret.json>' uma vez "
             f"para gerar o refresh token."
         )
-    with open(caminho, encoding="utf-8") as f:
+    with open(path, encoding="utf-8") as f:
         cs = json.load(f)["installed"]
     return Credentials(None, refresh_token=refresh,
                        token_uri=cs["token_uri"], client_id=cs["client_id"],

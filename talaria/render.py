@@ -345,7 +345,7 @@ def render_cut(video_path, segments, moment, project_dir, platforms, nomes=None)
         # `-ss`/`-to` do vídeo produziria stream vazio (testado empiricamente:
         # ffmpeg recorta ANTES desse frame e não sobra nada). Com `-loop 1` o
         # stream é contínuo e o -ss/-to do bloco anterior não o afeta.
-        logo_idx = len(seek_inputs) // 2   # cada item de seek_inputs é "-i, caminho"
+        logo_idx = len(seek_inputs) // 2   # cada item de seek_inputs é "-i, path"
         fg += ";" + _watermark_graph("outv", str(logo_idx))
 
         cmd = [

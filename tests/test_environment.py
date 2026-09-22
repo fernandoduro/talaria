@@ -19,13 +19,13 @@ class TestCarrega(unittest.TestCase):
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_le_par_simples(self):
         self._write("IG_PAGE_TOKEN=abc123\n")
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertEqual(os.environ["IG_PAGE_TOKEN"], "abc123")
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_ignora_comentario_e_linha_vazia(self):
         self._write("# comentário\n\nA=1\n   # outro\nB=2\n")
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertEqual((os.environ.get("A"), os.environ.get("B")), ("1", "2"))
 
     @mock.patch.dict("os.environ", {}, clear=True)
@@ -34,7 +34,7 @@ class TestCarrega(unittest.TestCase):
         # como "" faria a checagem de credencial passar e a API recusar
         # depois, com mensagem pior.
         self._write("VAZIA=\nCHEIA=x\n")
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertNotIn("VAZIA", os.environ)
         self.assertEqual(os.environ["CHEIA"], "x")
 
@@ -42,7 +42,7 @@ class TestCarrega(unittest.TestCase):
     def test_tira_aspas_e_espacos(self):
         # Colar de um console costuma trazer aspas junto.
         self._write('COM_ASPAS="abc"\nCOM_ESPACO=  def  \nSIMPLES=\'ghi\'\n')
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertEqual(os.environ["COM_ASPAS"], "abc")
         self.assertEqual(os.environ["COM_ESPACO"], "def")
         self.assertEqual(os.environ["SIMPLES"], "ghi")
@@ -52,25 +52,25 @@ class TestCarrega(unittest.TestCase):
         # `IG_PAGE_TOKEN=x python run.py ...` precisa sobrepor o arquivo, que
         # é o jeito de testar outra credencial sem editar nada.
         self._write("JA_EXISTE=do_arquivo\n")
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertEqual(os.environ["JA_EXISTE"], "do_shell")
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_valor_com_igual_no_meio_fica_inteiro(self):
         # Token base64 termina em '=' e URL leva '=' em query.
         self._write("T=abc=def==\n")
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertEqual(os.environ["T"], "abc=def==")
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_sem_arquivo_nao_estoura(self):
         # Quem só renderiza clip nunca criou .env — não é error.
-        environment.carrega(os.path.join(self.d, "nao_existe"))
+        environment.load(os.path.join(self.d, "nao_existe"))
 
     @mock.patch.dict("os.environ", {}, clear=True)
     def test_aceita_export_na_frente(self):
         self._write("export A=1\n")
-        environment.carrega(self.env)
+        environment.load(self.env)
         self.assertEqual(os.environ.get("A"), "1")
 
 

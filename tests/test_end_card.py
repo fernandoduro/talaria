@@ -31,9 +31,9 @@ class TestMontaCard(unittest.TestCase):
     def test_logo_ausente_da_mensagem_clara(self):
         # Mesmo padrão do POST_TEMPLATE em post_instagram.py: error explícito
         # dizendo onde o asset deveria estar, não um FileNotFoundError cru
-        # do Pillow apontando pra um caminho sem contexto.
+        # do Pillow apontando pra um path sem contexto.
         antigo = config.LOGO_PATH
-        config.LOGO_PATH = "/caminho/que/nao/existe/logo.png"
+        config.LOGO_PATH = "/path/que/nao/existe/logo.png"
         try:
             with self.assertRaises(FileNotFoundError) as e:
                 end_card.compose_card()
@@ -47,29 +47,29 @@ class TestCardCacheado(unittest.TestCase):
         self.d = tempfile.mkdtemp()
 
     def test_gera_o_arquivo_na_primeira_chamada(self):
-        caminho = end_card.cached_card(self.d)
-        self.assertTrue(os.path.exists(caminho))
+        path = end_card.cached_card(self.d)
+        self.assertTrue(os.path.exists(path))
 
     def test_duracao_do_arquivo_bate_com_config(self):
-        caminho = end_card.cached_card(self.d)
+        path = end_card.cached_card(self.d)
         r = subprocess.run(
             ["ffprobe", "-v", "error", "-show_entries", "format=duration",
-             "-of", "csv=p=0", caminho],
+             "-of", "csv=p=0", path],
             capture_output=True, text=True, check=True)
         self.assertAlmostEqual(float(r.stdout.strip()),
                                config.CARD_DURATION_S, delta=0.15)
 
     def test_reaproveita_sem_regravar(self):
-        caminho = end_card.cached_card(self.d)
-        mtime_1 = os.path.getmtime(caminho)
+        path = end_card.cached_card(self.d)
+        mtime_1 = os.path.getmtime(path)
         time.sleep(0.05)
         caminho_2 = end_card.cached_card(self.d)
-        self.assertEqual(caminho, caminho_2)
-        self.assertEqual(os.path.getmtime(caminho), mtime_1)
+        self.assertEqual(path, caminho_2)
+        self.assertEqual(os.path.getmtime(path), mtime_1)
 
     def test_logo_trocado_invalida_o_cache(self):
-        caminho = end_card.cached_card(self.d)
-        mtime_1 = os.path.getmtime(caminho)
+        path = end_card.cached_card(self.d)
+        mtime_1 = os.path.getmtime(path)
         # Guarda o mtime ANTES de mexer, em vez de reconstruí-lo do git no
         # final: fora de um clone git (tarball, cópia do código) o comando não
         # devolve nada, a restauração não acontece em silêncio e o logo fica
@@ -80,7 +80,7 @@ class TestCardCacheado(unittest.TestCase):
         try:
             time.sleep(0.05)
             end_card.cached_card(self.d)
-            self.assertGreater(os.path.getmtime(caminho), mtime_1)
+            self.assertGreater(os.path.getmtime(path), mtime_1)
         finally:
             os.utime(config.LOGO_PATH,
                      (stat_antes.st_atime, stat_antes.st_mtime))

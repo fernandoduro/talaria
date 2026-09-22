@@ -12,10 +12,10 @@ _SPEC.loader.exec_module(youtube_auth)
 
 
 def _write(d, conteudo):
-    caminho = os.path.join(d, "cs.json")
-    with open(caminho, "w", encoding="utf-8") as f:
+    path = os.path.join(d, "cs.json")
+    with open(path, "w", encoding="utf-8") as f:
         f.write(conteudo)
-    return caminho
+    return path
 
 
 class TestValidaClientSecret(unittest.TestCase):
@@ -26,22 +26,22 @@ class TestValidaClientSecret(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             dados = {"installed": {"client_id": "x", "client_secret": "y",
                                    "token_uri": "https://oauth2.example/token"}}
-            caminho = _write(d, json.dumps(dados))
-            self.assertEqual(youtube_auth.validate_client_secret(caminho),
+            path = _write(d, json.dumps(dados))
+            self.assertEqual(youtube_auth.validate_client_secret(path),
                              dados["installed"])
 
     def test_recusa_client_web_dizendo_o_que_fazer(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _write(d, json.dumps({"web": {"client_id": "x"}}))
+            path = _write(d, json.dumps({"web": {"client_id": "x"}}))
             with self.assertRaises(SystemExit) as ctx:
-                youtube_auth.validate_client_secret(caminho)
+                youtube_auth.validate_client_secret(path)
             self.assertIn("Desktop", str(ctx.exception))
 
     def test_recusa_json_invalido(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _write(d, "nao e json {")
+            path = _write(d, "nao e json {")
             with self.assertRaises(SystemExit) as ctx:
-                youtube_auth.validate_client_secret(caminho)
+                youtube_auth.validate_client_secret(path)
             self.assertIn("Baixe", str(ctx.exception))
 
     def test_recusa_arquivo_ausente(self):
@@ -51,9 +51,9 @@ class TestValidaClientSecret(unittest.TestCase):
 
     def test_recusa_installed_truncado(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _write(d, json.dumps({"installed": {"client_id": "x"}}))
+            path = _write(d, json.dumps({"installed": {"client_id": "x"}}))
             with self.assertRaises(SystemExit) as ctx:
-                youtube_auth.validate_client_secret(caminho)
+                youtube_auth.validate_client_secret(path)
             msg = str(ctx.exception)
             self.assertIn("incompleto", msg)
             self.assertIn("client_secret", msg)
@@ -61,9 +61,9 @@ class TestValidaClientSecret(unittest.TestCase):
 
     def test_recusa_json_nao_objeto(self):
         with tempfile.TemporaryDirectory() as d:
-            caminho = _write(d, "42")
+            path = _write(d, "42")
             with self.assertRaises(SystemExit):
-                youtube_auth.validate_client_secret(caminho)
+                youtube_auth.validate_client_secret(path)
 
     def test_escopo_e_exatamente_o_do_publish(self):
         from talaria import publish_youtube

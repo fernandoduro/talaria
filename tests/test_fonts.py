@@ -23,9 +23,9 @@ class TestFontesVersionadas(unittest.TestCase):
         raiz = os.path.dirname(os.path.dirname(os.path.abspath(config.__file__)))
         esperado = os.path.join(raiz, "assets", "fonts")
         for name in EXPECTED:
-            caminho = getattr(config, name)
-            self.assertTrue(os.path.isfile(caminho), f"{name}: {caminho}")
-            self.assertEqual(os.path.dirname(caminho), esperado, name)
+            path = getattr(config, name)
+            self.assertTrue(os.path.isfile(path), f"{name}: {path}")
+            self.assertEqual(os.path.dirname(path), esperado, name)
 
     def test_cada_fonte_tem_a_identidade_esperada(self):
         for name, identidade in EXPECTED.items():

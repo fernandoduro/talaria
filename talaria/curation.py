@@ -393,7 +393,7 @@ def to_moments(estado: dict) -> list:
 
 
 def save_moments(project_dir: str, estado: dict) -> str:
-    """Grava moments.json no diretório do project e devolve o caminho."""
+    """Grava moments.json no diretório do project e devolve o path."""
     moments = to_moments(estado)
     path = layout.ensure_dir(layout.moments(project_dir))
     with open(path, "w", encoding="utf-8") as f:

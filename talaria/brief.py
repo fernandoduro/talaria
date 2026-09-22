@@ -48,14 +48,14 @@ def readable_metadata(project_dir: str) -> str:
     )
 
 
-def preencher(template: str, transcript: str, metadados: str,
-              curation: str = "", cortes: str = "") -> str:
+def fill_template(template: str, transcript: str, metadados: str,
+              curation: str = "", clips: str = "") -> str:
     """Substitui os placeholders do prompt pelo conteúdo do episódio."""
     return (template
             .replace("{{TRANSCRICAO}}", transcript)
             .replace("{{METADADOS}}", metadados)
             .replace("{{CURADORIA}}", curation)
-            .replace("{{CORTES}}", cortes))
+            .replace("{{CORTES}}", clips))
 
 
 def readable_curation(estado: dict) -> str:
@@ -109,15 +109,15 @@ def _read_prompt(name: str) -> str:
         return f.read()
 
 
-def montar(project_dir: str, kind: str) -> str:
-    """kind: 'materiais' ou 'cortes'. Retorna o caminho do arquivo gerado."""
-    if kind not in ("materiais", "cortes"):
-        raise ValueError("tipo deve ser 'materiais' ou 'cortes'")
+def build(project_dir: str, kind: str) -> str:
+    """kind: 'materials' ou 'clips'. Retorna o path do arquivo gerado."""
+    if kind not in ("materials", "clips"):
+        raise ValueError("tipo deve ser 'materials' ou 'clips'")
     template = _read_prompt(f"{kind}.md")
     estado_txt = ""
-    if kind == "cortes":
+    if kind == "clips":
         estado_txt = readable_curation(cur.load(project_dir))
-    conteudo = preencher(
+    conteudo = fill_template(
         template,
         transcript=readable_transcript(project_dir),
         metadados=readable_metadata(project_dir),
@@ -171,10 +171,10 @@ def clip_speech(project_dir: str, clip: dict) -> str:
     return " ".join(partes).strip()
 
 
-def readable_clips(project_dir: str, cortes: list) -> str:
+def readable_clips(project_dir: str, clips: list) -> str:
     """Bloco com a fala de cada clip selecionado, para a sessão de curation."""
     partes = []
-    for c in cortes:
+    for c in clips:
         partes.append(
             f"### {c['slug']}  [{utils.mmss(c['start'])}–{utils.mmss(c['end'])}]\n\n"
             f"- Tipo: {c.get('kind', '')}\n"
@@ -184,10 +184,10 @@ def readable_clips(project_dir: str, cortes: list) -> str:
     return "\n".join(partes)
 
 
-def build_posts(project_dir: str, cortes: list) -> str:
+def build_posts(project_dir: str, clips: list) -> str:
     """Escreve brief_posts.md com o prompt e a fala dos cortes escolhidos.
 
-    Função separada de `montar()` porque o pacote de posts não recebe a
+    Função separada de `build()` porque o pacote de posts não recebe a
     transcrição inteira: a citação sai de cortes já approved, e mandar o
     episódio todo convidaria a escolher fala que nunca virou vídeo.
     """
@@ -196,11 +196,11 @@ def build_posts(project_dir: str, cortes: list) -> str:
         f"Máximo de {config.POST_QUOTE_MAX_LINES} linhas por card, cerca de "
         f"100 caracteres. A citação de referência tem 96.\n"
     )
-    conteudo = preencher(
+    conteudo = fill_template(
         _read_prompt("posts.md"),
         transcript="",
         metadados=readable_metadata(project_dir) + "\n" + limite,
-        cortes=readable_clips(project_dir, cortes),
+        clips=readable_clips(project_dir, clips),
     )
     out = layout.ensure_dir(layout.brief(project_dir, "posts"))
     with open(out, "w", encoding="utf-8") as f:

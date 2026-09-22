@@ -18,7 +18,7 @@ from zoneinfo import ZoneInfo
 from . import config, layout
 
 
-def carrega(pd: str) -> dict:
+def load(pd: str) -> dict:
     """Lê o registro. Arquivo corrompido ABORTA — fail closed.
 
     JSON inválido nunca é tratado como "nada published ainda": isso
@@ -49,9 +49,9 @@ def record(pd: str, platform: str, slug: str, id_post: str,
     """Acrescenta UMA publicação e grava na hora, atomicamente.
 
     temp + os.replace no mesmo filesystem: ou o arquivo novo inteiro, ou o
-    antigo intacto — nunca um JSON pela metade (que o `carrega` recusaria).
+    antigo intacto — nunca um JSON pela metade (que o `load` recusaria).
     """
-    reg = carrega(pd)
+    reg = load(pd)
     reg.setdefault(platform, []).append({
         "slug": slug,
         "id": id_post,

@@ -11,7 +11,7 @@ import unittest
 
 from talaria import curation, episode, layout, texts, txt_parse
 
-TRANSCRICAO = """0:00
+TRANSCRIPT = """0:00
 Primeira fala do host apresentando o episódio de teste.
 0:10
 >> Resposta do convidado que começa aqui e segue por um bom tempo.
@@ -35,7 +35,7 @@ class TestFluxoCompleto(unittest.TestCase):
         self.pd = tempfile.mkdtemp()
         self.txt = layout.ensure_dir(layout.transcript_txt(self.pd))
         with open(self.txt, "w", encoding="utf-8") as f:
-            f.write(TRANSCRICAO)
+            f.write(TRANSCRIPT)
 
     def tearDown(self):
         shutil.rmtree(self.pd, ignore_errors=True)

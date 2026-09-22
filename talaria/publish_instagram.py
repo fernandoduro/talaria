@@ -58,7 +58,7 @@ def _credentials() -> tuple:
     return token, conta
 
 
-def _call(metodo: str, caminho: str, **params) -> dict:
+def _call(metodo: str, path: str, **params) -> dict:
     """GET/POST na Graph API; error vira exceção com a mensagem DA API.
 
     O corpo de error do Graph vem em {"error": {"message": ...}} mesmo com
@@ -66,7 +66,7 @@ def _call(metodo: str, caminho: str, **params) -> dict:
     """
     fn = requests.post if metodo == "post" else requests.get
     host = host_for_token(params.get("access_token", ""))
-    r = fn(f"{host}/{caminho}", params=params, timeout=TIMEOUT_HTTP_S)
+    r = fn(f"{host}/{path}", params=params, timeout=TIMEOUT_HTTP_S)
     # Corpo que não é JSON (página de error de proxy num 502, resposta
     # truncada) não pode estourar aqui: trocaria "Graph API: 502" por um
     # JSONDecodeError que não diz o que houve, justo durante o incidente.
@@ -76,7 +76,7 @@ def _call(metodo: str, caminho: str, **params) -> dict:
         corpo = {}
     if r.status_code >= 400 or "error" in corpo:
         msg = (corpo.get("error") or {}).get("message") or r.text
-        raise RuntimeError(f"Graph API ({caminho}): {msg}")
+        raise RuntimeError(f"Graph API ({path}): {msg}")
     return corpo
 
 
@@ -139,7 +139,7 @@ def publish_post(png_paths: list, legenda: str) -> dict:
     depois de todos estarem prontos: pai montado sobre filho `IN_PROGRESS`
     falha do mesmo jeito, e aí sem dizer qual dos filhos era.
 
-    O limite de 10 é validado na carga da agenda (schedule.carrega), antes
+    O limite de 10 é validado na carga da agenda (schedule.load), antes
     de chegar aqui.
     """
     token, conta = _credentials()
