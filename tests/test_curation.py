@@ -123,7 +123,7 @@ class TestEndAtCompleteSentence(unittest.TestCase):
         """Bloco 95-160 acaba sem pontuação final: o clip fica pela metade."""
         ok, msgs = curation.validate_clip((95.0, 160.0), self.segs, {})
         self.assertFalse(ok)
-        self.assertTrue(any("end" in m.lower() for m in msgs), msgs)
+        self.assertTrue(any("não fecha frase" in m.lower() for m in msgs), msgs)
 
     def test_fim_com_reticencias_e_aceito(self):
         segs = [{"start": 0.0, "end": 65.0, "text": "E aí a gente parou...", "turn": False}]

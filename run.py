@@ -220,7 +220,7 @@ def cmd_curate(args):
     # Sem este aviso, `curate --target 8` sobre um state com target 5 seguia em
     # silêncio com a target antiga.
     if already_existed and state["target"] != args.target:
-        print(f"[curate] aviso: state gravado tem target {state['target']}, "
+        print(f"[curate] aviso: estado gravado tem target {state['target']}, "
               f"ignorando --target {args.target}")
 
     if args.export:
@@ -254,7 +254,7 @@ def cmd_curate(args):
     print("[curate] composição: " + ", ".join(f"{t}={n}" for t, n in comp.items()))
     missing = curation.missing_kinds(state)
     if missing:
-        print(f"[curate] tipos missing: {', '.join(missing)}")
+        print(f"[curate] tipos ausentes: {', '.join(missing)}")
     ms = curation.reasons(state)
     if ms:
         print(f"[curate] motivos de rejeição acumulados: {'; '.join(ms)}")
@@ -431,7 +431,7 @@ def main():
     g.add_argument("--clips", action="store_true", help="prompt de seleção de cortes")
     sp.set_defaults(func=cmd_brief)
 
-    sp = sub.add_parser("curate", help="state da curadoria iterativa")
+    sp = sub.add_parser("curate", help="estado da curadoria iterativa")
     add_common(sp)
     sp.add_argument("--target", type=int, default=5, help="quantos cortes aprovar")
     sp.add_argument("--export", action="store_true", help="gera moments.json")
@@ -452,7 +452,7 @@ def main():
                     help="slugs específicos, fora da data agendada "
                          "(ex.: corte1,cit_x) — não republica o que já foi")
     sp.add_argument("--platform", default="",
-                    help="publica só nestas platforms (ex.: youtube_shorts) "
+                    help="publica só nestas plataformas (ex.: youtube_shorts) "
                          "— o resto do corte segue pendente para depois")
     sp.set_defaults(func=cmd_publish)
 

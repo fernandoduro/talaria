@@ -215,10 +215,10 @@ def validate_clip(span: tuple, segs: list, state: dict) -> tuple:
     # Fim no MEIO de um bloco é caso legítimo (o gestor apara a cauda onde a
     # frase acaba, mesmo que o bloco siga) e não deve ser bloqueado aqui.
     if segs and _valid_boundary(end, segs) and not _ends_sentence(end, segs):
-        msgs.append(f"end {end:.1f}s não fecha frase (corta a fala no meio)")
+        msgs.append(f"fim {end:.1f}s não fecha frase (corta a fala no meio)")
 
     if state and is_burned(span, state):
-        msgs.append("sobrepõe span já queimada (aprovada ou rejeitada)")
+        msgs.append("sobrepõe faixa já queimada (aprovada ou rejeitada)")
 
     return (not msgs), msgs
 
