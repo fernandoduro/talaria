@@ -458,17 +458,16 @@ def str_methods() -> bytes:
 # ---------------------------------------------------------------------------
 
 @dumper("g1/replay.json")
-def g1_replay() -> bytes:
+def g1_replay(extra: bool = False) -> bytes:
     import copy
     import datetime as dt
-    import importlib
     import types
     import unittest
     from unittest import mock
     from talaria import (brief, caption, environment, hashtags, post_instagram,
-                         published, schedule, texts, utils)
+                         published, schedule, texts, utils, vtt_parse, render)
 
-    modules = ["utils", "txt_parse", "layout", "episode", "curation", "schedule",
+    modules = [] if extra else ["utils", "txt_parse", "layout", "episode", "curation", "schedule",
                "published", "hashtags", "texts", "caption", "brief", "environment"]
     api = {
         utils: "srt_ts mmss strip_markup clean_caption fix_proper_nouns group_words_into_segments",
@@ -484,6 +483,9 @@ def g1_replay() -> bytes:
         brief: "readable_transcript readable_metadata fill_template readable_curation build clip_speech readable_clips build_posts",
         environment: "load",
         post_instagram: "load file_slug",
+        vtt_parse: "parse_vtt",
+        transcribe: "_write_outputs",
+        render: "_trim_text",
     }
     rows, calls, roots = [], [], []
     depth = 0
@@ -513,7 +515,7 @@ def g1_replay() -> bytes:
             tree = {}
             for p in sorted(Path(root).rglob("*")):
                 rel = str(p.relative_to(root))
-                tree[rel] = None if p.is_dir() else normalize(p.read_text(encoding="utf-8"))
+                tree[rel] = None if p.is_dir() else normalize(p.read_bytes().decode("utf-8"))
             out[f"<TMP{i}>"] = tree
         return out
 
@@ -558,16 +560,6 @@ def g1_replay() -> bytes:
         def now(cls, tz=None):
             return cls(2026, 11, 18, 12, 34, 56, tzinfo=tz)
 
-    # Calls to regex.search in the original tests are observable operations too.
-    class FirstPerson:
-        def search(self, s):
-            result = bool(curation.RE_FIRST_PERSON_ORIGINAL.search(s))
-            calls.append({"op": "curation.has_first_person", "input": [[s], {}],
-                          "result": result, "error": None, "args_after": [[s], {}],
-                          "stdout": "", "before": snapshot(), "after": snapshot()})
-            return result
-
-    curation.RE_FIRST_PERSON_ORIGINAL = curation.RE_FIRST_PERSON
     with contextlib.ExitStack() as stack:
         stack.enter_context(mock.patch.object(tempfile, "mkdtemp", mkdtemp))
         stack.enter_context(mock.patch.object(published, "dt", types.SimpleNamespace(datetime=FrozenDatetime)))
@@ -614,8 +606,129 @@ def g1_replay() -> bytes:
                 import shutil
                 for root in roots:
                     shutil.rmtree(root, ignore_errors=True)
-    del curation.RE_FIRST_PERSON_ORIGINAL
+        if extra:
+            calls, roots = [], []
+            def capture(name, fn, *a, **kw):
+                nonlocal calls
+                calls = []
+                with contextlib.redirect_stdout(io.StringIO()):
+                    try:
+                        fn(*a, **kw)
+                    except Exception:
+                        pass  # The observed exception is itself an expectation.
+                if not calls:
+                    raise RuntimeError(f"no call for {name}")
+                rows.append({"name": name, "calls": copy.deepcopy(calls)})
+
+            corpus = STR_SAMPLES + [
+                "we we shipped it", "a a a a a a a a", "like, we like tools, like Slack, you know.",
+                "you know, Gonna ship it. I mean, we wanna try. Like, it works, like!",
+                "\u0130 i", "i \u0131", "\u03c3 \u03c2", "\u00b5 \u03bc", "\u017f s", "\u00b2 \u00b2",
+                "e\u0301 e\u0301", "a\u203fa a\u203fa", "\x1cuh,\x1fgonna\u00a0ship\u3000it",
+                "[\x1cMUSIC\x1f] [ important ] &lt;x&gt;&amp; [MU\u017fIC]",
+                "Uh\u0301, Gonna\u0301 ship", "like\u0301, wanna go", "\u0131 mean, it works",
+                "we  we   WE we", "gONNA WANNA GOTTA KINDA", "ahead umbrella error yeah",
+                "../outside/clip", "..", " ._-- ", "foo\\bar.v2", "Ribeir\u00e3o A\u00e7a\u00ed",
+            ]
+            for i, s in enumerate(corpus):
+                for mod, fn in ((utils, "clean_caption"), (utils, "strip_markup"),
+                                (hashtags, "slug"), (post_instagram, "file_slug")):
+                    capture(f"{mod.__name__.split('.')[-1]}.{fn}/{i}", getattr(mod, fn), s)
+            names = ["Kestril", "Zarvik", "Delta", "Ribeir\u00e3oA\u00e7a\u00ed", "Ikea", "Stri\u00dfe", "E\u0301mark"]
+            variants = ["Cestril Kestryl Keztril kestril Kestril", "zarvic zarvik", "the delta of the risk",
+                        "ribeir\u00e3oa\u00e7a\u00ed Ribeir\u00e3oA\u00e7a\u00ed", "\u0130KEA \u0131kea", "stri\u00dfe STRI\u00dfE", "e\u0301mark E\u0301marc"]
+            for i, (s, name) in enumerate(zip(variants, names)):
+                capture(f"fix_proper_nouns/{i}", utils.fix_proper_nouns, s, [name])
+            for i, name in enumerate([r"X\g<", r"X\g<>", r"X\g<foo>", r"X\g<-1>", r"X\g<1>",
+                                      r"A\g<0>b", r"A\g<00>b", r"A\101b", r"A\000b", r"A\777b",
+                                      r"A\9b", r"A\99b", r"A\999b", r"A\nb", r"A\&b", r"A\\b",
+                                      r"A\qb", r"A\g", "A\\q\nb", "\u0578\u0605A0"]):
+                capture(f"fix_proper_nouns/template/{i}", utils.fix_proper_nouns,
+                        name if name[-1].isalnum() or name[-1] == "_" else name + "0", [name])
+            for i, s in enumerate(["About \u0663 users", "we talked about 3 things", "roughly 1. about 2",
+                                   "maybe " + "\u00e3" * 40 + "7", "\u00e3about 3", "our fir\u017ft hire"]):
+                capture(f"hedged/{i}", curation.has_hedged_number, s)
+            for i, seconds in enumerate([0.0, 1.2345, -0.0005, -1.5, 59.9995, 3599.9995, 3723.2]):
+                capture(f"srt_ts/{i}", utils.srt_ts, seconds)
+                capture(f"mmss/{i}", utils.mmss, seconds)
+            for i, words in enumerate([
+                [], [(0.0, "[music]")], [(0.0, "Hello"), (.7, "there"), (1.401, "world!")],
+                [(0.0, "\u00e3" * 76), (.1, "next")], [(0.0, "\u00e3" * 75), (.1, "next")],
+                [(0.0, "one"), (5.0, "two"), (5.001, "three")],
+                [(i * .2, w) for i, w in enumerate("we gonna ship it. [laughter] then go!".split())],
+            ]):
+                capture(f"group_words/{i}", utils.group_words_into_segments, words)
+            for i, (s, a, b) in enumerate([
+                ("one two three four five", .5, .5), ("one two three. Four five.", 0, .4),
+                ("\u00e3\u00e7a\u00ed\u00a0one\u3000two three.", .2, .7), ("one two. Three four five.", 0, .8),
+                ("one two three.", 1, 1), (" ", .5, .6), (" one  two ", 0, 1),
+            ]):
+                capture(f"trim_text/{i}", render._trim_text, s, a, b)
+            for i, (d, h, u) in enumerate([(None, None, None), ("desc", "#Tags", " https://youtu.be/x "),
+                                          (" \u00e3\u00e7\x1c", "#Gda\u0144sk", ""), ("", "", "u")]):
+                capture(f"compose/{i}", caption.compose, d, h, u)
+            pd = mkdtemp(prefix="talaria-g1-extra-")
+            ep = {"season": 2, "episode": 7, "company": "Ribeir\u00e3oA\u00e7a\u00ed", "city": "Gda\u0144sk",
+                  "uf": "SP", "guests": [{"name": "Teresa", "role": "CTO", "linkedin": "https://x"}],
+                  "topics": ["biotech", "B2B to B2C"], "extra": {"\u00e7": 2.0}}
+            capture("episode.save", episode.save, pd, ep)
+            capture("episode.load", episode.load, pd)
+            for i, v in enumerate([2.7, "2", True, False, None]):
+                data = dict(ep, season=v)
+                Path(layout.episode(pd)).write_text(json.dumps(data), encoding="utf-8")
+                capture(f"episode.coercion/{i}", episode.load, pd)
+            episode.save(pd, ep)
+            segs = txt_parse.parse_txt(str(FIXTURES / "example.txt"))
+            capture("parse_txt/example", txt_parse.parse_txt, str(FIXTURES / "example.txt"))
+            capture("parse_txt/duration", txt_parse.parse_txt, str(FIXTURES / "example.txt"), 3750.4)
+            capture("transcript.outputs", transcribe._write_outputs, segs, pd)
+            capture("texts.thumb_args", texts.thumb_args, pd)
+            capture("texts.save", texts.save, pd, {"thumb": {"l1": "CUSTOM", "extra": 3.0}, "hashtags": "#Tags"})
+            capture("texts.override", texts.thumb_args, pd)
+            state = _curation_state()
+            capture("curation.save", curation.save, pd, state)
+            capture("curation.moments", curation.save_moments, pd, state)
+            capture("brief.metadata", brief.readable_metadata, pd)
+            capture("brief.curation", brief.readable_curation, state)
+            capture("brief.materials", brief.build, pd, "materials")
+            capture("brief.clips", brief.build, pd, "clips")
+            capture("brief.posts", brief.build_posts, pd, state["approved"])
+            for i, span in enumerate([(0., 65.), (10., 75.), (100., 170.), (3723., 3790.)]):
+                capture(f"warnings/{i}", curation.clip_warnings, span, segs)
+                capture(f"validate/{i}", curation.validate_clip, span, segs, state)
+                capture(f"guest/{i}", curation.guest_speech_fraction, span, segs)
+                capture(f"host/{i}", curation.host_opening, span, segs)
+            multibyte = [{"start": 0., "end": 80., "text": "\u00e3" * 30 + ". " + "\u00e7" * 100 + "!"}]
+            capture("sentence_ends/unicode", curation.sentence_ends, multibyte, 0., 60., 90.)
+            # Representative YouTube rolling captions: consolidated line ignored,
+            # new words carry inline timestamps, and cues without <c> ignored.
+            vtt = Path(pd) / "rolling.vtt"
+            vtt.write_text("WEBVTT\n\n00:00:01.000 --> 00:00:03.000\nold repeated text\nHello <00:00:01.200><c>world.</c>\n\n00:00:03.000 --> 00:00:05.000\nHello world.\n<c>We</c><00:00:03.200><c>ship &amp; learn!</c>\n\n00:00:05.000 --> 00:00:07.000\nplain cue ignored\n", encoding="utf-8")
+            capture("vtt/rolling", vtt_parse.parse_vtt, str(vtt))
+            capture("posts/missing", post_instagram.load, pd)
+            Path(layout.ensure_dir(layout.posts(pd))).write_text('{"posts": [{"slug": "q", "cards": ["quote"]}]}')
+            capture("posts/load", post_instagram.load, pd)
+            Path(layout.ensure_dir(layout.schedule(pd))).write_text(json.dumps({"schedule": [
+                {"date": "2026-11-17", "kind": "clip", "slug": state["approved"][0]["slug"]},
+                {"date": "2026-11-19", "kind": "post", "slug": "q"}]}))
+            capture("schedule/pending", schedule.pending, pd, dt.date(2026, 11, 18))
+            capture("schedule/no-platforms", schedule.pending, pd, dt.date(2026, 11, 18), platforms=[])
+            capture("published/record", published.record, pd, "youtube_shorts", state["approved"][0]["slug"], "id", "u")
+            capture("schedule/retry", schedule.pending, pd, dt.date(2026, 11, 18))
+            # Pin the known order-dependent approve() quirk rather than fixing it.
+            s = curation.new_state()
+            curation.approve(s, {"slug": "a", "start": 0., "end": 70.})
+            curation.approve(s, {"slug": "b", "start": 200., "end": 270.})
+            capture("approve/early-same-slug", curation.approve, s, {"slug": "a", "start": 210., "end": 280.})
+            import shutil
+            for root in roots:
+                shutil.rmtree(root, ignore_errors=True)
     return case_json(rows)
+
+
+@dumper("g1/extra.json")
+def g1_extra() -> bytes:
+    return g1_replay(extra=True)
 
 
 def write_all(dest: Path, only: str = "") -> list[str]:

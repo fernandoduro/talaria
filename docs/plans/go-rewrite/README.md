@@ -34,3 +34,9 @@ G0 dumps:
 - `pycompat/`: CPython's answers for `repr(float)`, `json.dumps(float)`, `round(x, n)`, `int(v)`, `repr(str)`, `str.isprintable()` and `str.capitalize()` (the last two for every code point).
 
 The goldens freeze as plain test data at G5, when Python and `dump.py` are removed.
+
+## G1 pure-logic harness
+
+`g1/replay.json` records all 245 original G1 tests as API-call tables; `internal/parity.TestReplay/<python_test>` compares complete results, mutations, stdout and filesystem bytes instead of the original weaker assertions. The extra golden covers adversarial inputs and full reading packets. Default Go tests use only committed data; `just check` also regenerates it from Python to prove freshness. See [G1 parity notes](g1-findings.md) for the schema, Python quirks, safety boundaries, and exact fuzz commands.
+
+The `pyoracle` build tag enables the long-lived Python differential oracle for `FuzzCleanCaption`, `FuzzFixProperNouns` and `FuzzFileSlug`. CI runs their regression seeds; ten-minute campaigns are an explicit stage gate, not part of default `go test`.
