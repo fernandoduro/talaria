@@ -122,6 +122,8 @@ python3 -m unittest discover -s tests -v
 There are 394 tests, with no network dependency: the API calls (YouTube,
 Instagram, S3) are mocked. Run them inside the venv.
 
+A Go port is in progress (see `docs/plans/go-rewrite/README.md`). `just check` runs both suites, the golden-file freshness check and the test ledger.
+
 ## Notes
 
 - Python 3.9+.
