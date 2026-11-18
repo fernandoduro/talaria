@@ -54,6 +54,8 @@ Ordering constraints: Phase 1 precedes Phase 2 (don't design a profile format in
 Portuguese and then translate it). Phase 2 precedes Phase 4 (the API layer
 consumes prompts that reference declared schema fields). Phase 3 is independent.
 
+**Go rewrite before Phase 2, and a Python feature freeze (decided 2026-11-18).** Talaria is ported to Go as a behaviour-preserving port in stages G0–G5, named apart from these phases. Phases 2–4 are then designed and built in Go, for the same reason Phase 1 preceded Phase 2: don't design `channel.toml`, the publisher interface or the Claude client in Python and then port them. Until G4 switches the CLI to Go, the Python code is frozen: bug fixes only, no new features, no Phase 2–4 spec work in Python. Each stage is one PR from a `go/gN-*` branch into `main`, the Python suite stays green on every one, and `docs/plans/go-rewrite/` holds the harness (test ledger, golden oracle).
+
 ## Phase 0 design
 
 ### Repository
