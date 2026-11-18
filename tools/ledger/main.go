@@ -59,8 +59,12 @@ func main() {
 		fatal(err)
 	}
 	r := &runner{root: root, out: os.Stdout}
+	ledger := *ledgerPath
+	if !filepath.IsAbs(ledger) {
+		ledger = filepath.Join(root, ledger)
+	}
 	ok, err := r.run(options{
-		ledger:  filepath.Join(root, *ledgerPath),
+		ledger:  ledger,
 		sync:    *sync,
 		summary: *summary,
 		done:    splitList(*done),
