@@ -25,6 +25,7 @@ import io
 import json
 import os
 import random
+import re
 import struct
 import subprocess
 import sys
@@ -346,10 +347,282 @@ def sigma() -> bytes:
 
 
 # ---------------------------------------------------------------------------
+# G1: Unicode properties behind Python's str methods and re semantics
+# ---------------------------------------------------------------------------
 
-def write_all(dest: Path) -> list[str]:
+def _all_chars():
+    for cp in range(0x110000):
+        if not 0xD800 <= cp < 0xE000:
+            yield cp
+
+
+@dumper("pycompat/unicode.json")
+def unicode_props() -> bytes:
+    """What `re` and `str` treat as space, word, digit and case, per code point.
+
+    re's \\s, \\w and \\d on a str pattern are str.isspace(), str.isalnum() or
+    "_", and str.isdecimal(); IGNORECASE compares _sre.unicode_tolower() and
+    adds re._casefix._EXTRA_CASES. str.splitlines() has its own separator set.
+    """
+    import _sre
+    from re import _casefix
+    space, word, digit = re.compile(r"\s"), re.compile(r"\w"), re.compile(r"\d")
+    return case_json({
+        "unicode_version": unicodedata.unidata_version,
+        "space": _ranges(lambda c: bool(space.match(c))),
+        "isspace": _ranges(str.isspace),
+        "word": _ranges(lambda c: bool(word.match(c))),
+        "decimal": [[cp, int(chr(cp))] for cp in _all_chars() if digit.match(chr(cp))],
+        "sre_lower": [[cp, _sre.unicode_tolower(cp)] for cp in _all_chars()
+                      if _sre.unicode_tolower(cp) != cp],
+        "sre_cased": _ranges(lambda c: _sre.unicode_iscased(ord(c))),
+        "lower_full": [[cp, chr(cp).lower()] for cp in _all_chars()
+                       if chr(cp).lower() != chr(_sre.unicode_tolower(cp))],
+        "extra_cases": [[k, list(v)] for k, v in sorted(_casefix._EXTRA_CASES.items())],
+        "line_breaks": [cp for cp in _all_chars()
+                        if ("a" + chr(cp) + "b").splitlines() == ["a", "b"]],
+        "mn": _ranges(lambda c: unicodedata.category(c) == "Mn"),
+        "nfd": [[cp, unicodedata.normalize("NFD", chr(cp))] for cp in _all_chars()
+                if unicodedata.normalize("NFD", chr(cp)) != chr(cp)],
+    })
+
+
+@dumper("pycompat/re_ignorecase.json")
+def re_ignorecase() -> bytes:
+    """For every cased character p, the characters re.I lets match it.
+
+    Candidates are every character related to p by lower(), upper(),
+    casefold() or the extra-cases table; the regex engine itself decides.
+    """
+    import _sre
+    from re import _casefix
+    by = {}
+    for cp in _all_chars():
+        c = chr(cp)
+        for key in (("l", _sre.unicode_tolower(cp)), ("u", c.upper()), ("f", c.casefold())):
+            by.setdefault(key, []).append(cp)
+    rows = []
+    for p in _all_chars():
+        if not _sre.unicode_iscased(p):
+            continue
+        c = chr(p)
+        lo = _sre.unicode_tolower(p)
+        cand = set(by[("l", lo)]) | set(by[("u", c.upper())]) | set(by[("f", c.casefold())])
+        for x in _casefix._EXTRA_CASES.get(lo, ()):
+            cand |= set(by.get(("l", x), ())) | {x}
+        rx = re.compile(re.escape(c), re.IGNORECASE)
+        rows.append([p, sorted(x for x in cand if rx.fullmatch(chr(x)))])
+    return case_json(rows)
+
+
+ISO_DATES = [
+    "2026-08-24", "20260824", "2026-W35", "2026W35", "2026-W35-1", "2026W351",
+    "2026-W35-7", "2026-W35-0", "2026-W35-8", "2026-W00", "2026-W53", "2020-W53",
+    "2015-W53-7", "2026-W35-", "2026-W351", "2026W35-1", "2026082499", "2026-08-2x",
+    "+026-08-24", "2026-8-24 ", "2026-08-24 ", " 2026-08-24", "2026-02-30", "2024-02-29",
+    "2023-02-29", "0000-01-01", "0001-01-01", "9999-12-31", "9999-W52-5", "9999-W52-6",
+    "0001-W01-1", "0001-W01", "2026-13-01", "2026-00-10", "2026-12-00", "2026-12-32",
+    "24/08/2026", "", "2026", "2026-08", "202608", "2026-0824", "202608-24",
+    "2026-08-24T00", "2026/08/24", "\u0662\u0660\u0662\u0666-08-24", "2026-08-\u0662\u0664",
+    "2026\u201108\u201124", "2026-08-24\n", "2026-W5a", "abcd-ef-gh", "2026-W35-1x",
+    "1999-W52-7", "2004-W53-7", "2026--8-24", "2026-+8-24", "2026-08--4",
+]
+
+
+@dumper("pycompat/isodate.json")
+def isodate() -> bytes:
+    import datetime as dt
+    rows = []
+    for s in ISO_DATES:
+        try:
+            rows.append([s, dt.date.fromisoformat(s).isoformat()])
+        except ValueError:
+            rows.append([s, None])
+    return case_json(rows)
+
+
+@dumper("pycompat/strings.json")
+def str_methods() -> bytes:
+    samples = STR_SAMPLES + [
+        "  padded\t\n", "\x1c\x1dfile sep\x1e\x1f", "\u00a0nbsp\u3000", "\u200bzw\u200b",
+        "a\nb\r\nc\rd\x0be\x0cf\x1cg\x1dh\x1ei\x85j\u2028k\u2029l", "trail\n", "\n\nx\n\n",
+        "one  two\tthree\u2003four", "", "   ", "x\r", "\r\n", "...dots. ", ". .",
+        "ΣΑΣ σ Σ", "İSTANBUL", "MAŁOPOLSKA",
+    ]
+    return case_json([[s, s.strip(), s.split(), s.splitlines(), s.lower(), s.strip(". ")]
+                      for s in samples])
+
+
+# ---------------------------------------------------------------------------
+# G1: replay each original test's real calls against Go, with filesystem IO
+# ---------------------------------------------------------------------------
+
+@dumper("g1/replay.json")
+def g1_replay() -> bytes:
+    import copy
+    import datetime as dt
+    import importlib
+    import types
+    import unittest
+    from unittest import mock
+    from talaria import (brief, caption, environment, hashtags, post_instagram,
+                         published, schedule, texts, utils)
+
+    modules = ["utils", "txt_parse", "layout", "episode", "curation", "schedule",
+               "published", "hashtags", "texts", "caption", "brief", "environment"]
+    api = {
+        utils: "srt_ts mmss strip_markup clean_caption fix_proper_nouns group_words_into_segments",
+        txt_parse: "parse_txt regroup_into_sentences resolve_speakers",
+        layout: "ensure_dir episode video transcript transcript_txt source_dir curation moments texts posts schedule published brief thumbnail end_card_mp4 episode_txt platform posts_png migrate",
+        episode: "template load save code youtube_url",
+        curation: "new_state overlaps burned_spans is_burned slots_left load save has_hedged_number segments_in_clip guest_speech_fraction sentence_ends validate_clip attribution_trustworthy host_opening clip_warnings approve reject composition missing_kinds reasons is_closed to_moments save_moments",
+        schedule: "today platforms_of date_of moments load pending",
+        published: "load is_published record",
+        hashtags: "slug build format_line",
+        texts: "load save thumb_args build_kwargs",
+        caption: "validate episode_line compose compose_episode txt_path write",
+        brief: "readable_transcript readable_metadata fill_template readable_curation build clip_speech readable_clips build_posts",
+        environment: "load",
+        post_instagram: "load file_slug",
+    }
+    rows, calls, roots = [], [], []
+    depth = 0
+    real_mkdtemp = tempfile.mkdtemp
+
+    def mkdtemp(*a, **kw):
+        p = real_mkdtemp(*a, **kw)
+        roots.append(p)
+        return p
+
+    def normalize(v):
+        if isinstance(v, str):
+            for i, root in sorted(enumerate(roots), key=lambda x: -len(x[1])):
+                v = v.replace(root, f"<TMP{i}>")
+            return v.replace(str(ROOT), "<ROOT>")
+        if isinstance(v, dt.date):
+            return v.isoformat()
+        if isinstance(v, (list, tuple)):
+            return [normalize(x) for x in v]
+        if isinstance(v, dict):
+            return {normalize(k): normalize(x) for k, x in v.items()}
+        return v
+
+    def snapshot():
+        out = {}
+        for i, root in enumerate(roots):
+            tree = {}
+            for p in sorted(Path(root).rglob("*")):
+                rel = str(p.relative_to(root))
+                tree[rel] = None if p.is_dir() else normalize(p.read_text(encoding="utf-8"))
+            out[f"<TMP{i}>"] = tree
+        return out
+
+    def wrapper(mod, name, fn):
+        def call(*args, **kwargs):
+            nonlocal depth
+            if depth:
+                return fn(*args, **kwargs)
+            before = snapshot()
+            inp = copy.deepcopy(normalize([args, kwargs]))
+            env = {}
+            if mod is environment and args and os.path.isfile(args[0]):
+                for line in Path(args[0]).read_text().splitlines():
+                    if "=" in line:
+                        key = line.removeprefix("export ").split("=", 1)[0].strip()
+                        if key and not key.startswith("#"):
+                            env[key] = os.environ.get(key)
+            buf, err, result = io.StringIO(), None, None
+            depth += 1
+            try:
+                with contextlib.redirect_stdout(buf):
+                    result = fn(*args, **kwargs)
+            except BaseException as e:
+                err = [type(e).__name__, str(e)]
+                raise
+            finally:
+                depth -= 1
+                row = {"op": f"{mod.__name__.split('.')[-1]}.{name}",
+                       "input": inp, "result": normalize(result), "error": normalize(err),
+                       "args_after": normalize([args, kwargs]), "stdout": normalize(buf.getvalue()),
+                       "before": before, "after": snapshot()}
+                if mod is environment:
+                    row["env_before"] = env
+                    row["env_after"] = {k: os.environ.get(k) for k in env}
+                calls.append(row)
+                print(buf.getvalue(), end="")
+            return result
+        return call
+
+    class FrozenDatetime(dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return cls(2026, 11, 18, 12, 34, 56, tzinfo=tz)
+
+    # Calls to regex.search in the original tests are observable operations too.
+    class FirstPerson:
+        def search(self, s):
+            result = bool(curation.RE_FIRST_PERSON_ORIGINAL.search(s))
+            calls.append({"op": "curation.has_first_person", "input": [[s], {}],
+                          "result": result, "error": None, "args_after": [[s], {}],
+                          "stdout": "", "before": snapshot(), "after": snapshot()})
+            return result
+
+    curation.RE_FIRST_PERSON_ORIGINAL = curation.RE_FIRST_PERSON
+    with contextlib.ExitStack() as stack:
+        stack.enter_context(mock.patch.object(tempfile, "mkdtemp", mkdtemp))
+        stack.enter_context(mock.patch.object(published, "dt", types.SimpleNamespace(datetime=FrozenDatetime)))
+        # `today` has no original G1 test, but a fixed clock keeps replay deterministic.
+        stack.enter_context(mock.patch.object(schedule, "today", lambda: dt.date(2026, 11, 18)))
+        for mod, names in api.items():
+            for name in names.split():
+                stack.enter_context(mock.patch.object(mod, name, wrapper(mod, name, getattr(mod, name))))
+        for modname in modules:
+            suite = unittest.defaultTestLoader.loadTestsFromName(f"tests.test_{modname}")
+            def flatten(s):
+                for t in s:
+                    if isinstance(t, unittest.TestSuite):
+                        yield from flatten(t)
+                    else:
+                        yield t
+            for test in flatten(suite):
+                calls, roots = [], []
+                result = unittest.TestResult()
+                with contextlib.redirect_stdout(io.StringIO()):
+                    test.run(result)
+                if result.errors or result.failures:
+                    raise RuntimeError(f"oracle test failed: {test.id()}: {result.errors + result.failures}")
+                name = test.id().removeprefix("tests.")
+                # These three tests inspect constants or a signature, not a function
+                # call. Pin the inspected API in a small direct trace operation.
+                if name.endswith("test_required_fields_do_not_shrink"):
+                    calls.append({"op": "episode.required_fields", "result": episode.REQUIRED_FIELDS})
+                if name.endswith("test_own_company_phrases_are_detected") or name.endswith("test_bare_first_person_plural_is_not_a_marker") or name.endswith("test_third_person_is_not_detected"):
+                    # The regex was not patched inside curation: its callers need the
+                    # real Match, not a bool. These mirror the direct regex assertions.
+                    samples = {
+                        "test_own_company_phrases_are_detected": ["our team shipped it", "our first hire", "my co-founder left", "we set up our own studio"],
+                        "test_bare_first_person_plural_is_not_a_marker": ["tell us how it started", "we are recording another episode", "today we are going to talk about it"],
+                        "test_third_person_is_not_detected": ["the company hired three people"],
+                    }[name.split(".")[-1]]
+                    for s in samples:
+                        calls.append({"op": "curation.has_first_person", "input": [[s], {}],
+                                      "result": bool(curation.RE_FIRST_PERSON.search(s)), "args_after": [[s], {}]})
+                if not calls:
+                    raise RuntimeError(f"no observable calls for {name}")
+                rows.append({"name": name, "calls": copy.deepcopy(calls)})
+                # Tests use mkdtemp without cleanup; the generator must not leak them.
+                import shutil
+                for root in roots:
+                    shutil.rmtree(root, ignore_errors=True)
+    del curation.RE_FIRST_PERSON_ORIGINAL
+    return case_json(rows)
+
+
+def write_all(dest: Path, only: str = "") -> list[str]:
     written = []
     for rel, fn in DUMPERS.items():
+        if not rel.startswith(only):
+            continue
         path = dest / rel
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_bytes(fn())
@@ -382,10 +655,12 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=(__doc__ or "").splitlines()[0])
     ap.add_argument("--check", action="store_true",
                     help="regenerate into a temp dir and fail if testdata/golden differs")
+    ap.add_argument("--only", default="", metavar="PREFIX",
+                    help="write only the golden files whose path starts with PREFIX")
     args = ap.parse_args()
     if args.check:
         return check()
-    written = write_all(GOLDEN)
+    written = write_all(GOLDEN, args.only)
     print(f"[golden] wrote {len(written)} files under {GOLDEN.relative_to(ROOT)}")
     return 0
 
