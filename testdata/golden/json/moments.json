@@ -1,0 +1,35 @@
+[
+  {
+    "slug": "side-project-to-company",
+    "start": 44.0,
+    "end": 121.5,
+    "kind": "story",
+    "screen_text": "It began as a side project — then a customer asked to buy it",
+    "youtube_title": "From side project to company: “we had no ambition at all”",
+    "summary": "How Acme went from night tinkering to a real company",
+    "hashtags": [
+      "#Acme",
+      "#RibeirãoAçaí",
+      "#startups"
+    ],
+    "speaker_note": "Guest answers; host asks the question at 0:35"
+  },
+  {
+    "slug": "validate-before-building",
+    "start": 3730.0,
+    "end": 3801.25,
+    "kind": "advice",
+    "screen_text": "Validate before you build",
+    "confidence": 0.85,
+    "extra": {
+      "nested": [
+        1,
+        2.0,
+        null,
+        true
+      ],
+      "empty": {},
+      "list": []
+    }
+  }
+]

@@ -1,0 +1,88 @@
+{
+  "segments": [
+    {
+      "start": 10.0,
+      "end": 15.0,
+      "text": "Good afternoon everyone, we are recording another episode today.",
+      "turn": false,
+      "speaker": "host"
+    },
+    {
+      "start": 15.0,
+      "end": 21.0,
+      "text": "Today we are going to talk about Acme and, as always, my co-host here,",
+      "turn": false,
+      "speaker": "host"
+    },
+    {
+      "start": 21.0,
+      "end": 27.0,
+      "text": "John, running the conversation alongside me. Good to be with you all.",
+      "turn": false,
+      "speaker": "host"
+    },
+    {
+      "start": 27.0,
+      "end": 35.0,
+      "text": "Great to be here. Thanks a lot for the invitation, and for the chance to tell a bit of our R&D story.",
+      "turn": true,
+      "speaker": "guest"
+    },
+    {
+      "start": 35.0,
+      "end": 44.0,
+      "text": "Tell us how it started, then. When did you decide this was going to be a real company?",
+      "turn": true,
+      "speaker": "host"
+    },
+    {
+      "start": 44.0,
+      "end": 50.0,
+      "text": "Look, at the beginning it was only a side project. We worked somewhere",
+      "turn": true,
+      "speaker": "guest"
+    },
+    {
+      "start": 50.0,
+      "end": 55.0,
+      "text": "else and tinkered with it at night, with no ambition at all.",
+      "turn": false,
+      "speaker": "guest"
+    },
+    {
+      "start": 55.0,
+      "end": 61.0,
+      "text": "Then a customer asked whether they could buy it, and we realised there was",
+      "turn": false,
+      "speaker": "guest"
+    },
+    {
+      "start": 61.0,
+      "end": 3723.0,
+      "text": "something there worth taking seriously.",
+      "turn": false,
+      "speaker": "guest"
+    },
+    {
+      "start": 3723.0,
+      "end": 3730.0,
+      "text": "And looking back, what would you do differently today?",
+      "turn": true,
+      "speaker": "host"
+    },
+    {
+      "start": 3730.0,
+      "end": 3736.0,
+      "text": "I would have validated before building. We spent months making",
+      "turn": true,
+      "speaker": "guest"
+    },
+    {
+      "start": 3736.0,
+      "end": 3750.4,
+      "text": "something nobody had asked for, and that costs a lot.",
+      "turn": false,
+      "speaker": "guest"
+    }
+  ]
+}
